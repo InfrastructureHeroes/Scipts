@@ -10,7 +10,7 @@ C:\PS> get-CVE20201472Events.ps1
 
 .NOTES
 Author     : Fabian Niesen (www.fabian-niesen.de)
-Filename   : get-GPOBackup.ps1
+Filename   : get-CVE20201472Events.ps1
 Requires   : PowerShell Version 3.0
 Version    : 1.0
 History    : 1.0   FN  17.01.2021  initial version
