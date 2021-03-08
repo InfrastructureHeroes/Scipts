@@ -2,6 +2,7 @@
 Powershell Skriptsammlung von Fabian Niesen [InfrastrukturHelden.de](https://www.infrastrukturhelden.de). Für alle Scripte gilt:
 **Verwendung auf eigene Gefahr und ohne Gewährleistungsansprüche!**
 Die Skripte die über einen Header mit Versionierung verfügen, sind meistens ausgereifter. Andere sind teilweise auch nur praktische Codeschnipsel, die ich so besser im Zugriff habe.
+Ihr sucht die [Life-Cycle Diagramme](https://github.com/FabianNiesen/InfrastrukturHelden-LifeCycle-diagrams), dann seit Ihr hier leider falsch.
 
 ## Skripte in der Übersicht
 
