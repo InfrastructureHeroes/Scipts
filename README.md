@@ -12,6 +12,7 @@ Ihr sucht die [Life-Cycle Diagramme](https://github.com/FabianNiesen/Infrastrukt
 * Start-Bitlocker.ps1 - *Startet die BitLocker Verschlüsselung mit einer definierten PIN*
 
 ### Exchange
+Verschiedene Skripte auf meiner Exchange-Berater Zeit. Nicht mehr gepflegt!
 
 ### GPO - Gruppenrichtlinien
 * get-GPOBackup.ps1 - *Creates backup of the GPO with according html Reports. The script creates a subfolder based upon an actual timestamp. - V1.58*
@@ -42,6 +43,7 @@ The scripts that have a header with versioning are usually more mature. Others a
 * Start-Bitlocker.ps1 - *Starts BitLocker encryption with a defined PIN*.
 
 ### Exchange
+Scripts from the time where I was Exchange consultant - no longer maintained
 
 ### GPO - Group Policy
 * get-GPOBackup.ps1 - *Creates backup of the GPO with according html reports. The script creates a subfolder based upon an actual timestamp. - V1.58*
