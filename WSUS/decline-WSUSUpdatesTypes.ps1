@@ -86,8 +86,9 @@ Author     : Fabian Niesen
 Filename   : decline-WSUSUpdatesTypes.ps1
 Requires   : PowerShell Version 3.0
 	
-Version    : 1.4
-History    : 1.4  Add Config file
+Version    : 1.5
+History    : 1.5  Add ARM64, LTSB2015, LTSB2016, LTSC2019 to script
+             1.4  Add Config file
              1.3  Coments, Header added
              1.2  Fix issues
              1.1  added Mail funtion
@@ -109,50 +110,58 @@ Param(
     [Parameter(Position=5)]
     [switch]$Itanium,
     [Parameter(Position=6)]
-    [switch]$LanguageFeatureOnDemand,
+    [switch]$ARM64,
     [Parameter(Position=7)]
-    [switch]$Sharepoint,
+    [switch]$Win10LTSB2015,
     [Parameter(Position=8)]
-    [switch]$Dell,
+    [switch]$Win10LTSB2016,
     [Parameter(Position=9)]
-    [switch]$Surface,
-    [Parameter(Position=10)]
-    [switch]$OfficeWebApp,
+    [switch]$Win10LTSC2019,
+        [Parameter(Position=10)]
+    [switch]$LanguageFeatureOnDemand,
     [Parameter(Position=11)]
-    [switch]$Drivers,
+    [switch]$Sharepoint,
     [Parameter(Position=12)]
-    [switch]$Officex86,
+    [switch]$Dell,
     [Parameter(Position=13)]
-    [switch]$Officex64,
+    [switch]$Surface,
     [Parameter(Position=14)]
-    [switch]$Superseded,
+    [switch]$OfficeWebApp,
     [Parameter(Position=15)]
-    [switch]$ListNeeded,
+    [switch]$Drivers,
     [Parameter(Position=16)]
-    [string]$SmtpServer,
+    [switch]$Officex86,
     [Parameter(Position=17)]
-	[string]$From,
+    [switch]$Officex64,
     [Parameter(Position=18)]
-	[string]$To,
+    [switch]$Superseded,
     [Parameter(Position=19)]
-	[string]$Subject = "WSUS Update Report $WsusServer",
+    [switch]$ListNeeded,
     [Parameter(Position=20)]
-    [switch]$WhatIf,
+    [string]$SmtpServer,
     [Parameter(Position=21)]
-    [switch]$TLS,
+	[string]$From,
     [Parameter(Position=22)]
-    [switch]$SmtpAuth,
+	[string]$To,
     [Parameter(Position=23)]
-    [string]$smtppw = "",
+	[string]$Subject = "WSUS Update Report $WsusServer",
     [Parameter(Position=24)]
-    [string]$smtpuser = "",
+    [switch]$WhatIf,
     [Parameter(Position=25)]
-	[switch]$EmailLog,
+    [switch]$TLS,
     [Parameter(Position=26)]
-    [switch]$TestMail,
+    [switch]$SmtpAuth,
     [Parameter(Position=27)]
-    [switch]$Default,
+    [string]$smtppw = "",
     [Parameter(Position=28)]
+    [string]$smtpuser = "",
+    [Parameter(Position=29)]
+	[switch]$EmailLog,
+    [Parameter(Position=30)]
+    [switch]$TestMail,
+    [Parameter(Position=31)]
+    [switch]$Default,
+    [Parameter(Position=32)]
     [switch]$save,
     [switch]$load
 )
@@ -233,6 +242,66 @@ IF ($Itanium -eq $true)
     }
     Else
     {"No Itanium Updates found that needed declining. Come back next 'Patch Tuesday' and you may have better luck."}  
+}
+
+IF ($ARM64 -eq $true)
+{
+    Write-Output "Declining of ARM64 updates selected, starting query."
+    $ARM64Updates = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match “ARM64”}
+    Write-Output "Found $($ARM64Updates.count) ARM64 Updates to decline"
+    If($ARM64Updates) 
+    {
+      IF (! $WhatIF) {$ARM64Updates | %{$_.Decline()}}
+      $ARM64Updates | Add-Member -MemberType NoteProperty -Name PatchType -value "ARM64"
+      $Updates = $Updates + $ARM64Updates
+    }
+    Else
+    {"No ARM64 Updates found that needed declining. Come back next 'Patch Tuesday' and you may have better luck."}  
+}
+
+IF ($Win10LTSB2015 -eq $true)
+{
+    Write-Output "Declining of Windows 10 Version 1507 (aka. LTSB 2015) updates selected, starting query."
+    $Win10LTSB2015Updates = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match “Windows 10 Version 1507”}
+    Write-Output "Found $($Win10LTSB2015Updates.count) Windows 10 Version 1507 Updates to decline"
+    If($Win10LTSB2015Updates) 
+    {
+      IF (! $WhatIF) {$Win10LTSB2015Updates | %{$_.Decline()}}
+      $Win10LTSB2015Updates | Add-Member -MemberType NoteProperty -Name PatchType -value "Win10LTSB2015"
+      $Updates = $Updates + $Win10LTSB2015Updates
+    }
+    Else
+    {"No Windows 10 Version 1507 (aka. LTSB 2015) Updates found that needed declining. Come back next 'Patch Tuesday' and you may have better luck."}  
+}
+
+IF ($Win10LTSB2016 -eq $true)
+{
+    Write-Output "Declining of Windows 10 Version 1607 (aka. LTSB 2016) updates selected, starting query."
+    $Win10LTSB2016Updates = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match “Windows 10 Version 1607”}
+    Write-Output "Found $($Win10LTSB2016Updates.count) Windows 10 Version 1607 Updates to decline"
+    If($Win10LTSB2016Updates) 
+    {
+      IF (! $WhatIF) {$Win10LTSB2016Updates | %{$_.Decline()}}
+      $Win10LTSB2016Updates | Add-Member -MemberType NoteProperty -Name PatchType -value "Win10LTSB2016"
+      $Updates = $Updates + $Win10LTSB2016Updates
+    }
+    Else
+    {"No Windows 10 Version 1607 (aka. LTSB 2016) Updates found that needed declining. Come back next 'Patch Tuesday' and you may have better luck."}  
+}
+
+IF ($Win10LTSC2019 -eq $true)
+{
+    Write-Output "Declining of Windows 10 Version 1809 (aka. LTSC 2019) updates selected, starting query."
+    $Win10LTSC2019Updates = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match “Windows 10 Version 1809”}
+    Write-Output "Found $($Win10LTSC2019Updates.count) Windows 10 Version 1809 Updates to decline"
+    If($Win10LTSC2019Updates) 
+    {
+      IF (! $WhatIF) {$Win10LTSC2019Updates | %{$_.Decline()}}
+      $Win10LTSC2019Updates | Add-Member -MemberType NoteProperty -Name PatchType -value "Win10LTSC2019"
+      $Updates = $Updates + $Win10LTSC2019Updates
+    }
+    Else
+    {"No Windows 10 Version 1809 (aka. LTSC 2019) Updates found that needed declining. Come back next 'Patch Tuesday' and you may have better luck."}  
 }
 
 IF ($LanguageFeatureOnDemand -eq $true)
