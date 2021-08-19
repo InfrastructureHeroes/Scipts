@@ -20,7 +20,7 @@ Verschiedene Skripte auf meiner Exchange-Berater Zeit. Nicht mehr gepflegt!
 
 ### User - Benutzermanagement
 * create-user.ps1 - *Legt einen neuen Benutzer an. Inklusive Microsoft365 Lizenzzuweisung und einer Begrüßungsmail. Passender Artikel: [Benutzer einfachen anlegen mit PowerShell](https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/benutzer-einfachen-anlegen-mit-powershell/)*
-* Get-LastLogonOU.ps1 - *eigt das letzte LogOn für alle Nutzer in einer OU an. Sowohl AD als auch Exchange.*
+* Get-LastLogonOU.ps1 - *zeigt das letzte LogOn für alle Nutzer in einer OU an. Sowohl AD als auch Exchange.*
 
 ### WSUS -  Windows Server Update Service
 * decline-WSUSUpdatesTypes.ps1 - *Decline several Update Types in Windows Server Update Services (WSUS)*
