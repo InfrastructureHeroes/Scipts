@@ -3,7 +3,7 @@
 Create Intunewin Files from Sourcefolders
 
 .DESCRIPTION
-Create Intunewin Files from Sourcefolders. Install Comands must be located in install.cmd
+Create Intunewin Files from Sourcefolders. Install Commands must be located in install.cmd
 
 .EXAMPLE 
 create-package.ps1 -workpath "path to Install" -ContentPrepTool "Path to ContentPrepTool Executable file"
@@ -37,13 +37,13 @@ Write-Progress -activity "Preparing Workdir: $workdir" -Status "starting" -Perce
 $Sources = (Get-ChildItem -Path $($workpath+"\Source")).Name 
 foreach ($Source in $Sources)
 {
-$i++
-Write-Progress -activity "Processing Sources" -Status "$($Source)" -PercentComplete (($i / $Sources.count)*100) -Id 1
-Write-Verbose $Source
-$c = $workpath+"\Source\"+$Source
-$s = $workpath+"\Source\"+$Source+"\install.cmd"
-$o = $workpath+"\Output\"+$date+"\"+$Source
-Write-Verbose "Starte ContentPrep"
-& $ContentPrepTool -c $c -s $s -o $o -q
-Write-Verbose "ContentPrep abgeschlossen"
+	$i++
+	Write-Progress -activity "Processing Sources" -Status "$($Source)" -PercentComplete (($i / $Sources.count)*100) -Id 1
+	Write-Verbose $Source
+	$c = $workpath+"\Source\"+$Source
+	$s = $workpath+"\Source\"+$Source+"\install.cmd"
+	$o = $workpath+"\Output\"+$date+"\"+$Source
+	Write-Verbose "Starte ContentPrep"
+	& $ContentPrepTool -c $c -s $s -o $o -q
+	Write-Verbose "ContentPrep abgeschlossen"
 }
