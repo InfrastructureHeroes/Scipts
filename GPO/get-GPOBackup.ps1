@@ -1,39 +1,3 @@
-
-<#PSScriptInfo
-
-.VERSION 1.58
-
-.GUID 63e6c25c-7a63-4aec-a009-eec1c4791608
-
-.AUTHOR Fabian Niesen (Infrastrukturhelden.de)
-
-.COMPANYNAME
-
-.COPYRIGHT Fabian Niesen 2018
-
-.TAGS GPO Grouppolicy Backup
-
-.LICENSEURI
-
-.PROJECTURI https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/gruppenrichtlinien-richtig-sichern-und-dokumentieren.html
-
-.ICONURI
-
-.EXTERNALMODULEDEPENDENCIES ActiveDirectory 
-
-.REQUIREDSCRIPTS
-
-.EXTERNALSCRIPTDEPENDENCIES
-
-.RELEASENOTES
-Add Centralstore Policy Definition with the Switch -PolicyDefinition to the script. It is supported on DC and non-DC computer
-
-.PRIVATEDATA
-
-#> 
-
-
-
 <#
 .SYNOPSIS
 Creates backup of the GPO with according html Reports. The script creates a subfolder based upon an actual timestamp.
@@ -78,7 +42,7 @@ Switch to force an Error with Warrning for testing
 Author     : Fabian Niesen (www.fabian-niesen.de)
 Filename   : get-GPOBackup.ps1
 Requires   : PowerShell Version 3.0
-Version    : 1.58
+Version    : 1.59
 History    : 1.0.0   FN  27/07/14  initial version
              1.1.0   FN  25/08/14  Change script to handle new GUID on GPO backup
              1.1.1   FN  03/09/14  Fix Targetpath for secured enviorment
@@ -92,6 +56,7 @@ History    : 1.0.0   FN  27/07/14  initial version
                                    for this I change and add EventIDs. Some fixes with the get-Help output
              1.57    FN  06/02/19  Added "/" to Escape Chars
              1.58    FN  12/03/19  Added Central Store Backup
+             1.59    FN  11/08/21  Added '"' to Escape Chars
 
 .LINK
 https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/gruppenrichtlinien-richtig-sichern-und-dokumentieren.html
@@ -103,7 +68,7 @@ Param(
     [Parameter(Mandatory=$false, Position=1, ValueFromPipeline=$False)]
     [Int]$KeepDate="93",
     [Parameter(Mandatory=$false, Position=2, ValueFromPipeline=$false)]
-    [string]$characters = ". $%&!?#*:;\><|/",
+    [string]$characters = '. $%&!?#*:;\><|/"',
     [switch]$PolicyDefinitions,
     [switch]$testerror,
     [switch]$testwarning,
