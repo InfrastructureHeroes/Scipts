@@ -1,7 +1,7 @@
 
 <#PSScriptInfo
 
-.VERSION 1.0.0
+.VERSION 1.0.1
 
 .GUID 3c0736ab-4777-4b58-ae0f-80b4e89b64a2
 
@@ -11,7 +11,7 @@
 
 .COPYRIGHT 
 
-.TAGS BitLocker,PowerShell,Update,ActiveDirectory,RecoveryKeys
+.TAGS BitLocker PowerShell Update ActiveDirectory RecoveryKeys
 
 .LICENSEURI 
 
@@ -28,7 +28,9 @@
 .RELEASENOTES
 
 
-#>
+#> 
+
+
 
 <#
 .SYNOPSIS
@@ -61,7 +63,8 @@ Author     : Fabian Niesen (www.fabian-niesen.de)
 Filename   : Update-BitLockerRecovery.ps1
 Requires   : PowerShell Version 3.0
 Version    : 1.0.0
-History    : 1.0.0   FN  01/22/2021  initial version
+History    : 1.0.1 FN 09.12.2021 Change Locale setting after feedback from Jonas. Thanks
+             1.0.0 FN 01/22/2021  initial version
              
 
 .LINK
@@ -73,12 +76,16 @@ Param(
     [Parameter(Mandatory=$false, Position=1, ValueFromPipeline=$False)]
     [String]$procstatepat="",
     [Parameter(Mandatory=$false, Position=2, ValueFromPipeline=$false)]
-    [string]$locale = $((GET-WinSystemLocale).Name),
+    [string]$locale = $((Get-UICulture).Name),
     [switch]$adcheck
 )
 $ErrorActionPreference = "Stop"
 If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
-{   $arguments = "& '" + $myinvocation.mycommand.definition + "'"Start-Process powershell -Verb runAs -ArgumentList $argumentsBreak}
+{   
+$arguments = "& '" + $myinvocation.mycommand.definition + "'"
+Start-Process powershell -Verb runAs -ArgumentList $arguments
+Break
+}
 switch($locale){
 "de-DE" {$procstate = "Schutzstatus" ; $procstatepat = "*Der Schutz ist aktiviert*" ; Write-Verbose "Locale set to de-DE"}
 "en-EN" {$procstate = "Protection" ; $procstatepat = "*Protection On*" ; Write-Verbose "Locale set to en-EN"}
@@ -92,7 +99,7 @@ Set-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\FVE -Name OSRequireActi
 Set-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\FVE -Name OSActiveDirectoryInfoToStore -Value 1 -Type DWord -Force; 
 Set-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\FVE -Name OSActiveDirectoryBackup -Value 1 -Type DWord -Force; 
 Set-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\FVE -Name OSHideRecoveryPage -Value 0 -Type DWord -Force
-Get-PSDrive -PSProvider FileSystem | ? { !($_.DisplayRoot -ilike "\\*") } | % {
+Get-PSDrive -PSProvider FileSystem | Where-Object { !($_.DisplayRoot -ilike "\\*") } | ForEach-Object {
     $root = $_.Root # Fetch the drive letter or mount point
     if ($root -ilike "*\") { $root = $root.substring(0, $root.length - 1) } # Remove trailing backslash
     [string] $status = (manage-bde -status $root) | Select-String -Pattern $procstate
@@ -102,7 +109,7 @@ Get-PSDrive -PSProvider FileSystem | ? { !($_.DisplayRoot -ilike "\\*") } | % {
         $id = $id.Replace("ID: ", "").Trim()
         Write-verbose "ID: $id"
         manage-bde -protectors -adbackup $root -id $id
-        sleep -Seconds 10
+        Start-Sleep -Seconds 10
     }
 }
 Remove-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\FVE -Name OSRecovery -Force; 
@@ -124,8 +131,8 @@ GPupdate.exe /Target:Computer /Force
     break
   }
   Write-Output "Wait 30 sec to process and AD sync"
-  sleep -Seconds 30
-  $recoveryPass = Get-ADObject -Filter {objectclass -eq 'msFVE-RecoveryInformation'} -SearchBase $($env:COMPUTERNAME).DistinguishedName -Properties 'msFVE-RecoveryPassword' | where {$_.DistinguishedName -like "*$id*"}
+  Start-Sleep -Seconds 30
+  $recoveryPass = Get-ADObject -Filter {objectclass -eq 'msFVE-RecoveryInformation'} -SearchBase $($env:COMPUTERNAME).DistinguishedName -Properties 'msFVE-RecoveryPassword' | Where-Object {$_.DistinguishedName -like "*$id*"}
   Write-Output "Stored Recovery Password in AD: $recoveryPass "
 }
 
