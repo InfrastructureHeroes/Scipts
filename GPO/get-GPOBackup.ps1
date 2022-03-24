@@ -75,7 +75,7 @@ Param(
     [switch]$testerrorwarning
 )
 
-#Verknüfungsorte mit speichern
+#VerknÃ¼fungsorte mit speichern
 
 $ErrorActionPreference = "Stop"
 $GPList = @()
@@ -272,7 +272,7 @@ Write-Verbose "Check Admin privilages for creation of the EventLog entries"
 ### Proof for administrative permissions (UAC) and start EventLog Handling
 If (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole( [Security.Principal.WindowsBuiltInRole] "Administrator"))
 {
-    Write-Warning "Not run as administrator, eventlog handling will be disabled."    
+  Write-Warning "Not run as administrator, eventlog handling will be disabled."
 } ELSE {
   $skipeventlog = $false
   Try 
@@ -286,7 +286,7 @@ If (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     "Eventlog Source >GPObackup< not found. Try to create" | Out-File $InfoLog -Append
     Try 
     {
-      New-EventLog –LogName Application –Source “GPObackup”
+      New-EventLog -LogName Application -Source "GPObackup"
     }
     catch 
     { 
