@@ -145,10 +145,10 @@ IF (Test-Path -Path "$($env:ProgramData)\Microsoft\IntuneApps")
 
 # Copy AppDeploymentToolkit Logs
 Write-Log -Message "Checking for Logfiles from PSAppDeploymentToolkit"
-IF (Test-Path -Path "$envWinDir\Logs\Software") 
+IF (Test-Path -Path "$env:WINDIR\Logs\Software") 
 { 
     Write-Log -Message "Found Logs in $envWinDir\Logs\Software"
-    Copy-Item -Path "$envWinDir\Logs\Software" -Destination $Logpath -Recurse -Force
+    Copy-Item -Path "$env:WINDIR\Logs\Software" -Destination $Logpath -Recurse -Force
 }
 
 # MDMDiagnostics
