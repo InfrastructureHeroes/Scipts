@@ -13,32 +13,44 @@ C:\PS> get-AutopilotLogs.ps1
 Author     : Fabian Niesen (www.fabian-niesen.de)
 Filename   : get-AutopilotLogs.ps1
 Requires   : PowerShell Version 4.0
-Version    : 1.0.0
-History    : 1.0.0   FN  21.08.2022  initial version
+Version    : 1.0.2
+History    : 1.0.2   FN  26.08.2022  Add ToDo list, changed LogName
+             1.0.1   FN  25.08.2022  Buxfixes
+             1.0.0   FN  21.08.2022  initial version
+
+.ToDo
+- Integrate Networkchecks
+- Integrate TPM check
+- Gather MDM Policies from Registry
 
 .LINK
 https://github.com/InfrastructureHeroes/Scipts/
+
+.COPYRIGHT
+Copyright (c) Fabian Niesen if not stated otherwise. All rights reserved. Licensed under the MIT license.
+
 #>
 $ErrorActionPreference = "SilentlyContinue"
-$script:BuildVer = "1.0.0"
+$script:BuildVer = "1.0.2"
 $script:ProgramFiles = $env:ProgramFiles
 $script:ParentFolder = $PSScriptRoot | Split-Path -Parent
 $script:ScriptName = $myInvocation.MyCommand.Name
 $script:ScriptName = $scriptName.Substring(0, $scriptName.Length - 4)
 $serial = $(Get-WmiObject Win32_bios).Serialnumber
 $Device = Get-CimInstance -ClassName Win32_ComputerSystem
-$LogName = $serial + "_" + (Get-Date -UFormat "%Y%m%d-%H%M")
+$LogName = (Get-Date -UFormat "%Y%m%d-%H%M")+ "_" + $serial
 $Logpath = $PSScriptRoot + "\" + $LogName
-$LogFile = $Logpath +"\" + $script:ScriptName + ".txt"
+$LogFile = $Logpath +"\" + $script:ScriptName + ".log"
 $ntpserver = "ptbtime1.ptb.de,ptbtime2.ptb.de,time.windows.com,time.nist.gov"
 ####################################################
 #region Logfiles
 <#
-.COPYRIGHT
+.COPYRIGHT for this region
 Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 See LICENSE in the project https://github.com/gregnottage/IntuneScripts for license information.
 
-Removed EventLog Handling by Fabian Niesen
+.Notes
+Removed EventLog Handling and smaller changes by Fabian Niesen
 #>
 Function Start-Log {
     param (
@@ -155,7 +167,7 @@ IF (Test-Path -Path "$env:WINDIR\Logs\Software")
 [string]$DiagArea = $(Get-ChildItem HKLM:\SOFTWARE\Microsoft\MdmDiagnostics\Area).PSChildName
 $DiagArea = $DiagArea.replace(' ',';')
 Write-Log -Message "Start MDMDiagnostics - $DiagArea"
-Start-Process -FilePath "C:\windows\system32\MdmDiagnosticsTool.exe" -ArgumentList "-area $DiagArea -cab $logpath\$serial.cab" -NoNewWindow -Wait -PassThru 
+Start-Process -FilePath "C:\windows\system32\MdmDiagnosticsTool.exe" -ArgumentList "-area $DiagArea -cab $logpath\$LogName.cab" -NoNewWindow -Wait -PassThru 
 
 # Gater additional Informations
 Write-Log -Message "Get installed Software"
