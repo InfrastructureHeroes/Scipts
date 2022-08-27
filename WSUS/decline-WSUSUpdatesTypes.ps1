@@ -50,8 +50,9 @@ Author     : Fabian Niesen
 Filename   : decline-WSUSUpdatesTypes.ps1
 Requires   : PowerShell Version 3.0
 	
-Version    :  1.6
-History    :  1.6  Add WSUS internal Cleanup Trigger
+Version    :  1.7
+History    :  1.7  Add "Dev" to filter for -Preview (#3), Replace powershell alias with full commands
+              1.6  Add WSUS internal Cleanup Trigger
               1.5  Add ARM64, LTSB2015, LTSB2016, LTSC2019 to script
               1.4  Add Config file
               1.3  Coments, Header added
@@ -132,7 +133,7 @@ Param(
     [switch]$load
 )
 
-cls
+Clear-Host
 $conffile = "./decline-WSUSUpdatesType.clixml"
 
 IF ($save) 
@@ -182,11 +183,11 @@ IF ($WhatIF) { Write-Warning "WhatIF Mode, no changes will be made!!!"}
 IF ($Preview -eq $true) 
 {
     Write-Output "Declining of Beta and Preview updates selected, starting query."
-    $BetaUpdates = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and ($_.Title -match �preview|beta� -or -not $_.IsDeclined -and $_.IsBeta -eq $true)}
+    $BetaUpdates = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and ($_.Title -match "preview|beta|dev" -or -not $_.IsDeclined -and $_.IsBeta -eq $true)}
     Write-Output "Found $($BetaUpdates.count) Preview or Beta Updates to decline"
     If($BetaUpdates) 
     {
-      IF (! $WhatIF) {$BetaUpdates | %{$_.Decline()}}
+      IF (! $WhatIF) {$BetaUpdates | ForEach-Object{$_.Decline()}}
 	  $BetaUpdates | Add-Member -MemberType NoteProperty -Name PatchType -value BetaUpdate 
       $Updates = $Updates + $BetaUpdates
         
@@ -198,11 +199,11 @@ IF ($Preview -eq $true)
 IF ($Itanium -eq $true)
 {
     Write-Output "Declining of Itanium updates selected, starting query."
-    $ItaniumUpdates = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match �ia64|itanium�}
+    $ItaniumUpdates = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Title -match "ia64|itanium"}
     Write-Output "Found $($ItaniumUpdates.count) Itanium Updates to decline"
     If($ItaniumUpdates) 
     {
-      IF (! $WhatIF) {$ItaniumUpdates | %{$_.Decline()}}
+      IF (! $WhatIF) {$ItaniumUpdates | ForEach-ObjectorEach-Object{$_.Decline()}}
       $ItaniumUpdates | Add-Member -MemberType NoteProperty -Name PatchType -value "Itanium"
       $Updates = $Updates + $ItaniumUpdates
     }
@@ -213,11 +214,11 @@ IF ($Itanium -eq $true)
 IF ($ARM64 -eq $true)
 {
     Write-Output "Declining of ARM64 updates selected, starting query."
-    $ARM64Updates = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match �ARM64�}
+    $ARM64Updates = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Title -match "ARM64"}
     Write-Output "Found $($ARM64Updates.count) ARM64 Updates to decline"
     If($ARM64Updates) 
     {
-      IF (! $WhatIF) {$ARM64Updates | %{$_.Decline()}}
+      IF (! $WhatIF) {$ARM64Updates | ForEach-Object{$_.Decline()}}
       $ARM64Updates | Add-Member -MemberType NoteProperty -Name PatchType -value "ARM64"
       $Updates = $Updates + $ARM64Updates
     }
@@ -228,11 +229,11 @@ IF ($ARM64 -eq $true)
 IF ($Win10LTSB2015 -eq $true)
 {
     Write-Output "Declining of Windows 10 Version 1507 (aka. LTSB 2015) updates selected, starting query."
-    $Win10LTSB2015Updates = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match �Windows 10 Version 1507�}
+    $Win10LTSB2015Updates = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Title -match "Windows 10 Version 1507"}
     Write-Output "Found $($Win10LTSB2015Updates.count) Windows 10 Version 1507 Updates to decline"
     If($Win10LTSB2015Updates) 
     {
-      IF (! $WhatIF) {$Win10LTSB2015Updates | %{$_.Decline()}}
+      IF (! $WhatIF) {$Win10LTSB2015Updates | ForEach-Object{$_.Decline()}}
       $Win10LTSB2015Updates | Add-Member -MemberType NoteProperty -Name PatchType -value "Win10LTSB2015"
       $Updates = $Updates + $Win10LTSB2015Updates
     }
@@ -243,11 +244,11 @@ IF ($Win10LTSB2015 -eq $true)
 IF ($Win10LTSB2016 -eq $true)
 {
     Write-Output "Declining of Windows 10 Version 1607 (aka. LTSB 2016) updates selected, starting query."
-    $Win10LTSB2016Updates = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match �Windows 10 Version 1607�}
+    $Win10LTSB2016Updates = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Title -match "Windows 10 Version 1607"}
     Write-Output "Found $($Win10LTSB2016Updates.count) Windows 10 Version 1607 Updates to decline"
     If($Win10LTSB2016Updates) 
     {
-      IF (! $WhatIF) {$Win10LTSB2016Updates | %{$_.Decline()}}
+      IF (! $WhatIF) {$Win10LTSB2016Updates | ForEach-Object{$_.Decline()}}
       $Win10LTSB2016Updates | Add-Member -MemberType NoteProperty -Name PatchType -value "Win10LTSB2016"
       $Updates = $Updates + $Win10LTSB2016Updates
     }
@@ -258,11 +259,11 @@ IF ($Win10LTSB2016 -eq $true)
 IF ($Win10LTSC2019 -eq $true)
 {
     Write-Output "Declining of Windows 10 Version 1809 (aka. LTSC 2019) updates selected, starting query."
-    $Win10LTSC2019Updates = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match �Windows 10 Version 1809�}
+    $Win10LTSC2019Updates = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Title -match "Windows 10 Version 1809"}
     Write-Output "Found $($Win10LTSC2019Updates.count) Windows 10 Version 1809 Updates to decline"
     If($Win10LTSC2019Updates) 
     {
-      IF (! $WhatIF) {$Win10LTSC2019Updates | %{$_.Decline()}}
+      IF (! $WhatIF) {$Win10LTSC2019Updates | ForEach-Object{$_.Decline()}}
       $Win10LTSC2019Updates | Add-Member -MemberType NoteProperty -Name PatchType -value "Win10LTSC2019"
       $Updates = $Updates + $Win10LTSC2019Updates
     }
@@ -273,11 +274,11 @@ IF ($Win10LTSC2019 -eq $true)
 IF ($LanguageFeatureOnDemand -eq $true)
 {
     Write-Output "Declining of Language Feature on Demand selected, starting query."
-    $LanguageFeatureOnDemandU = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match �LanguageFeatureOnDemand|Lang Pack (Language Feature) Feature On Demand|LanguageInterfacePack�}
+    $LanguageFeatureOnDemandU = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Title -match "LanguageFeatureOnDemand|Lang Pack (Language Feature) Feature On Demand|LanguageInterfacePack"}
     Write-Output "Found $($LanguageFeatureOnDemandU.count) LanguageFeatureOnDemand to decline"
     If($LanguageFeatureOnDemandU) 
     {
-      IF (! $WhatIF) {$LanguageFeatureOnDemandU | %{$_.Decline()}}
+      IF (! $WhatIF) {$LanguageFeatureOnDemandU | ForEach-Object{$_.Decline()}}
       $LanguageFeatureOnDemandU | Add-Member -MemberType NoteProperty -Name PatchType -value "LanguageFeatureOnDemand"
       $Updates = $Updates + $LanguageFeatureOnDemandU
     }
@@ -289,11 +290,11 @@ IF ($LanguageFeatureOnDemand -eq $true)
 IF ($Sharepoint -eq $true)
 {
     Write-Output "Declining of Sharepoint Updates selected, starting query."
-    $SharepointU = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match �SharePoint Enterprise Server|SharePoint Foundation|SharePoint Server|FAST Search Server�}
+    $SharepointU = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Title -match "SharePoint Enterprise Server|SharePoint Foundation|SharePoint Server|FAST Search Server"}
     Write-Output "Found $($SharepointU.count) Sharepoint Updates to decline"
     If($SharepointU) 
     {
-      IF (! $WhatIF) {$SharepointU | %{$_.Decline()}}
+      IF (! $WhatIF) {$SharepointU | ForEach-Object{$_.Decline()}}
       $SharepointU | Add-Member -MemberType NoteProperty -Name PatchType -value "SharePoint"
       $Updates = $Updates + $SharepointU
     }
@@ -304,11 +305,11 @@ IF ($Sharepoint -eq $true)
 IF ($Dell -eq $true)
 {
     Write-Output "Declining of Dell Updates selected, starting query."
-    $DellU = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match �Dell�}
+    $DellU = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Title -match "Dell"}
     Write-Output "Found $($DellU.count) Dell Updates to decline"
     If($DellU) 
     {
-      IF (! $WhatIF) {$DellU | %{$_.Decline()}}
+      IF (! $WhatIF) {$DellU | ForEach-Object{$_.Decline()}}
       $DellU | Add-Member -MemberType NoteProperty -Name PatchType -value "Dell"
       $Updates = $Updates + $DellU
     }
@@ -319,11 +320,11 @@ IF ($Dell -eq $true)
 IF ($Surface -eq $true)
 {
     Write-Output "Declining of Microsoft Surface updates selected, starting query."
-    $SurfaceU = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match �Surface� -and $_.Title -match �Microsoft�}
+    $SurfaceU = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Title -match "Surface" -and $_.Title -match "Microsoft"}
     Write-Output "Found $($SurfaceU.count) Microsoft Surface updates to decline"
     If($SurfaceU) 
     {
-      IF (! $WhatIF) {$SurfaceU | %{$_.Decline()}}
+      IF (! $WhatIF) {$SurfaceU | ForEach-Object{$_.Decline()}}
       $SurfaceU | Add-Member -MemberType NoteProperty -Name PatchType -value "Surface"
       $Updates = $Updates + $SurfaceU
     }
@@ -334,11 +335,11 @@ IF ($Surface -eq $true)
 IF ($Officex86 -eq $true)
 {
     Write-Output "Declining of Office updates for 32 bit selected, starting query."
-    $Officex86U = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match �Microsoft Office|Microsoft Access|Microsoft Excel|Microsoft Outlook|Microsoft Onenote|Microsoft PowerPoint|Microsoft Publisher|Microsoft Word� -and $_.Title -match �32-Bit�}
+    $Officex86U = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Title -match "Microsoft Office|Microsoft Access|Microsoft Excel|Microsoft Outlook|Microsoft Onenote|Microsoft PowerPoint|Microsoft Publisher|Microsoft Word" -and $_.Title -match "32-Bit"}
     Write-Output "Found $($Officex86U.count) Microsoft Surface updates to decline"
     If($Officex86U) 
     {
-      IF (! $WhatIF) {$Officex86U | %{$_.Decline()}}
+      IF (! $WhatIF) {$Officex86U | ForEach-Object{$_.Decline()}}
       $Officex86U | Add-Member -MemberType NoteProperty -Name PatchType -value "Office x86"
       $Updates = $Updates + $Officex86U
     }
@@ -349,11 +350,11 @@ IF ($Officex86 -eq $true)
 IF ($Officex64 -eq $true)
 {
     Write-Output "Declining of Office updates for 64 bit selected, starting query."
-    $Officex64U = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match �Microsoft Office|Microsoft Access|Microsoft Excel|Microsoft Outlook|Microsoft Onenote|Microsoft PowerPoint|Microsoft Publisher|Microsoft Word� -and $_.Title -match �64-Bit�}
+    $Officex64U = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Title -match "Microsoft Office|Microsoft Access|Microsoft Excel|Microsoft Outlook|Microsoft Onenote|Microsoft PowerPoint|Microsoft Publisher|Microsoft Word" -and $_.Title -match "64-Bit"}
     Write-Output "Found $($Officex64U.count) Microsoft Surface updates to decline"
     If($Officex64U) 
     {
-      IF (! $WhatIF) {$Officex64U | %{$_.Decline()}}
+      IF (! $WhatIF) {$Officex64U | ForEach-Object{$_.Decline()}}
       $Officex64U | Add-Member -MemberType NoteProperty -Name PatchType -value "Office x64"
       $Updates = $Updates + $Officex64U
     }
@@ -364,11 +365,11 @@ IF ($Officex64 -eq $true)
 IF ($Drivers -eq $true) 
 {
     Write-Output "Declining of Drivers selected, starting query."
-    $DriversUpdates = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Classification -match �Drivers�}
+    $DriversUpdates = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Classification -match "Drivers"}
     Write-Output "Found $($DriversUpdates.count) Drivers to decline"
     If($DriversUpdates) 
     {
-      IF (! $WhatIF) {$DriversUpdates | %{$_.Decline()}}
+      IF (! $WhatIF) {$DriversUpdates | ForEach-Object{$_.Decline()}}
       $DriversUpdates | Add-Member -MemberType NoteProperty -Name PatchType -value "Driver Update" 
       $Updates = $Updates + $DriversUpdates
         
@@ -380,11 +381,11 @@ IF ($Drivers -eq $true)
 IF ($OfficeWebApp -eq $true)
 {
     Write-Output "Declining of Office WebApp Updates selected, starting query."
-    $OfficeWebAppU = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.Title -match �Excel Web App|Office Web App|Word Web App|PowerPoint Web App�}
+    $OfficeWebAppU = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.Title -match "Excel Web App|Office Web App|Word Web App|PowerPoint Web App"}
     Write-Output "Found $($OfficeWebAppU.count) Office WebApp Updates to decline"
     If($OfficeWebAppU) 
     {
-      IF (! $WhatIF) {$OfficeWebAppU | %{$_.Decline()}}
+      IF (! $WhatIF) {$OfficeWebAppU | ForEach-Object{$_.Decline()}}
       $OfficeWebAppU | Add-Member -MemberType NoteProperty -Name PatchType -value "OfficeWebApp"
       $Updates = $Updates + $OfficeWebAppU
     }
@@ -395,11 +396,11 @@ IF ($OfficeWebApp -eq $true)
 IF ($Superseded -eq $true )
 {
     Write-Output "Declining Superseded Updates selected, starting query."
-    $SupersededU = $WsusServerAdminProxy.GetUpdates() | ?{-not $_.IsDeclined -and $_.IsSuperseded -eq $true}
+    $SupersededU = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and $_.IsSuperseded -eq $true}
     Write-Output "Found $($SupersededU.count) Superseded Updates to decline"
     If($SupersededU) 
     {
-      IF (! $WhatIF) {$SupersededU | %{$_.Decline()}}
+      IF (! $WhatIF) {$SupersededU | ForEach-Object{$_.Decline()}}
       $SupersededU | Add-Member -MemberType NoteProperty -Name PatchType -value "Superseded"
       $Updates = $Updates + $SupersededU
     }
@@ -426,11 +427,11 @@ IF ($CleanupObsoleteComputers) #Add other Cleanscopes => Invoke-WsusServerCleanu
   }
 }
 
-$Updates | select $Table | sort -Property "KB Article" | ft -AutoSize -Property "Kind of Patch",Title,"KB Article"
+$Updates | Select-Object $Table | Sort-Object -Property "KB Article" | Format-Table -AutoSize -Property "Kind of Patch",Title,"KB Article"
 
 IF ($EmailLog -and $Updates.Count -ge 1)
 {
-    $Body = "<h1>Declined Updates</h1>$($Updates | Select $Table | ConvertTo-HTML -head $Style)"
+    $Body = "<h1>Declined Updates</h1>$($Updates | Select-Object $Table | ConvertTo-HTML -head $Style)"
 }
 Else
 {
@@ -449,10 +450,10 @@ IF ($ListNeeded -eq $true)
     Write-Output "Found $($NeededUpdates.count) needed Updates"
     If($NeededUpdates) 
     {
-      #IF (! $WhatIF) {$SupersededU | %{$_.Decline()}}
+      #IF (! $WhatIF) {$SupersededU | ForEach-Object{$_.Decline()}}
       Write-Output "Needed Updates:"
-      $NeededUpdates | Select $Table | FT -AutoSize 
-      $Body = $Body +"<br><h1>Needed Updates</h1>"+$($NeededUpdates | Select $Table | ConvertTo-HTML -head $Style)
+      $NeededUpdates | Select-Object $Table | Format-Table -AutoSize 
+      $Body = $Body +"<br><h1>Needed Updates</h1>"+$($NeededUpdates | Select-Object $Table | ConvertTo-HTML -head $Style)
     }
     Else
     {"No Needed Updates found to list. Come back next 'Patch Tuesday' and you may have better luck."}
