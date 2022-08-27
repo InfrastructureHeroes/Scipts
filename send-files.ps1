@@ -39,17 +39,21 @@ Password for SMTP User. Only need with SmtpAuth.
 .PARAMETER smtpuser
 SMTP Username. Only need with SmtpAuth.
 
+.PARAMETER SmtpPort
+Portnumber for SMTP if non Standard
+
 .PARAMETER Body
 Mail body, no HTML.
 
 .NOTES
-Author     : Fabian Niesen
-Filename   : 
-Requires   : PowerShell Version 3.0
+Author     :    Fabian Niesen
+Filename   :    send-files.ps1
+Requires   :    PowerShell Version 3.0
 	
-Version    : 1.0
-History    : 1.0  initial version
-                     
+Version    :    1.0
+History    :    1.1 FN 27.08.2022 Add SMTP Port (for #4)
+                1.0 FN initial version
+
 .LINK
 https://www.infrastrukturhelden.de/?p=13527
 #>
@@ -75,16 +79,18 @@ Param(
     [string]$smtppw,
     [Parameter(Position=24)]
     [string]$smtpuser,
+    [Parameter(Position=25)]
+    [int]$SmtpPort,
     [Parameter(Position=28)]
     [string]$Body = "Please see attachment."
 )
 
 IF ($SmtpAuth) {
-  Write-Debug "Using SMTP Auth"
-  $password = ConvertTo-SecureString $smtppw -AsPlainText -Force
-  $cred = New-Object System.Management.Automation.PSCredential ($smtpuser, $password)
-  }
-
+    Write-Debug "Using SMTP Auth"
+    $password = ConvertTo-SecureString $smtppw -AsPlainText -Force
+    $cred = New-Object System.Management.Automation.PSCredential ($smtpuser, $password)
+    }
+IF ($SmtpPort) { $SmtpClient.Port = $SmtpPort }
 $sources = Get-ChildItem $sourcepath -Filter $filetype -Depth 0
 
 ForEach ( $source in $sources) 
