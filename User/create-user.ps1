@@ -6,14 +6,16 @@ Code sample to create a new AD User with Office 365 integration.
 Code sample to create a new AD User with Office 365 integration. This needs to be customized to the target environment.
 
 .NOTES
-Author     : Fabian Niesen (www.fabian-niesen.de)
-Filename   : create-user.ps1
-Requires   : PowerShell Version 3.0
-Version    : 0.1
-History    : 0.1     FN  22/01/19  initial draft
+Author     :  Fabian Niesen (www.fabian-niesen.de)
+Filename   :  create-user.ps1
+Requires   :  PowerShell Version 3.0
+Version    :  0.1
+History    :  0.2 FN  27.08.2022  Add SmtpPort due #4, fixed some encoding and Typos - Not testest, since my test env is down - Any problems, open an issue at https://github.com/InfrastructureHeroes/Scipts
+              0.1 FN  22.01.2019  initial draft
              
 .LINK
-https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/benutzer-einfachen-anlegen-mit-powershell.html
+https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/benutzer-einfachen-anlegen-mit-powershell/
+https://github.com/InfrastructureHeroes/Scipts/blob/master/User/create-user.ps1
 #>
 [cmdletbinding()] 
  Param(
@@ -39,24 +41,26 @@ https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/benu
 [switch] $TLS,
 [switch] $SmtpAuth,
 [string] $smtppw = "",
-[string] $smtpuser = ""
+[string] $smtpuser = "",
+[int] $SmtpPort =""
  )
 [String] $WelcomeSub = "Willkommen bei Infrastrukturhelden.de"
-[String] $WelcomeBody = "Hallo $Vorname,<br>hier schreiben wir dir noch eine nette Begrüssung<br>Besuche uns auf <a href="https://www.infrastrukturhelden.de">Infrastrukturhelden.de</a>"
+[String] $WelcomeBody = "Hallo $Vorname" + ',<br>hier schreiben wir dir noch eine nette Begrüssung<br>Besuche uns auf <a href="https://www.infrastrukturhelden.de">Infrastrukturhelden.de</a>'
 
 Function SendEmailStatus($From, $To, $Subject, $SmtpServer, $BodyAsHtml, $Body)
-     {   $SmtpMessage = New-Object System.Net.Mail.MailMessage $From, $To, $Subject, $Body
-         $SmtpMessage.IsBodyHTML = $BodyAsHtml
-         $SmtpClient = New-Object System.Net.Mail.SmtpClient $SmtpServer 
-         IF ($TLS) { $SmtpClient.EnableSsl = $true }
-         IF ($SmtpAuth) { $SmtpClient.Credentials = New-Object System.Net.NetworkCredential($smtpuser, $smtppw) }
+  {   $SmtpMessage = New-Object System.Net.Mail.MailMessage $From, $To, $Subject, $Body
+    $SmtpMessage.IsBodyHTML = $BodyAsHtml
+    $SmtpClient = New-Object System.Net.Mail.SmtpClient $SmtpServer 
+    IF ($TLS) { $SmtpClient.EnableSsl = $true }
+    IF ($SmtpAuth) { $SmtpClient.Credentials = New-Object System.Net.NetworkCredential($smtpuser, $smtppw) }
+    IF ($SmtpPort) { $SmtpClient.Port = $SmtpPort }
          $SmtpClient.Send($SmtpMessage)
-If($? -eq $False){Write-Warning "$($Error[0] .Exception.Message) | $($Error[0] .Exception.GetBaseException().Message)"}
+If($? -eq $False){Write-Warning "$($Error[0].Exception.Message) | $($Error[0].Exception.GetBaseException().Message)"}
          $SmtpMessage.Dispose()
          Remove-Variable SmtpClient
          Remove-Variable SmtpMessage
      }
-If (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity] ::GetCurrent()).IsInRole( [Security.Principal.WindowsBuiltInRole]  "Administrator"))
+If (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole( [Security.Principal.WindowsBuiltInRole]  "Administrator"))
  {
     $newProcess = new-object System.Diagnostics.ProcessStartInfo "PowerShell";
     $newProcess.Arguments = $myInvocation.MyCommand.Definition;
@@ -68,7 +72,7 @@ If (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
  IF ($DC -eq "") { $DC = $(Get-ADDomainController).HostName ; Write-Verbose "Kein DC angegeben, nutze $DC"  }
  IF ( $O365 ) { Try { Connect-AzureAD } catch { Write-Verbose "Installiere AzureAD Modul" ; Install-Module -Name AzureAD -Force ; Connect-AzureAD } }
  $SecPass = $Password | ConvertTo-SecureString -AsPlainText -Force
- !Zeichenlimit für SAM Account
+ #Zeichenlimit für SAM Account
  Write-Verbose "Lege Benutzer an"
  New-ADUser -Name $Username -GivenName $Vorname -Surname $Nachname -Path $OU -AccountPassword $SecPass -DisplayName $($Vorname+" "+$Nachname) -EmailAddress $Email -UserPrincipalName $UPN -OtherAttributes @{proxyAddresses=$("SMPT:"+$Email)} -Server $DC
  Start-Sleep -Seconds 10
@@ -88,5 +92,5 @@ If (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
    Set-AzureADUserLicense -ObjectId $Email -AssignedLicenses $licenses
    Write-Verbose "Assigned Licenses: $($(Get-AzureADUserLicenseDetail -ObjectId $Email ).SkuPartNumber)"
  }
- ! Willkommensemail
+ # Willkommensemail
  SendEmailStatus -From $From -To $Email -Subject $WelcomeSub -SmtpServer $SmtpServer -BodyAsHtml $True -Body $WelcomeBody
