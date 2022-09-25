@@ -17,6 +17,8 @@ History    : 1.0   FN  24.09.2022  first official
 
 .LINK
 https://github.com/InfrastructureHeroes/Scipts
+https://www.infrastructureheroes.org/microsoft-infrastructure/microsoft-windows/the-windows-sid-and-an-old-problem/
+https://www.infrastrukturhelden.de/microsoft-infrastruktur/microsoft-windows/die-windows-sid-und-ein-altes-problem/
 #>
 
 Param()
