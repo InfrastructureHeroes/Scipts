@@ -25,6 +25,7 @@ Param()
 
 #ToDo: Test for local PsGetsid64.exe, ask for Path or Download
 #ToDo: Add Parameter for CSV Export
+#ToDo: Test for PSGetSid exists
 
 $ErrorActionPreference = "SilentlyContinue"
 $PSGetSid = ".\PsGetsid64.exe"
