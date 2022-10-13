@@ -78,6 +78,7 @@ Param(
 )
 #region Functions 
 ########################
+# Function found at: https://sdmsoftware.com/group-policy-videos/find-all-registry-settings-managed-in-a-gpo/
 function Get-GPPolicyKey
         {
             param(
