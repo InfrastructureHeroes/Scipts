@@ -41,7 +41,7 @@ Switch to force an Error with Warrning for testing
 .NOTES
 Author     : Fabian Niesen (www.fabian-niesen.de)
 Filename   : get-GPOBackup.ps1
-Requires   : PowerShell Version 3.0
+Requires   : PowerShell Version 4.0
 Version    : 1.59
 History    : 1.0.0   FN  27/07/14  initial version
              1.1.0   FN  25/08/14  Change script to handle new GUID on GPO backup
@@ -57,6 +57,7 @@ History    : 1.0.0   FN  27/07/14  initial version
              1.57    FN  06/02/19  Added "/" to Escape Chars
              1.58    FN  12/03/19  Added Central Store Backup
              1.59    FN  11/08/21  Added '"' to Escape Chars
+             1.60    FN  13.10.22  Addep PowerShell Creation for easier GPO export and import - only works with GPO Settings stored in Regestry Keys under HKEY_LOCAL_MACHINE and HKEY_CURRENT_USER Everthing under Software and System!
 
 .LINK
 https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/gruppenrichtlinien-richtig-sichern-und-dokumentieren.html
@@ -70,10 +71,32 @@ Param(
     [Parameter(Mandatory=$false, Position=2, ValueFromPipeline=$false)]
     [string]$characters = '. $%&!?#*:;\><|/"',
     [switch]$PolicyDefinitions,
+    [switch]$PowerShellExport,
     [switch]$testerror,
     [switch]$testwarning,
     [switch]$testerrorwarning
 )
+#region Functions 
+########################
+function Get-GPPolicyKey
+        {
+            param(
+                [string]$gpoName,
+                [string]$key
+            )
+            $ErrorActionPreference = "Stop"
+            Write-Verbose "GPO: $gpoName - Key: $key"
+            $hive = Get-GPRegistryValue -Name $gpoName -Key $key
+            ForEach ($item in $hive)
+            {
+                Write-Verbose "Item: $($item.FullKeyPath)"
+                if ($item.ValueName -ne $null) { [array]$result += $item }
+                else { Get-GPPolicyKey -Key $item.FullKeyPath -gpoName $gpoName  }
+            }
+            return $result
+        }
+
+#endregion Functions 
 
 #Verknüfungsorte mit speichern
 
@@ -101,6 +124,16 @@ catch
 {
   Write-Warning "GroupPolicy Module ist missing. Please install first"
   "GroupPolicy Module ist missing. Please install first" | Out-file $ErrorLog -Append
+  break
+}
+try
+{
+  Import-Module activedirectory 
+}
+catch
+{
+  Write-Warning "ActiveDirectory Module ist missing. Please install first"
+  "ActiveDirectory Module ist missing. Please install first" | Out-file $ErrorLog -Append
   break
 }
 
@@ -210,6 +243,47 @@ FOREACH ( $GPO in $GPOS)
     $Error.Item($Error.Count - 1) | Format-List * -Force | Out-file $ErrorLog -Append
     Write-Warning "$($GPO.DisplayName) HTML report failed"
     "$($GPO.DisplayName) HTML report failed"| Out-file $ErrorLog -Append
+  }
+  IF ( $PowerShellExport )
+  {
+    Write-Verbose "Start PowerShell script creation"
+    $exportcsv = $bpath  + "\" + $GPOname + "-PS.csv"
+    $exportps = $bpath + "\" + $GPOname + ".ps1"
+    Write-Verbose "ExportCSV: $exportcsv - ExportPS: $exportps"
+    try { $settings = Get-GPPolicyKey -key "HKEY_LOCAL_MACHINE\Software" -gpoName $($GPO.DisplayName) -ErrorAction Stop }
+    catch 
+    { 
+      Write-Host "No Policy under HKEY_LOCAL_MACHINE\Software" 
+    }
+    try { $settings += Get-GPPolicyKey -key "HKEY_LOCAL_MACHINE\System" -gpoName $($GPO.DisplayName) -ErrorAction Stop }
+    catch 
+    { 
+      Write-Host "No Policy under HKEY_LOCAL_MACHINE\System" 
+    }
+    try { $settings += Get-GPPolicyKey -key "HKEY_CURRENT_USER\Software" -gpoName $($GPO.DisplayName) -ErrorAction Stop }
+    catch 
+    { 
+      Write-Host "No Policy under HKEY_CURRENT_USER\Software" 
+    }
+    try { $settings += Get-GPPolicyKey -key "HKEY_CURRENT_USER\System" -gpoName $($GPO.DisplayName) -ErrorAction Stop }
+    catch 
+    { 
+      Write-Host "No Policy under HKEY_CURRENT_USER\System" 
+    }
+    $settings = $settings.Where({ $null -ne $_ })
+    Write-Verbose "Export CSV"
+    $settings | Export-Csv -NoTypeInformation -Path $exportcsv -Force -Confirm:$false -Delimiter ";"
+    Write-Progress -activity "Processing GPO $GPOname - $i of $j" -Status "Create PowerShell import script" -PercentComplete (($i / $GPOS.count)*100) -Id 1 -ErrorAction SilentlyContinue
+    Write-Progress -activity "Create PowerShell import script" -Status "starting" -PercentComplete "0" -Id 2 -ParentId 1
+    Write-Verbose "Found $(($settings).count)"
+    [int]$i2 = 0
+    [int]$j2 = $($settings).count
+    ForEach ($setting in $settings)
+    {
+        $i2++
+        Write-Progress -activity "Create PowerShell import script - $i2 of $j2" -Status $($setting.ValueName) -PercentComplete (($i2 / $j2 *100)) -Id 2 -ParentId 1 -ErrorAction SilentlyContinue 
+        "Set-GPRegistryValue -Key " + $($setting.FullKeyPath) + " -Name "+ $GPOname +" -Type "+ $($setting.Type) + " -Value "+ $($setting.Value)+ " -ValueName " + $($setting.ValueName) | out-file -FilePath $exportps -Append
+    }
   }
 }
 
