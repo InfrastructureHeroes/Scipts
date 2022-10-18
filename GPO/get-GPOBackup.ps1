@@ -283,7 +283,7 @@ FOREACH ( $GPO in $GPOS)
     {
         $i2++
         Write-Progress -activity "Create PowerShell import script - $i2 of $j2" -Status $($setting.ValueName) -PercentComplete (($i2 / $j2 *100)) -Id 2 -ParentId 1 -ErrorAction SilentlyContinue 
-        "Set-GPRegistryValue -Key " + $($setting.FullKeyPath) + " -Name "+ $GPOname +" -Type "+ $($setting.Type) + " -Value "+ $($setting.Value)+ " -ValueName " + $($setting.ValueName) | out-file -FilePath $exportps -Append
+        "Set-GPRegistryValue -Key " + $($setting.FullKeyPath) + " -Name '"+ $GPOname +"' -Type "+ $($setting.Type) + " -Value "+ $($setting.Value)+ " -ValueName " + $($setting.ValueName) | out-file -FilePath $exportps -Append
     }
   }
 }
