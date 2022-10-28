@@ -21,14 +21,21 @@ https://www.infrastructureheroes.org/microsoft-infrastructure/microsoft-windows/
 https://www.infrastrukturhelden.de/microsoft-infrastruktur/microsoft-windows/die-windows-sid-und-ein-altes-problem/
 #>
 
-Param()
+Param(
+[String]$PSGetSid = ".\PsGetsid64.exe",
+[switch]$CSV
+)
 
 #ToDo: Test for local PsGetsid64.exe, ask for Path or Download
 #ToDo: Add Parameter for CSV Export
 #ToDo: Test for PSGetSid exists
-
 $ErrorActionPreference = "SilentlyContinue"
-$PSGetSid = ".\PsGetsid64.exe"
+Set-Location $PSScriptRoot
+$ScriptName = $myInvocation.MyCommand.Name
+$ScriptName = $ScriptName.Substring(0, $scriptName.Length - 4)
+$LogName = (Get-Date -UFormat "%Y%m%d-%H%M") + "-" + $scriptName + "_" + $ENV:COMPUTERNAME +".log"
+Start-Transcript -Path "$PSScriptRoot\$LogName" -Append
+
 try {
         Get-ItemProperty -Path "REGISTRY::HKEY_CURRENT_USER\Software\Sysinternals\PsGetSid" -ErrorAction Stop | Select-Object -ExpandProperty "EulaAccepted" -ErrorAction Stop | Out-Null
     }
@@ -66,3 +73,9 @@ ForEach ($Computer in $Computers)
     $SIDs += $Computer
 }
 $SIDs | Format-Table -Property name,Online,SID,LastLogonDate,OperatingSystem,OperatingSystemVersion,whenChanged -AutoSize
+IF ( $CSV) 
+{
+    $csvpath = "$PSScriptRoot\"+(Get-Date -UFormat "%Y%m%d-%H%M")+"-SID.csv"
+    Write-Output "CSV file generated - $csvpath"
+    $SIDs | Export-Csv -Path $csvpath -Force -Delimiter ";" -NoTypeInformation
+}
