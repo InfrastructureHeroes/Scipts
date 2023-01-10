@@ -1,19 +1,27 @@
 ﻿<#
 .SYNOPSIS
     Utilize PSGetSid by Mark Russinovich (Sysinternals) to gather the Windows SID from all online Computer within the Active Directory.
+
 .DESCRIPTION
     Utilize PSGetSid by Mark Russinovich (Sysinternals) to gather the Windows SID from all online Computer within the Active Directory. It also gather some Additional information from the Active Directory.
     Download and extract PSGetSid from PSTools: https://download.sysinternals.com/files/PSTools.zip
     For more details about duplicated SID check Marks article: https://learn.microsoft.com/en-us/archive/blogs/markrussinovich/the-machine-sid-duplication-myth-and-why-sysprep-matters
+
+.PARAMETER PSGetSid
+    Path to PsGetsid64.exe including filename
+
+.PARAMETER CSV
+    Export report as CSV
+
 .EXAMPLE 
-C:\PS> Get-WindowsSid.ps1
+    C:\PS> Get-WindowsSid.ps1
 
 .NOTES
-Author     : Fabian Niesen (www.fabian-niesen.de)
-Filename   : Get-WindowsSid.ps1
-Requires   : PowerShell Version 3.0
-Version    : 1.0
-History    : 1.0   FN  24.09.2022  first official
+    Author     : Fabian Niesen (www.fabian-niesen.de)
+    Filename   : Get-WindowsSid.ps1
+    Requires   : PowerShell Version 3.0
+    Version    : 1.0
+    History    : 1.0   FN  24.09.2022  first official
 
 .LINK
 https://github.com/InfrastructureHeroes/Scipts
@@ -41,7 +49,6 @@ try {
     }
     catch {
     Write-Verbose "no EULA"
-    & $PSGetSid
     $accepteula = Read-Host "Do you Accept the EULA? (Y/N)"
     IF ( $accepteula -match "y" -or $accepteula -match "z")
     { & $PSGetSid -accepteula }
