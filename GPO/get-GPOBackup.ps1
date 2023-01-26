@@ -42,22 +42,23 @@ Switch to force an Error with Warrning for testing
 Author     : Fabian Niesen (www.fabian-niesen.de)
 Filename   : get-GPOBackup.ps1
 Requires   : PowerShell Version 4.0
-Version    : 1.59
+Version    : 1.61
 History    : 1.0.0   FN  27/07/14  initial version
-             1.1.0   FN  25/08/14  Change script to handle new GUID on GPO backup
-             1.1.1   FN  03/09/14  Fix Targetpath for secured enviorment
-             1.2     FN  20/01/15  move download to TechNet, translation to english, 
-                                   implement Eventlog if Run as Admin
-             1.3     FN  09/02/15  Change Name to get-GPOBackup, Change Path to parameter 
-                                   instead Config, Implementing KeepDate, Implementing Error-Logging
-             1.4     FN  25/02/15  Tracking runtime, fixes in documentation
-             1.55    FN  11/08/17  Add some Debug Options. Filtering GPO Names for unwanted Characters
-             1.56    FN  04/03/18  Fix Eventlog handling. Add additional Eventlog posibilities, 
-                                   for this I change and add EventIDs. Some fixes with the get-Help output
-             1.57    FN  06/02/19  Added "/" to Escape Chars
-             1.58    FN  12/03/19  Added Central Store Backup
-             1.59    FN  11/08/21  Added '"' to Escape Chars
-             1.60    FN  13.10.22  Addep PowerShell Creation for easier GPO export and import - only works with GPO Settings stored in Regestry Keys under HKEY_LOCAL_MACHINE and HKEY_CURRENT_USER Everthing under Software and System!
+            1.1.0   FN  25/08/14  Change script to handle new GUID on GPO backup
+            1.1.1   FN  03/09/14  Fix Targetpath for secured enviorment
+            1.2     FN  20/01/15  move download to TechNet, translation to english, 
+                                  implement Eventlog if Run as Admin
+            1.3     FN  09/02/15  Change Name to get-GPOBackup, Change Path to parameter 
+                                  instead Config, Implementing KeepDate, Implementing Error-Logging
+            1.4     FN  25/02/15  Tracking runtime, fixes in documentation
+            1.55    FN  11/08/17  Add some Debug Options. Filtering GPO Names for unwanted Characters
+            1.56    FN  04/03/18  Fix Eventlog handling. Add additional Eventlog posibilities, 
+                                  for this I change and add EventIDs. Some fixes with the get-Help output
+            1.57    FN  06/02/19  Added "/" to Escape Chars
+            1.58    FN  12/03/19  Added Central Store Backup
+            1.59    FN  11/08/21  Added '"' to Escape Chars
+            1.60    FN  13.10.22  Added PowerShell Creation for easier GPO export and import - only works with GPO Settings stored in Regestry Keys under HKEY_LOCAL_MACHINE and HKEY_CURRENT_USER Everthing under Software and System!
+            1.61    FN  26.01.23  Small Improvements for Module loading
 
 .LINK
 https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/gruppenrichtlinien-richtig-sichern-und-dokumentieren.html
@@ -117,26 +118,10 @@ $InfoLog =$BackupPath+$date+"-info.log"
 $WarningLog =$BackupPath+$date+"-warning.log"
 $Report = $BackupPath+$date+"-Report.csv"
 Write-Verbose "Import Grouppolicy module"
-try
-{
-  Import-Module grouppolicy 
-}
-catch
-{
-  Write-Warning "GroupPolicy Module ist missing. Please install first"
-  "GroupPolicy Module ist missing. Please install first" | Out-file $ErrorLog -Append
-  break
-}
-try
-{
-  Import-Module activedirectory 
-}
-catch
-{
-  Write-Warning "ActiveDirectory Module ist missing. Please install first"
-  "ActiveDirectory Module ist missing. Please install first" | Out-file $ErrorLog -Append
-  break
-}
+IF ( (Get-WindowsFeature -Name GPMC).InstallState -notlike "Installed" ) {Write-Warning "Missing Windows Feature GPMC - start Installation" ; Install-WindowsFeature -Name GPMC}
+IF ( (Get-WindowsFeature -Name RSAT-AD-PowerShell).InstallState -notlike "Installed" ) {Write-Warning "Missing Windows Feature RSAT-AD-PowerShell - start Installation" ; Install-WindowsFeature -Name RSAT-AD-PowerShell}
+IF ( (Get-WindowsFeature -Name GPMC).InstallState -notlike "Installed" ) {Write-Error -Message "GPMC missing - Installation Failed" ; Break }
+IF ( (Get-WindowsFeature -Name RSAT-AD-PowerShell).InstallState -notlike "Installed" ) {Write-Error -Message "RSAT-AD-PowerShell missing - Installation Failed" ; Break }
 
 Write-Verbose "Check if backup path is default"
 IF ($BackupPath -eq "c:\temp\GPOBackup\")
