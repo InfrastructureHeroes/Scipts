@@ -1,0 +1,15 @@
+# Windows Update URL list for squid ACL (Fabian Niesen - InfrastrukturHelden.de)
+# based upon https://learn.microsoft.com/de-de/security-updates/WindowsUpdateServices/18127640 and https://learn.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/2-configure-wsus#211-connection-from-the-wsus-server-to-the-internet
+# add to squid.conf:
+# acl windowsupdate dstdomain "/etc/squid/allow_windowsupdate.squid"
+# http_access allow windowsupdate
+
+
+.windowsupdate.microsoft.com
+.update.microsoft.com
+.windowsupdate.com
+download.microsoft.com
+wustat.windows.com
+ntservicepack.microsoft.com
+go.microsoft.com
+.delivery.mp.microsoft.com
