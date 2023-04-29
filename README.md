@@ -30,6 +30,7 @@ Verschiedene Skripte auf meiner Exchange-Berater Zeit. Nicht mehr gepflegt!
 ### Sonstige
 * get-adinfo.ps1 - *Erstellt einen AD Report mit Nützlichen Funktionen wie Liste der DCs und die Versionen des Schemas und eventueller Erweiterungen.*
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Z8Z8FB6VH)
 # English version
 Powershell script collection by Fabian Niesen [InfrastrukturHelden.de](https://www.infrastrukturhelden.de). The following applies to all scripts:
 **Use at your own risk and without any guarantee!**
