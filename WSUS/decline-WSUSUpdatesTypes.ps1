@@ -133,7 +133,7 @@ Param(
     [switch]$load
 )
 
-Clear-Host
+
 $conffile = "./decline-WSUSUpdatesType.clixml"
 
 IF ($save) 
@@ -203,7 +203,7 @@ IF ($Itanium -eq $true)
     Write-Output "Found $($ItaniumUpdates.count) Itanium Updates to decline"
     If($ItaniumUpdates) 
     {
-      IF (! $WhatIF) {$ItaniumUpdates | ForEach-ObjectorEach-Object{$_.Decline()}}
+      IF (! $WhatIF) {$ItaniumUpdates | ForEach-Object{$_.Decline()}}
       $ItaniumUpdates | Add-Member -MemberType NoteProperty -Name PatchType -value "Itanium"
       $Updates = $Updates + $ItaniumUpdates
     }
