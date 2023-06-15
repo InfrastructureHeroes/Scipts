@@ -24,8 +24,8 @@
     .PARAMETER Authoritative,
         Replication will be Authorative
 
-    .PARAMETER referenceDC
-        ReferenceDC for replication. Required for Authorative. If not defined PDC is used, if reachable.
+    .PARAMETER referenceServer
+        referenceServer for replication. Required for Authorative. If not defined PDC is used, if reachable.
 
 	.NOTES
 		Author     :    Fabian Niesen
@@ -42,7 +42,7 @@ Param(
     [Parameter(ParameterSetName = "all")][Switch]$all,
     [Parameter(ParameterSetName = "list")][Switch]$list,
     [switch]$Authoritative,
-    [String]$referenceDC
+    [String]$referenceServer
 )
 #region Functions
 Function Start-Log {
@@ -161,7 +161,7 @@ $global:ScriptName = $myInvocation.MyCommand.Name
 $global:ScriptName = $ScriptName.Substring(0, $scriptName.Length - 4)
 $global:scriptsource = $myInvocation.MyCommand.Source
 $global:scriptparam = $MyInvocation.BoundParameters
-Write-Verbose "RefenceDC: $referenceDC - Authoritative: $Authoritative"
+Write-Verbose "RefenceDC: $referenceServer - Authoritative: $Authoritative"
 Start-log -ScriptName $ScriptName
 Write-Log -Message "Start $ScriptName $ScriptVersion - Executed on $($Env:COMPUTERNAME)"
 #endregion init
@@ -177,22 +177,23 @@ IF ($null -ne $TargetReplicationGroup){
 }
 
 $DC=(Get-ADDomainController -Filter {OperationMasterRoles -like "PDC*"}).Hostname
-IF ( IsNull($referenceDC)  ) { $referenceDC = $DC } Else { $referenceDC = (Get-ADComputer -Identity $referenceDC).DNSHostName }
+IF ( IsNull($referenceServer)  ) { $referenceServer = $DC } Else { $referenceServer = (Get-ADComputer -Identity $referenceServer).DNSHostName }
 [String]$LDAPDOM = (Get-ADDomain).DistinguishedName
 $DFSServers = Get-ADDomain | Select-Object -ExpandProperty ReplicaDirectoryServers
 #region Sort Server
-[String[]]$SortServer = $DFSServers | Where-Object { $_ -like "$referenceDC"}
-ForEach ( $DFSServer in $($DFSServers | Where-Object { $_ -ne "$referenceDC"})) { $SortServer += $DFSServer }
+[String[]]$SortServer = $DFSServers | Where-Object { $_ -like "$referenceServer"}
+ForEach ( $DFSServer in $($DFSServers | Where-Object { $_ -ne "$referenceServer"})) { $SortServer += $DFSServer }
 $DFSServers = $SortServer
 Write-Log -message "Server precedence: $($DFSServers -join(', '))"
 #endregion Sort Server
 Write-Log -message "Detected $($DFSServers.count) Replication Server"
+
 ForEach ( $DFSServer in $DFSServers )
 {
     Write-Debug "$DFSServer"
     $DFSServerDN = (Get-ADComputer -Identity $($DFSServer.Split(".")[0])).DistinguishedName
-    IF ( $all ) { $ReplicationGroups = Get-ChildItem "AD:\CN=DFSR-LocalSettings,$DFSServerDN" }
-    IF ( $TargetReplicationGroup) {  }
+    IF ( $all ) { [string[]]$ReplicationGroups = Get-ChildItem "AD:\CN=DFSR-LocalSettings,$DFSServerDN" }
+    IF ( $TargetReplicationGroup) { [string[]]$ReplicationGroups = "$TargetReplicationGroup"  }
     #IF ($null -ne $TargetReplicationGroup) {  }
     ForEach ( $ReplicationGroup in $ReplicationGroups)
     {
@@ -200,7 +201,7 @@ ForEach ( $DFSServer in $DFSServers )
         Write-Log -Message "Modify Replication Group $ReplicationGroupName"
         $DfsrSettingsObject = Get-ADObject $((Get-ChildItem "AD:\$($ReplicationGroup.DistinguishedName)").DistinguishedName) -Properties "msDFSR-Enabled","msDFSR-options" -Server $DC
         If ( $PSCmdlet.MyInvocation.BoundParameters["Verbose"].IsPresent) { $DfsrSettingsObject | format-List }
-        IF ( $Authoritative -and $DFSServer -like $referenceDC ) { $DfsrSettingsObject.'msDFSR-options' = 1 }
+        IF ( $Authoritative -and $DFSServer -like $referenceServer ) { $DfsrSettingsObject.'msDFSR-options' = 1 }
         $DfsrSettingsObject.'msDFSR-Enabled' = $False
         Set-ADObject -Instance $DfsrSettingsObject -Server $DC
         start-wait -Comment "Waiting for AD" -seconds 5
@@ -248,7 +249,7 @@ ForEach ( $DFSServer in $DFSServers )
     Catch { Write-log -message "$($_.Exception.Message)" -logLevel 3 ; Continue }
     start-wait -Comment "Waiting for AD" -seconds 5
     Update-DfsrConfigurationFromAD -ComputerName $DFSServer -Verbose
-    IF ( $DFSServer -eq $referenceDC)
+    IF ( $DFSServer -eq $referenceServer)
     {
         do {
             Start-Wait -comment "Wait for DFS-R to settle" -seconds 10
