@@ -1,0 +1,11 @@
+name: generate docs
+on: 
+  [push]
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+    - name: Generate docs
+      uses: Microsoft/ps-docs@main
