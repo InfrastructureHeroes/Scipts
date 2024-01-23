@@ -1,0 +1,14 @@
+# NuGet URL list for squid ACL (Fabian Niesen - InfrastrukturHelden.de)
+# based upon https://learn.microsoft.com/en-us/powershell/gallery/getting-started?view=powershellget-2.x
+# add to squid.conf:
+# acl psgallery dstdomain "/etc/squid/allow_psgallery.squid"
+# http_access allow psgallery
+
+go.microsoft.com
+onegetcdn.azureedge.net
+psg-prod-centralus.azureedge.net
+psg-prod-eastus.azureedge.net
+az818661.vo.msecnd.net
+# For Website
+devopsgallerystorage.blob.core.windows.net
+*.powershellgallery.com

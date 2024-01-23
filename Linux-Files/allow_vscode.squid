@@ -1,0 +1,9 @@
+# Visual Studio Code URL list for squid ACL (Fabian Niesen - InfrastrukturHelden.de)
+# add to squid.conf:
+# acl vscode dstdomain "/etc/squid/allow_vscode.squid"
+# http_access allow vscode
+
+# extension gallery
+marketplace.visualstudio.com
+.vsassets.io
+

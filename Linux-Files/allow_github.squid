@@ -1,0 +1,6 @@
+# GitHub URL list for squid ACL (Fabian Niesen - InfrastrukturHelden.de)
+# add to squid.conf:
+# acl github dstdomain "/etc/squid/allow_github.squid"
+# http_access allow github
+
+.github.com
