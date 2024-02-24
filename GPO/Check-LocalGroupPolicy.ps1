@@ -6,20 +6,17 @@
 	.DESCRIPTION
 		Check local EventLog for signes of issues with Local GPO and fixed them if needed. Malformed local GPO prevent GPO processing. This mean changes in GPOs will not be processed by this client. The script needs to be run with Administrative permissions.
 	.EXAMPLE  
-        .\configure-AD.ps1 -XMLfile .\securead.xml
-
-    .PARAMETER XMLfile
-        Path to XML config file
+	Check-LocalGroupPolicy.ps1
 
 	.NOTES
 		Author     :    Fabian Niesen
-		Filename   :    configure-AD.ps1
+		Filename   :    Check-LocalGroupPolicy.ps1
 		Requires   :    PowerShell Version 4.0
 		
 		Version    :    0.3
 		History    :    0.3 23.12.2022 FN Some Cleanup and Housekeeping
-                    0.2 08.03.2021 FN Found in personal archive and published to GitHub
-                    0.1 FN 2016 Initial version.
+                    		0.2 08.03.2021 FN Found in personal archive and published to GitHub
+                    		0.1 FN 2016 Initial version.
     .LINK
         https://github.com/InfrastructureHeroes/Scipts/blob/master/GPO/Check-LocalGroupPolicy.ps1
 #>
