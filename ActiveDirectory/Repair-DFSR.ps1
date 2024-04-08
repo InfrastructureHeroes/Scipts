@@ -253,7 +253,7 @@ ForEach ( $DFSServer in $DFSServers )
     {
         do {
             Start-Wait -comment "Wait for DFS-R to settle" -seconds 10
-        } Until ( (Get-EventLog -LogName "DFS Replication" -ComputerName "DC01" -InstanceId 1073746426 -Newest 3 -After (Get-Date).AddMinutes(-10)).Count -ge 1 )
+        } Until ( (Get-EventLog -LogName "DFS Replication" -ComputerName $referenceServer -InstanceId 1073746426 -Newest 3 -After (Get-Date).AddMinutes(-10)).Count -ge 1 )
     }   
 }
 Write-Log -Message "DFS-R Repair Completed - Synchronisation may take a while"
