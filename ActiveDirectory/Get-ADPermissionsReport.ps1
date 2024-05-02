@@ -62,4 +62,4 @@ foreach($OU in $OUs){
 }
 Write-Progress -activity "Query Permissions, please wait." -Completed -Id 1
 IF ($showresult) { $report | Format-Table -AutoSize }
-IF ($export) { $report | Export-Csv -Path "$ExportFile" -NoTypeInformation -Force }
+IF ($export) { $report | Export-Csv -Path "$ExportFile" -NoTypeInformation -Force -Delimiter ";"}
