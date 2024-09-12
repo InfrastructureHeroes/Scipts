@@ -199,13 +199,13 @@ ForEach ( $DFSServer in $DFSServers )
     {
         $ReplicationGroupName =$((($ReplicationGroup -split ',')[0]).Replace('CN=',''))
         Write-Log -Message "Modify Replication Group $ReplicationGroupName"
-        $DfsrSettingsObject = Get-ADObject $((Get-ChildItem "AD:\$($ReplicationGroup.DistinguishedName)").DistinguishedName) -Properties "msDFSR-Enabled","msDFSR-options" -Server $DC
+        $DfsrSettingsObject = Get-ADObject $((Get-ChildItem "AD:\$($ReplicationGroup)").DistinguishedName) -Properties "msDFSR-Enabled","msDFSR-Options" -Server $DC
         If ( $PSCmdlet.MyInvocation.BoundParameters["Verbose"].IsPresent) { $DfsrSettingsObject | format-List }
         IF ( $Authoritative -and $DFSServer -like $referenceServer ) { $DfsrSettingsObject.'msDFSR-options' = 1 }
         $DfsrSettingsObject.'msDFSR-Enabled' = $False
         Set-ADObject -Instance $DfsrSettingsObject -Server $DC
         start-wait -Comment "Waiting for AD" -seconds 5
-        $DfsrSettingsObject = Get-ADObject $((Get-ChildItem "AD:\$($ReplicationGroup.DistinguishedName)").DistinguishedName) -Properties "msDFSR-Enabled","msDFSR-options" -Server $DC
+        $DfsrSettingsObject = Get-ADObject $((Get-ChildItem "AD:\$($ReplicationGroup)").DistinguishedName) -Properties "msDFSR-Enabled","msDFSR-Options" -Server $DC
         Write-Log -message "DFSR settings for $ReplicationGroupName are - msDFSR-Enabled: $($DfsrSettingsObject.'msDFSR-Enabled') msDFSR-options: $($DfsrSettingsObject.'msDFSR-options') " 
     }
     Write-Log -Message "Start remote AD replication on $DFSServer"
@@ -236,12 +236,12 @@ ForEach ( $DFSServer in $DFSServers )
     {
         $ReplicationGroupName =$((($ReplicationGroup -split ',')[0]).Replace('CN=',''))
         Write-Log -Message "Modify Replication Group $ReplicationGroupName"
-        $DfsrSettingsObject = Get-ADObject $((Get-ChildItem "AD:\$($ReplicationGroup.DistinguishedName)").DistinguishedName) -Properties "msDFSR-Enabled","msDFSR-options" -Server $DC
+        $DfsrSettingsObject = Get-ADObject $((Get-ChildItem "AD:\$($ReplicationGroup)").DistinguishedName) -Properties "msDFSR-Enabled","msDFSR-Options" -Server $DC
         If ( $PSCmdlet.MyInvocation.BoundParameters["Verbose"].IsPresent) { $DfsrSettingsObject | format-List }
         $DfsrSettingsObject.'msDFSR-Enabled' = $True
         Set-ADObject -Instance $DfsrSettingsObject -Server $DC
         start-wait -Comment "Waiting for AD" -seconds 5
-        $DfsrSettingsObject = Get-ADObject $((Get-ChildItem "AD:\$($ReplicationGroup.DistinguishedName)").DistinguishedName) -Properties "msDFSR-Enabled","msDFSR-options" -Server $DC
+        $DfsrSettingsObject = Get-ADObject $((Get-ChildItem "AD:\$($ReplicationGroup)").DistinguishedName) -Properties "msDFSR-Enabled","msDFSR-Options" -Server $DC
         Write-Log -message "DFSR settings for $ReplicationGroupName are - msDFSR-Enabled: $($DfsrSettingsObject.'msDFSR-Enabled') msDFSR-options: $($DfsrSettingsObject.'msDFSR-options') " 
     }
     Write-Log -Message "Start remote AD replication on $DFSServer"
