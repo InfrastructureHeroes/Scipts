@@ -5,7 +5,8 @@
 		Check Network connection and configuration from a client. Including MTU, NetBios over TCP/IP, IPv6 and LDAP Checks
 
     .COPYRIGHT
-        Copyright (c) 2022 Fabian Niesen. All rights reserved. Licensed under the MIT license.
+        Copyright (c) 2024 Fabian Niesen. All rights reserved. Licensed under the MIT license. 
+        Code for LDAP Test from https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/ under MIT license
 
     .EXAMPLE  
         .\Check-Network.ps1
@@ -30,8 +31,9 @@
 		Filename   :    Check-Network.ps1
 		Requires   :    PowerShell Version 4.0
 		
-		Version    :    0.2
-		History    : 	0.2 FN 23.12.2022 Housekeeping & Cleanup
+		Version    :    0.3
+		History    : 	0.3 FN 12.09.2024 Add some Ports
+                        0.2 FN 23.12.2022 Housekeeping & Cleanup
 						0.1 FN 12.10.2022 Initial version.
 
     .LINK
