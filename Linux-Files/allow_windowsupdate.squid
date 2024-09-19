@@ -5,12 +5,15 @@
 # http_access allow windowsupdate
 
 
+definitionupdates.microsoft.com
 .windowsupdate.microsoft.com
 .update.microsoft.com
 .windowsupdate.com
-download.windowsupdate.com
 download.microsoft.com
 wustat.windows.com
 ntservicepack.microsoft.com
 go.microsoft.com
 .delivery.mp.microsoft.com
+download.visualstudio.microsoft.com
+www.microsoft.com
+
