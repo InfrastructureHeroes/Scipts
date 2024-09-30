@@ -32,7 +32,8 @@
 		Requires   :    PowerShell Version 4.0
 		
 		Version    :    0.3
-		History    : 	0.3 FN 12.09.2024 Add some Ports
+		History    : 	0.4 FN 30.09.2024 Add KMS detection, add some ports
+                        0.3 FN 12.09.2024 Add some Ports
                         0.2 FN 23.12.2022 Housekeeping & Cleanup
 						0.1 FN 12.10.2022 Initial version.
 
@@ -240,17 +241,21 @@ ForEach ($DC in $DCs2)
     Write-Output " "
     Write-Output "Test SMB connection (might not work for not Domainjoined Computers)"
     Write-Output "============================================"
-    Get-ChildItem \\$DC\Sysvol\$env:USERDNSDOMAIN
-    Get-ChildItem \\$DC\NetLogon
+    Get-ChildItem \\$DC\Sysvol\$env:USERDNSDOMAIN | Format-Table -AutoSize
+    Get-ChildItem \\$DC\NetLogon | Format-Table -AutoSize
 }
 
 # Abfrage der SRV-Einträge für den KMS-Server
 $kmsInfo = nslookup -type=srv _vlmcs._tcp | Select-String -Pattern "port|svr hostname"
 IF ( $kmsInfo.count -gt 0)
 {
-    $kmsport = ($kmsInfo | Select-String -Pattern "port" | ForEach-Object { $_.Line.Split("=").Trim() })
-    $kmsserver = ($kmsInfo | Select-String -Pattern "svr hostname" | ForEach-Object { $_.Line.Split("=").Trim() })
+    [int]$kmsport = (($kmsInfo | Select-String -Pattern "port" ) -split("="))[1].trim()
+    $kmsserver = ($kmsInfo | Select-String -Pattern "svr hostname" | ForEach-Object { $_.Line.Split("=").Trim() }| Out-String)
+    Write-Output " "
     Write-Output "Found Microsoft Key Management server $kmsserver port $kmsport"
-    Write-Output "MS KMS Server (TCP $kmsport) : $((Test-NetConnection -ComputerName $kmsserver -Port $kmsserver -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
+    Write-Output "============================================"
+    Write-Output "MS KMS Server (TCP $kmsport) : $((Test-NetConnection -ComputerName $kmsserver -Port $kmsport -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
+    Write-Output " "
+    csript.exe c:\windows\system32\slmgr.vbs -dli
 } Else { Write-Output "No MS KMS Server found"}
 Stop-Transcript 
