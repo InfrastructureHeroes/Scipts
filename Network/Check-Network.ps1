@@ -47,6 +47,8 @@ param (
     [string]$DNSDomain = (Get-DnsClientGlobalSetting).SuffixSearchList[0],
     [string]$logpath = "C:\Windows\System32\LogFiles"
 )
+if ($Host.Name -eq "ServerRemoteHost") { Write-Error -Exception "RemoteShell detected" -Message "Please use local PowerShell, remote PowerShell Sessions are not supported" ; break }
+
 #region EVOTec Test LDAP
 #Code for this region from https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/ under MIT license
 #GitHub: https://github.com/EvotecIT/ADEssentials
