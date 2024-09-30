@@ -41,7 +41,7 @@
 #>
 
 param (
-    [int]$targetMTU = 8000,
+    [int]$targetMTU = 1500,
     [int]$mtuoh = 28,
     [string]$DNSDomain = (Get-DnsClientGlobalSetting).SuffixSearchList[0],
     [string]$logpath = "C:\Windows\System32\LogFiles"
@@ -214,17 +214,19 @@ ForEach ($DC in $DCs2)
     Write-Output "============================================"
     Write-Output "WinRM (TCP 5985)         : $((Test-NetConnection -ComputerName $DC -CommonTCPPort WINRM -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
     Write-Output "WinRMs (TCP 5986)        : $((Test-NetConnection -ComputerName $DC -Port 5986 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
-    Write-Output "Kerberos (TCP 88)        : $((Test-NetConnection -ComputerName $DC -Port 88 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
-    Write-Output "KerberosPW (TCP 464)     : $((Test-NetConnection -ComputerName $DC -Port 464 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
-    Write-Output "DNS (TCP 53)             : $((Test-NetConnection -ComputerName $DC -Port 53 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
-    Write-Output "RPC (TCP 135)            : $((Test-NetConnection -ComputerName $DC -Port 135 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
-    Write-Output "SMB (TCP 445)            : $((Test-NetConnection -ComputerName $DC -Port 445 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
-    Write-Output "Legacy NetBios (TCP 139) : $((Test-NetConnection -ComputerName $DC -Port 445 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
+    Write-Output "Kerberos (TCP 88)        : $((Test-NetConnection -ComputerName $DC -Port 88 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue   ).TcpTestSucceeded)"
+    Write-Output "KerberosPW (TCP 464)     : $((Test-NetConnection -ComputerName $DC -Port 464 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue  ).TcpTestSucceeded)"
+    Write-Output "ADWS (TCP 9389)          : $((Test-NetConnection -ComputerName $DC -Port 9389 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
+    Write-Output "DNS (TCP 53)             : $((Test-NetConnection -ComputerName $DC -Port 53 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue   ).TcpTestSucceeded)"
+    Write-Output "RPC (TCP 135)            : $((Test-NetConnection -ComputerName $DC -Port 135 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue  ).TcpTestSucceeded)"
+    Write-Output "SMB (TCP 445)            : $((Test-NetConnection -ComputerName $DC -Port 445 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue  ).TcpTestSucceeded)"
+    Write-Output "Legacy NetBios (TCP 139) : $((Test-NetConnection -ComputerName $DC -Port 139 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue  ).TcpTestSucceeded)"
     Write-Output " "
     Write-Output "Test Common UDP ports connection (True might be filltered / silently droped!)"
     Write-Output "============================================" 
     Write-Output "Kerberos (UDP 88)        : $(Test-UDP -target $DC -UDPport 88   )"
-    Write-Output "DNS (UDP 53)             : $(Test-UDP -target $DC -UDPport 53  )"
+    Write-Output "KerberosPW (UDP 464)     : $(Test-UDP -target $DC -UDPport 464  )"
+    Write-Output "DNS (UDP 53)             : $(Test-UDP -target $DC -UDPport 53   )"
     Write-Output "SMB (UDP 445)            : $(Test-UDP -target $DC -UDPport 445  )"
     Write-Output "W32Time / NTP (UDP 123)  : $(Test-UDP -target $DC -UDPport 123  )"
     Write-Output "Legacy NetBios (UDP 137) : $(Test-UDP -target $DC -UDPport 137  )"
@@ -238,8 +240,17 @@ ForEach ($DC in $DCs2)
     Write-Output " "
     Write-Output "Test SMB connection (might not work for not Domainjoined Computers)"
     Write-Output "============================================"
-    Write-Output "Found Directories in SysVol: $(([System.IO.Directory]::GetDirectories($("\\"+$DC+"\SysVol"))).Count)"
-    Write-Output "Found Files in NetLogon: $(([System.IO.Directory]::GetFiles($("\\"+$DC+"\NetLogon"))).Count)"
-
+    Get-ChildItem \\$DC\Sysvol\$env:USERDNSDOMAIN
+    Get-ChildItem \\$DC\NetLogon
 }
+
+# Abfrage der SRV-Einträge für den KMS-Server
+$kmsInfo = nslookup -type=srv _vlmcs._tcp | Select-String -Pattern "port|svr hostname"
+IF ( $kmsInfo.count -gt 0)
+{
+    $kmsport = ($kmsInfo | Select-String -Pattern "port" | ForEach-Object { $_.Line.Split("=").Trim() })
+    $kmsserver = ($kmsInfo | Select-String -Pattern "svr hostname" | ForEach-Object { $_.Line.Split("=").Trim() })
+    Write-Output "Found Microsoft Key Management server $kmsserver port $kmsport"
+    Write-Output "MS KMS Server (TCP $kmsport) : $((Test-NetConnection -ComputerName $kmsserver -Port $kmsserver -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
+} Else { Write-Output "No MS KMS Server found"}
 Stop-Transcript 
