@@ -38,7 +38,7 @@
 						0.1 FN 12.10.2022 Initial version.
 
     .LINK
-        https://github.com/FabianNiesen/
+        https://github.com/InfrastructureHeroes/Scipts/blob/master/Network/Check-Network.ps1
 #>
 
 param (
