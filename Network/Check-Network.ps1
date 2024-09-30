@@ -250,12 +250,12 @@ $kmsInfo = nslookup -type=srv _vlmcs._tcp | Select-String -Pattern "port|svr hos
 IF ( $kmsInfo.count -gt 0)
 {
     [int]$kmsport = (($kmsInfo | Select-String -Pattern "port" ) -split("="))[1].trim()
-    $kmsserver = ($kmsInfo | Select-String -Pattern "svr hostname" | ForEach-Object { $_.Line.Split("=").Trim() }| Out-String)
+    $kmsserver = (($kmsInfo | Select-String -Pattern "svr hostname") -split("="))[1].trim()
     Write-Output " "
     Write-Output "Found Microsoft Key Management server $kmsserver port $kmsport"
     Write-Output "============================================"
     Write-Output "MS KMS Server (TCP $kmsport) : $((Test-NetConnection -ComputerName $kmsserver -Port $kmsport -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
     Write-Output " "
-    csript.exe c:\windows\system32\slmgr.vbs -dli
+    c:\windows\system32\cscript.exe c:\windows\system32\slmgr.vbs -dli
 } Else { Write-Output "No MS KMS Server found"}
 Stop-Transcript 
