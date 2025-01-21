@@ -78,3 +78,11 @@ Write-Output " "
 Write-Output "Last $ShutdownEvents shutdown events:"
 Write-Output "==================================="
 Get-EventLog -LogName  System | Where-Object {$_.EventID -eq 1074} | Select-Object -First $ShutdownEvents | Format-List -Property TimeGenerated, UserName, Message
+Try { 
+    Get-Command Get-WUHistory -ErrorAction Stop
+    Write-Output " "
+    Write-Output "WUHistory:"
+    Write-Output "==================================="
+    Get-WUHistory -Last 20 
+} 
+Catch { Write-Output "Get-WUHistory not available." }
