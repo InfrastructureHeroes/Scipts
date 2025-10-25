@@ -20,8 +20,17 @@
     Author     : Fabian Niesen (www.fabian-niesen.de)
     Filename   : Get-WindowsSid.ps1
     Requires   : PowerShell Version 3.0
+    License    : GNU General Public License v3 (GPLv3)
+    (c) 2022-2025 Fabian Niesen, www.infrastrukturhelden.de
+    This script is licensed under the GNU General Public License v3 (GPLv3), except for 3rd party code (e.g. Function Get-GPPolicyKey). 
+    You can redistribute it and/or modify it under the terms of the GPLv3 as published by the Free Software Foundation.
+    This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
+    See https://www.gnu.org/licenses/gpl-3.0.html for the full license text.
     Version    : 1.0
-    History    : 1.0   FN  24.09.2022  first official
+    History    : 
+                    1.1 FN  25.10.2025 Change License to GPLv3
+                    1.0 FN  24.09.2022  first official
 
 .LINK
 https://github.com/InfrastructureHeroes/Scipts

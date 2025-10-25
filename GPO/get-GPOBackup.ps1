@@ -42,7 +42,14 @@ Switch to force an Error with Warrning for testing
 Author     : Fabian Niesen (www.fabian-niesen.de)
 Filename   : get-GPOBackup.ps1
 Requires   : PowerShell Version 4.0
-Version    : 1.61
+Version    : 1.7
+License    : GNU General Public License v3 (GPLv3)
+(c) 2014-2025 Fabian Niesen, www.infrastrukturhelden.de
+This script is licensed under the GNU General Public License v3 (GPLv3), except for 3rd party code (e.g. Function Get-GPPolicyKey). 
+You can redistribute it and/or modify it under the terms of the GPLv3 as published by the Free Software Foundation.
+This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
+See https://www.gnu.org/licenses/gpl-3.0.html for the full license text.
 History    : 1.0.0   FN  27/07/14  initial version
             1.1.0   FN  25/08/14  Change script to handle new GUID on GPO backup
             1.1.1   FN  03/09/14  Fix Targetpath for secured enviorment
@@ -59,6 +66,7 @@ History    : 1.0.0   FN  27/07/14  initial version
             1.59    FN  11/08/21  Added '"' to Escape Chars
             1.60    FN  13.10.22  Added PowerShell Creation for easier GPO export and import - only works with GPO Settings stored in Regestry Keys under HKEY_LOCAL_MACHINE and HKEY_CURRENT_USER Everthing under Software and System!
             1.61    FN  26.01.23  Small Improvements for Module loading
+            1.7     FN  25.10.2025 Change License to GPLv3, except for 3rdparty code (e.g Function Get-GPPolicyKey)
 
 .LINK
 https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/gruppenrichtlinien-richtig-sichern-und-dokumentieren.html
@@ -101,7 +109,7 @@ function Get-GPPolicyKey
 #endregion Functions 
 
 #Verknüfungsorte mit speichern
-
+$scriptversion = "1.7"
 $ErrorActionPreference = "Stop"
 $GPList = @()
 $regex = "[$([regex]::Escape($characters))]"
@@ -145,7 +153,7 @@ Write-Verbose "Start housekeeping, deleting old backups"
 try
 {
   Write-Host "Start deleting Backups older than $KeepDate days" 
-  Get-ChildItem $BackupPath |? {$_.PSIsContainer -and $_.LastWriteTime -le (Get-Date).AddDays(-$KeepDate)} |% {Remove-Item $_.Fullname -Recurse -Force }
+  Get-ChildItem $BackupPath | Where-Object {$_.PSIsContainer -and $_.LastWriteTime -le (Get-Date).AddDays(-$KeepDate)} | ForEach-Object {Remove-Item $_.Fullname -Recurse -Force }
 }
 catch
 {
@@ -360,7 +368,7 @@ If (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     write-eventlog -logname Application -source "GPObackup" -EventId $EHID -EntryType $EHCategory -Message $Message 
     Write-verbose "Eventlog entry written."
     ### Add for verbose
-    IF ($PSCmdlet.MyInvocation.BoundParameters["Verbose"].IsPresent) { Get-EventLog -LogName Application -Source "GPObackup" -Newest 1 | FL }
+    IF ($PSCmdlet.MyInvocation.BoundParameters["Verbose"].IsPresent) { Get-EventLog -LogName Application -Source "GPObackup" -Newest 1 | Format-List }
   }
 }
 

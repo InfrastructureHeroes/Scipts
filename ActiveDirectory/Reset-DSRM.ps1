@@ -14,13 +14,21 @@
 		Keine.
     .PARAMETER 
 	.NOTES
-		Author     : Fabian Niesen
-		Filename   : 
-		Requires   : PowerShell Version 3.0
-		
-		Version    : 0.1
-		History    : 0.2   FN  31.08.2022  Add some autodetection, Change Logging
-                     0.1   FN  26.11.2015  initial version
+		Author    : Fabian Niesen
+		Filename  : 
+		Requires  : PowerShell Version 3.0
+		License   : GNU General Public License v3 (GPLv3)
+		(c) 2015-2025 Fabian Niesen, www.infrastrukturhelden.de
+		This script is licensed under the GNU General Public License v3 (GPLv3), except for 3rd party code (e.g. Function Get-GPPolicyKey). 
+		You can redistribute it and/or modify it under the terms of the GPLv3 as published by the Free Software Foundation.
+		This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
+		See https://www.gnu.org/licenses/gpl-3.0.html for the full license text.
+		Version   : 0.3
+		History   : 
+					0.3   FN  25.10.2025  Change License to GPLv3
+					0.2   FN  31.08.2022  Add some autodetection, Change Logging
+                    0.1   FN  26.11.2015  initial version
                     
 
     .LINK

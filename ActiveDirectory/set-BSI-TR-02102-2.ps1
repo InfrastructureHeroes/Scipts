@@ -46,8 +46,15 @@
 		Author     : Fabian Niesen
 		Filename   : set-BSI-TR-02102-2.ps1
 		Requires   : PowerShell Version 5.1, Windows Server 2022 oder 2025, GPMC installed
+        License    : GNU General Public License v3 (GPLv3)
+        (c) 2025 Fabian Niesen, www.infrastrukturhelden.de
+        This script is licensed under the GNU General Public License v3 (GPLv3), except for 3rd party code (e.g. Function Get-GPPolicyKey). 
+        You can redistribute it and/or modify it under the terms of the GPLv3 as published by the Free Software Foundation.
+        This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
+        See https://www.gnu.org/licenses/gpl-3.0.html for the full license text.
 		Version    : 0.1
-		History    : 0.1   FN  26.04.2026  initial version
+		History    : 0.1   FN  26.04.2025  initial version
                     
     .LINK
         Blog DE: folgt bei Gelegenheit - https://www.infrastrukturhelden.de/
