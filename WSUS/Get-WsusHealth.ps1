@@ -10,21 +10,20 @@
         with monitoring systems.
 
         Checks performed:
-        1. WSUS Service Status (WsusService)
-        2. WSUS Connection URL Validation
-        3. IIS AppPool Status (WsusPool)
-        4. SSL Certificate Check (when HTTPS is enabled)
-        5. WSUS API Connectivity (Microsoft.UpdateServices.Administration)
-        6. Database/API Query Validation (GetComputerTargetGroups)
-        7. WSUS Content Directory Disk Space
-        8. System Drive Disk Space
-        9. Last Successful Synchronization Status
-        10. Catalog and Content Synchronization Errors
-        11. WSUS Self-Update Status
-        12. Email Notification Failures (last 7 days)
-        13. Update Installation Failures (last 7 days)
-        14. Inventory Failures (last 7 days)
-        15. Recent Event Log Errors (last 24 hours)
+        1. WSUS Service Status (WsusService) & WSUS Connection URL Validation
+        2. IIS AppPool Status (WsusPool)
+        3. SSL Certificate Check (when HTTPS is enabled)
+        4. WSUS API Connectivity (Microsoft.UpdateServices.Administration)
+        5. Database/API Query Validation (GetComputerTargetGroups)
+        6. WSUS Content Directory Disk Space
+        7. System Drive Disk Space
+        8. Last Successful Synchronization Status
+        9. Catalog and Content Synchronization Errors
+        10. WSUS Self-Update Status
+        11. Email Notification Failures (last 7 days)
+        12. Update Installation Failures (last 7 days)
+        13. Inventory Failures (last 7 days)
+        14. Recent Event Log Errors (last 24 hours)
 
 .PARAMETER WSUSServer
         WSUS server FQDN or hostname. Default: local computer FQDN
@@ -47,7 +46,7 @@
         Author      : Fabian Niesen
         Filename    : Get-WsusHealth.ps1
         Requires    : PowerShell 5.1+, Windows Server 2012 R2+, WSUS installed
-        Version     : 1.0
+        Version     : 1.1
         Updated     : 30. November 2025
 
 .LICENSE
@@ -131,7 +130,7 @@ Function SendEmailStatus {
                 Write-Warning "Failed to send email: $($_.Exception.Message)"
         }
 }
-
+$scriptversion = "1.1"
 # HTML Style for email
 $Style = "<Style>BODY{font-size:12px;font-family:verdana,sans-serif;color:navy;font-weight:normal;}" + "TABLE{border-width:1px;cellpadding=10;border-style:solid;border-color:navy;border-collapse:collapse;}" + "TH{font-size:12px;border-width:1px;padding:10px;border-style:solid;border-color:navy;}" + "TD{font-size:10px;border-width:1px;padding:10px;border-style:solid;border-color:navy;}</Style>"
 $SmtpSubject = $SmtpSubject + " - WSUS Server: $WSUSServer"
@@ -178,8 +177,8 @@ try {
 } catch {
         $results += New-CheckResult -Name 'IIS AppPool (WsusPool)' -Status 'Failed' -Message $_.Exception.Message
 }
-
-# 2.1) SSL Certificate Check (only if UseSSL is enabled)
+#endregion
+#region 3 SSL Certificate Check (only if UseSSL is enabled)
 if ($UseSSL) {
         try {
                 Import-Module WebAdministration -ErrorAction Stop | Out-Null
@@ -212,7 +211,7 @@ if ($UseSSL) {
         }
 }
 #endregion
-#region 3) WSUS API connectivity (AdminProxy)
+#region 4) WSUS API connectivity (AdminProxy)
 $wsus = $null
 try {
         [void][Reflection.Assembly]::LoadWithPartialName('Microsoft.UpdateServices.Administration')
@@ -226,7 +225,7 @@ try {
         $results += New-CheckResult -Name 'WSUS API' -Status 'Failed' -Message $_.Exception.Message
 }
 #endregion
-#region 4) Basic DB/API query (GetComputerTargetGroups) - ensures server side queries are functional
+#region 5) Basic DB/API query (GetComputerTargetGroups) - ensures server side queries are functional
 try {
         if ($wsus -eq $null) { throw "WSUS API object not available to run queries." }
         $groups = $wsus.GetComputerTargetGroups()  # simple call to validate server-side operations
@@ -240,7 +239,7 @@ try {
         $results += New-CheckResult -Name 'WSUS DB/API Query' -Status 'Failed' -Message $_.Exception.Message
 }
 #endregion
-#region 5) WSUS Directory Disk Space Check
+#region 6) WSUS Directory Disk Space Check
 try {
         # Get WSUS content directory from WSUS API configuration
         $wsusContentPath = $null
@@ -290,7 +289,7 @@ try {
         $results += New-CheckResult -Name 'WSUS Disk Space' -Status 'Failed' -Message $_.Exception.Message
 }
 #endregion
-#region 6) System Drive Disk Space Check
+#region 7) System Drive Disk Space Check
 try {
         $systemDrive = $env:SystemDrive
         $diskSpace = Get-Volume -DriveLetter $systemDrive.TrimEnd(':') -ErrorAction Stop
