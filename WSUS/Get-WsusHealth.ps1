@@ -34,6 +34,9 @@
 .PARAMETER WSUSPort
         WSUS port number. Default: 8530 (HTTP) or 8531 (HTTPS)
 
+.PARAMETER CSVExportPath
+        Create CSV report in the specified path. Filename is set to "Get-WsusHealth.csv"
+
 .EXAMPLE
         .\Get-WsusHealth.ps1
         Runs health checks on the local WSUS server
@@ -46,8 +49,8 @@
         Author      : Fabian Niesen
         Filename    : Get-WsusHealth.ps1
         Requires    : PowerShell 5.1+, Windows Server 2012 R2+, WSUS installed
-        Version     : 1.1
-        Updated     : 30. November 2025
+        Version     : 1.2
+        Updated     : 01. December 2025
 
 .LICENSE
         This script is provided under the GNU General Public License v3.0 (GPL-3.0)
@@ -79,7 +82,8 @@ param(
         [string]$SmtpPw = "",
         [int]$SmtpPort = 25,
         [switch]$EmailLog,
-        [switch]$TestMail
+        [switch]$TestMail,
+        [string]$CSVExportPath
 )
 
 #region Helper Functions
@@ -107,16 +111,16 @@ function New-CheckResult {
 # Mail function
 Function SendEmailStatus {
         param(
-                [string]$SmtpFrom,
-                [string]$SmtpTo,
-                [string]$SmtpSubject,
+                [string]$From,
+                [string]$To,
+                [string]$Subject,
                 [string]$SmtpServer,
                 [bool]$BodyAsHtml,
                 [string]$Body,
                 [int]$SmtpPort
         )
         try {
-                $SmtpMessage = New-Object System.Net.Mail.MailMessage $SmtpFrom, $SmtpTo, $SmtpSubject, $Body
+                $SmtpMessage = New-Object System.Net.Mail.MailMessage $From, $To, $Subject, $Body
                 $SmtpMessage.IsBodyHTML = $BodyAsHtml
                 $SmtpClient = New-Object System.Net.Mail.SmtpClient($SmtpServer, $SmtpPort)
                 if ($SmtpTLS) { $SmtpClient.EnableSsl = $true }
@@ -131,7 +135,7 @@ Function SendEmailStatus {
                 Write-Warning "Failed to send email: $($_.Exception.Message)"
         }
 }
-$scriptversion = "1.1"
+$scriptversion = "1.2"
 # HTML Style for email
 $Style = "<Style>BODY{font-size:12px;font-family:verdana,sans-serif;color:navy;font-weight:normal;}" + "TABLE{border-width:1px;cellpadding=10;border-style:solid;border-color:navy;border-collapse:collapse;}" + "TH{font-size:12px;border-width:1px;padding:10px;border-style:solid;border-color:navy;}" + "TD{font-size:10px;border-width:1px;padding:10px;border-style:solid;border-color:navy;}</Style>"
 $SmtpSubject = $SmtpSubject + " - WSUS Server: $WSUSServer"
@@ -493,11 +497,16 @@ try {
 #region Output summary
 $results | Format-Table -AutoSize
 
+IF ($CSVExportPath) {
+        $CSVFile = $CSVExportPath + "\Get-WsusHealth.csv"
+        $results | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Delimiter ";" 
+}
+
 # Send email if requested
 if ($EmailLog -and $SmtpServer) {
         $Body = "<h1>WSUS Health Report from $env:COMPUTERNAME</h1>"
         $Body += $results | ConvertTo-Html -Head $Style | Out-String
-        SendEmailStatus -From $SmtpFrom -To $SmtpTo -Subject $SmtpSubject -SmtpServer $SmtpServer -BodyAsHtml $true -Body $Body  -SmtpPort $SmtpPort
+        SendEmailStatus -From $SmtpFrom -To $SmtpTo -Subject $SmtpSubject -SmtpServer $SmtpServer -BodyAsHtml $true -Body $Body -SmtpPort $SmtpPort
 }
 
 # set exit code: non-zero if any Failed
