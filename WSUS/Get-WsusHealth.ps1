@@ -480,8 +480,8 @@ try {
 #region 14) Recent relevant Event Log errors (last 24 hours)
 try {
         $startTime = (Get-Date).AddHours(-24)
-        $sysErrors = Get-WinEvent -FilterHashtable @{LogName='System'; StartTime=$startTime} -ErrorAction Stop | Where-Object { $_.ProviderName -match 'WsusService|W3SVC|MSSQL|Windows Server Update Services|Microsoft-Windows-Web-Services' }
-        $appErrors = Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=$startTime} -ErrorAction Stop | Where-Object { $_.ProviderName -match 'Windows Server Update Services|WSUS' }
+        $sysErrors = Get-WinEvent -FilterHashtable @{LogName='System'; StartTime=$startTime} -ErrorAction Stop | Where-Object { $_.ProviderName -match 'WsusService|W3SVC|MSSQL|Windows Server Update Services|Microsoft-Windows-Web-Services' -and $_.Level -lt 3 }
+        $appErrors = Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=$startTime} -ErrorAction Stop | Where-Object { $_.ProviderName -match 'Windows Server Update Services|WSUS' -and $_.Level -lt 3 }
         $combined = @($sysErrors + $appErrors) | Sort-Object TimeCreated -Descending
         if ($combined.Count -eq 0) {
                 $results += New-CheckResult -Name 'Recent EventLog Errors' -Status 'OK' -Message 'No relevant errors found in the last 24 hours.'
