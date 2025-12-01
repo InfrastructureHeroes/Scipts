@@ -61,6 +61,7 @@
 
 .LINK
         https://github.com/InfrastructureHeroes/Scipts
+        https://www.infrastrukturhelden.de/microsoft-infrastruktur/wsus/wsus-fehleranalyse-und-health-checks-praxisleitfaden-mit-powershell/
 
 #>
 
