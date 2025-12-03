@@ -1,68 +1,85 @@
+#requires -version 5.1
+
 <#
 .SYNOPSIS
-Decline several Update Types in Windows Server Update Services (WSUS)
-
+  Decline several Update Types in Windows Server Update Services (WSUS)
+  
 .DESCRIPTION
-Decline several Update Types in Windows Server Update Services (WSUS). For example Beta and Preview Updates, Updates for Itanium, Drivers, Dell Hardware, Surface Hardware, SharePoint Updates in Office Channel, 
-Language on Demand Feature updates and superseded updates. The scrips send, if configured a list of the decliened updates.
+  Decline several Update Types in Windows Server Update Services (WSUS). For example Beta and Preview Updates, Updates for Itanium, Drivers, Dell Hardware, Surface Hardware, SharePoint Updates in Office Channel, 
+  Language on Demand Feature updates and superseded updates. The scrips send, if configured a list of the decliened updates.
 
 .EXAMPLE 
-decline-WSUSUpdatesTypes.ps1 -Preview -Itanium -Superseded -SmtpServer "Mail.domai.tld" -EmailLog
+  decline-WSUSUpdatesTypes.ps1 -Preview -Itanium -Superseded -SmtpServer "Mail.domai.tld" -EmailLog
 
 .EXAMPLE
-decline-WSUSUpdatesTypes.ps1 -Preview -Itanium -SharePoint 
+  decline-WSUSUpdatesTypes.ps1 -Preview -Itanium -SharePoint 
 
 .PARAMETER Preview
-Decline Updates with the phrases -Preview- or -Beta- in the title or the attribute -beta- set
+  Decline Updates with the phrases -Preview- or -Beta- in the title or the attribute -beta- set
 
 .PARAMETER Itanium
-Decline Updates with the phrases -ia64- or -itanium-
+  Decline Updates with the phrases -ia64- or -itanium-
 
 .PARAMETER LanguageFeatureOnDemand
-Decline Updates with the phrases -LanguageFeatureOnDemand- or -Lang Pack (Language Feature) Feature On Demand- or -LanguageInterfacePack-
+  Decline Updates with the phrases -LanguageFeatureOnDemand- or -Lang Pack (Language Feature) Feature On Demand- or -LanguageInterfacePack-
 
 .PARAMETER Sharepoint
-Decline Updates with the phrases -SharePoint Enterprise Server- or -SharePoint Foundation- or -SharePoint Server- or -FAST Search Server- Some of these are part of the Office Update Channel
+  Decline Updates with the phrases -SharePoint Enterprise Server- or -SharePoint Foundation- or -SharePoint Server- or -FAST Search Server- Some of these are part of the Office Update Channel
 
 .PARAMETER Dell
-Decline Updates with the phrases -Dell- for reducing for example the updates in the drivers category, if no Dell Hardware is used
+  Decline Updates with the phrases -Dell- for reducing for example the updates in the drivers category, if no Dell Hardware is used
 
 .PARAMETER Surface
-Decline Updates with the phrases -Surface- and -Microsoft-
+  Decline Updates with the phrases -Surface- and -Microsoft-
 
 .PARAMETER Drivers
-Decline Updates with the Classification -Drivers-
+  Decline Updates with the Classification -Drivers-
 
 .PARAMETER OfficeWebApp
-Decline Updates with the phrases -Excel Web App- or -Office Web App- or -Word Web App- or -PowerPoint Web App-
+  Decline Updates with the phrases -Excel Web App- or -Office Web App- or -Word Web App- or -PowerPoint Web App-
 
 .PARAMETER Officex86
-Decline Updates with the phrases -32-Bit- and one of these -Microsoft Office-, -Microsoft Access-, -Microsoft Excel-, -Microsoft Outlook-, -Microsoft Onenote-, -Microsoft PowerPoint-, -Microsoft Publisher-, -Microsoft Word-
+  Decline Updates with the phrases -32-Bit- and one of these -Microsoft Office-, -Microsoft Access-, -Microsoft Excel-, -Microsoft Outlook-, -Microsoft Onenote-, -Microsoft PowerPoint-, -Microsoft Publisher-, -Microsoft Word-
 
 .PARAMETER Officex64
-Decline Updates with the phrases -64-Bit- and one of these -Microsoft Office-, -Microsoft Access-, -Microsoft Excel-, -Microsoft Outlook-, -Microsoft Onenote-, -Microsoft PowerPoint-, -Microsoft Publisher-, -Microsoft Word-
+  Decline Updates with the phrases -64-Bit- and one of these -Microsoft Office-, -Microsoft Access-, -Microsoft Excel-, -Microsoft Outlook-, -Microsoft Onenote-, -Microsoft PowerPoint-, -Microsoft Publisher-, -Microsoft Word-
 
 .PARAMETER Superseded
-Decline Updates with the attribute -IsSuperseded-
+  Decline Updates with the attribute -IsSuperseded-
 
 .NOTES
-Author     : Fabian Niesen
-Filename   : decline-WSUSUpdatesTypes.ps1
-Requires   : PowerShell Version 3.0
-	
-Version    :  1.7
-History    :  1.7  Add "Dev" to filter for -Preview (#3), Replace powershell alias with full commands
-              1.6  Add WSUS internal Cleanup Trigger
-              1.5  Add ARM64, LTSB2015, LTSB2016, LTSC2019 to script
-              1.4  Add Config file
-              1.3  Coments, Header added
-              1.2  Fix issues
-              1.1  added Mail funtion
-              1.0  initial version
-                     
+  Author     :  Fabian Niesen
+  Filename   :  decline-WSUSUpdatesTypes.ps1
+  Requires   :  PowerShell Version 5.1
+  License    :  The MIT License (MIT)
+                Copyright (c) 2022-2025 Fabian Niesen
+                Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+                files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, 
+                merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+                furnished to do so, subject to the following conditions:
+                The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+                The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties 
+                of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be 
+                liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in 
+                connection with the software or the use or other dealings in the Software.
+  Disclaimer :  This script is provided "as is" without warranty. Use at your own risk.
+                The author assumes no responsibility for any damage or data loss caused by this script.
+                Test thoroughly in a controlled environment before deploying to production.
+  Version    :  1.8
+  History    :  1.8 FN 03.12.2025  change to MIT License, housekeeping Header, add Edge Beta / Dev channel to Preview filter
+                1.7  Add "Dev" to filter for -Preview (#3), Replace powershell alias with full commands
+                1.6  Add WSUS internal Cleanup Trigger
+                1.5  Add ARM64, LTSB2015, LTSB2016, LTSC2019 to script
+                1.4  Add Config file
+                1.3  Coments, Header added
+                1.2  Fix issues
+                1.1  added Mail funtion
+                1.0  initial version
+
 .LINK
-https://www.infrastrukturhelden.de/microsoft-infrastruktur/wsus/windows-server-update-services-bereinigen.html
+  https://www.infrastrukturhelden.de/microsoft-infrastruktur/wsus/windows-server-update-services-bereinigen.html
 #>
+
 [cmdletbinding()]
 Param(
 	[Parameter(Position=1)]
@@ -133,7 +150,8 @@ Param(
     [switch]$load
 )
 
-
+$scriptversion = "1.8"
+Write-Output "Starting decline-WSUSUpdatesTypes.ps1 version $scriptversion"
 $conffile = "./decline-WSUSUpdatesType.clixml"
 
 IF ($save) 
@@ -183,7 +201,7 @@ IF ($WhatIF) { Write-Warning "WhatIF Mode, no changes will be made!!!"}
 IF ($Preview -eq $true) 
 {
     Write-Output "Declining of Beta and Preview updates selected, starting query."
-    $BetaUpdates = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and ($_.Title -match "preview|beta|dev" -or -not $_.IsDeclined -and $_.IsBeta -eq $true)}
+    $BetaUpdates = $WsusServerAdminProxy.GetUpdates() | Where-Object{-not $_.IsDeclined -and ($_.Title -match "preview|edge-beta|edge-dev|beta channel|prerelease" -or $_.IsBeta -eq $true)}
     Write-Output "Found $($BetaUpdates.count) Preview or Beta Updates to decline"
     If($BetaUpdates) 
     {
