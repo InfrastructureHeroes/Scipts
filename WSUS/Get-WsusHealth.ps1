@@ -1,4 +1,5 @@
 ﻿#requires -version 5.1
+
 <#
 .SYNOPSIS
         Comprehensive WSUS health checks with detailed diagnostic reporting.
@@ -46,28 +47,38 @@
         Runs health checks on remote WSUS server with HTTPS
 
 .NOTES
-        Author      : Fabian Niesen
-        Filename    : Get-WsusHealth.ps1
-        Requires    : PowerShell 5.1+, Windows Server 2012 R2+, WSUS installed
-        Version     : 1.2
-        Updated     : 01. December 2025
-
-.LICENSE
-        This script is provided under the GNU General Public License v3.0 (GPL-3.0)
-        You are free to use, modify, and distribute this script under the terms of the GPL-3.0
-        See https://www.gnu.org/licenses/gpl-3.0.html for details
-
-.DISCLAIMER
-        This script is provided "as is" without warranty. Use at your own risk.
-        The author assumes no responsibility for any damage or data loss caused by this script.
-        Test thoroughly in a controlled environment before deploying to production.
-
+        Author     :    Fabian Niesen
+        Filename   :    Get-WsusHealth.ps1
+        Requires   :    PowerShell 5.1+, Windows Server 2012 R2+, WSUS installed
+        Updated    :    03.12.2025
+        LastModBy  :    Fabian Niesen
+        License    :    Except for the LDAP Test Code, witch is licensed by Evotec under MIT License 
+                        (Code for LDAP Test from https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/ under MIT license),
+                        The MIT License (MIT)
+                        Copyright (c) 2022-2025 Fabian Niesen
+                        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+                        files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, 
+                        merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+                        furnished to do so, subject to the following conditions:
+                        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+                        The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties 
+                        of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be 
+                        liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in 
+                        connection with the software or the use or other dealings in the Software.
+        Disclaimer :    This script is provided "as is" without warranty. Use at your own risk.
+                        The author assumes no responsibility for any damage or data loss caused by this script.
+                        Test thoroughly in a controlled environment before deploying to production.
+        GitHub     :    https://github.com/InfrastructureHeroes/Scipts
+        Version    :    1.3 FN 03.12.2025 Change to MIT License, housekeeping Header
+        History    : 	1.2 FN 01.12.2025 BugFixes
+                        1.1 FN 01.12.2025 BugFixes
+                        1.0 FN 30.11.2025 Initial version.
 .LINK
         https://github.com/InfrastructureHeroes/Scipts
         https://www.infrastrukturhelden.de/microsoft-infrastruktur/wsus/wsus-fehleranalyse-und-health-checks-praxisleitfaden-mit-powershell/
 
 #>
-
+[CmdletBinding()]
 param(
         [string]$WSUSServer = $($env:COMPUTERNAME + "." + $env:USERDNSDOMAIN),
         [switch]$UseSSL,
@@ -135,7 +146,7 @@ Function SendEmailStatus {
                 Write-Warning "Failed to send email: $($_.Exception.Message)"
         }
 }
-$scriptversion = "1.2"
+$scriptversion = "1.3"
 # HTML Style for email
 $Style = "<Style>BODY{font-size:12px;font-family:verdana,sans-serif;color:navy;font-weight:normal;}" + "TABLE{border-width:1px;cellpadding=10;border-style:solid;border-color:navy;border-collapse:collapse;}" + "TH{font-size:12px;border-width:1px;padding:10px;border-style:solid;border-color:navy;}" + "TD{font-size:10px;border-width:1px;padding:10px;border-style:solid;border-color:navy;}</Style>"
 $SmtpSubject = $SmtpSubject + " - WSUS Server: $WSUSServer"
