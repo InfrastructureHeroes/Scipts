@@ -1,58 +1,117 @@
+#requires -version 5.1
+
 <#
-	.SYNOPSIS
-		Check Network connection and configuration from a client.
-	.DESCRIPTION
-		Check Network connection and configuration from a client. Including MTU, NetBios over TCP/IP, IPv6 and LDAP Checks
+.SYNOPSIS
+    Check Network connection and configuration from a client.
 
-    .COPYRIGHT
-        Copyright (c) 2024 Fabian Niesen. All rights reserved. Licensed under the MIT license. 
-        Code for LDAP Test from https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/ under MIT license
+.DESCRIPTION
+    Check Network connection and configuration from a client. Including MTU, NetBios over TCP/IP, IPv6 and LDAP Checks
+    
+.EXAMPLE  
+    .\Check-Network.ps1
+    
+.EXAMPLE
+    .\Check-Network.ps1 -targetMTU 8000
+    
+.PARAMETER targetMTU
+    Target MTU in bytes. Default value is 8800 bytes.
+    
+.PARAMETER mtuoh
+    Overhead for MTU in bytes. Default size is 28 bytes.
+    
+.PARAMETER DNSDomain
+    DNS Domain for Domain Controller detection. If not defined first entry from DNS Serach Suffix List is used.
+    
+.PARAMETER logpath
+    Path for Transcript. Default Value is "C:\Windows\System32\LogFiles\"
+    
+.NOTES
+    Author     :    Fabian Niesen
+    Filename   :    Check-Network.ps1
+    Requires   :    PowerShell Version 5.1
+    Created    :    12.10.2022
+    Updated    :    03.12.2025
+    LastModBy  :    Fabian Niesen
+    License    :    Except for the LDAP Test Code, witch is licensed by Evotec under MIT License 
+                    (Code for LDAP Test from https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/ under MIT license),
+                    The MIT License (MIT)
+                    Copyright (c) 2022-2025 Fabian Niesen
+                    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+                    files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, 
+                    merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+                    furnished to do so, subject to the following conditions:
+                    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+                    The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties 
+                    of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be 
+                    liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in 
+                    connection with the software or the use or other dealings in the Software.
+    Disclaimer :    This script is provided "as is" without warranty. Use at your own risk.
+                    The author assumes no responsibility for any damage or data loss caused by this script.
+                    Test thoroughly in a controlled environment before deploying to production.
+    GitHub     :    https://github.com/InfrastructureHeroes/Scipts
+    Version    :    0.5 FN 03.12.2025 Change Errorhandling and reporting. Add WSUS and Terminal Server License Server Check
+    History    : 	
+                    0.4 FN 30.09.2024 Add KMS detection, add some ports
+                    0.3 FN 12.09.2024 Add some Ports
+                    0.2 FN 23.12.2022 Housekeeping & Cleanup
+                    0.1 FN 12.10.2022 Initial version.
+    
+.LINK
+    https://github.com/InfrastructureHeroes/Scipts/blob/master/Network/Check-Network.ps1
 
-    .EXAMPLE  
-        .\Check-Network.ps1
-
-    .EXAMPLE
-        .\Check-Network.ps1 -targetMTU 8000
-
-    .PARAMETER targetMTU
-        Target MTU in bytes. Default value is 8800 bytes.
-
-    .PARAMETER mtuoh
-        Overhead for MTU in bytes. Default size is 28 bytes.
-
-    .PARAMETER DNSDomain
-        DNS Domain for Domain Controller detection. If not defined first entry from DNS Serach Suffix List is used.
-
-    .PARAMETER logpath
-        Path for Transscript. Default Value is "C:\Windows\System32\LogFiles\"
-
-	.NOTES
-		Author     :    Fabian Niesen
-		Filename   :    Check-Network.ps1
-		Requires   :    PowerShell Version 4.0
-		
-		Version    :    0.3
-		History    : 	0.4 FN 30.09.2024 Add KMS detection, add some ports
-                        0.3 FN 12.09.2024 Add some Ports
-                        0.2 FN 23.12.2022 Housekeeping & Cleanup
-						0.1 FN 12.10.2022 Initial version.
-
-    .LINK
-        https://github.com/InfrastructureHeroes/Scipts/blob/master/Network/Check-Network.ps1
 #>
 
+[CmdletBinding()]
 param (
     [int]$targetMTU = 1500,
     [int]$mtuoh = 28,
     [string]$DNSDomain = (Get-DnsClientGlobalSetting).SuffixSearchList[0],
     [string]$logpath = "C:\Windows\System32\LogFiles"
 )
-if ($Host.Name -eq "ServerRemoteHost") { Write-Error -Exception "RemoteShell detected" -Message "Please use local PowerShell, remote PowerShell Sessions are not supported" ; break }
+#region Helper Functions
+function New-CheckResult {
+	<#
+	.SYNOPSIS
+		Creates a standardized check result object
+	.PARAMETER Name
+		Name of the check
+	.PARAMETER Status
+		Status of the check (OK, Warning, Failed)
+	.PARAMETER Message
+		Detailed message about the check result
+	#>
+	param($Name, $Status, $Message)
+	[PSCustomObject]@{
+		Check   = $Name
+		Status  = $Status
+		Message = $Message
+		Time    = (Get-Date)
+	}
+}
+
+#endregion Helper Functions
 
 #region EVOTec Test LDAP
 #Code for this region from https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/ under MIT license
 #GitHub: https://github.com/EvotecIT/ADEssentials
 function Test-LDAPPorts {
+    <#
+	.SYNOPSIS
+		Test LDAP Port connectivity
+    .DESCRIPTION
+        Test LDAP Port connectivity
+	.PARAMETER ServerName
+		Name of the server to test
+	.PARAMETER port
+        Port number to test
+	.LINK
+        https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/
+        https://github.com/EvotecIT/ADEssentials
+    .NOTES
+        Code for this region from https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/ under MIT license
+        GitHub:     https://github.com/EvotecIT/ADEssentials
+        LICENSE:    MIT License
+	#>
     [CmdletBinding()]
     param(
         [string] $ServerName,
@@ -77,6 +136,28 @@ function Test-LDAPPorts {
     }
 }
 Function Test-LDAP {
+    <#
+	.SYNOPSIS
+		Test all LDAP Ports on a givven Server
+    .DESCRIPTION
+        Test all LDAP Ports on a givven Server
+	.PARAMETER ComputerName
+		Name of the server to test
+	.PARAMETER GCPortLDAP
+        Port number for Global Catalog LDAP
+    .PARAMETER GCPortLDAPSSL
+        Port number for Global Catalog LDAPS
+    .PARAMETER PortLDAP
+        Port number for LDAP
+    .PARAMETER PortLDAPS
+        Port number for LDAPS
+	.LINK
+        https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/
+    .NOTES
+        Code for this region from https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/ under MIT license
+        GitHub:     https://github.com/EvotecIT/ADEssentials
+        LICENSE:    MIT License
+	#>
     [CmdletBinding()]
     param (
         [alias('Server', 'IpAddress')][Parameter(Mandatory = $True)][string[]]$ComputerName,
@@ -122,6 +203,38 @@ Function Test-LDAP {
 }
 #endregion EVOTec Test LDAP
 Function Test-UDP {
+    <#
+	.SYNOPSIS
+		Try to test UDP Port connectivity, due to the nature of UDP this is not 100% reliable
+    .DESCRIPTION
+        Try to test UDP Port connectivity, due to the nature of UDP this is not 100% reliable
+	.PARAMETER target
+		Name of the server to test
+	.PARAMETER UDPport
+        Port number to test
+	.LINK
+        https://github.com/InfrastructureHeroes/Scipts/
+    .NOTES
+        Author     :    Fabian Niesen
+		Requires   :    PowerShell Version 5.1
+        License    :    Except for the LDAP Test Code, witch is licensed by Evotec under MIT License 
+                        (Code for LDAP Test from https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/ under MIT license),
+                        The MIT License (MIT)
+                        Copyright (c) 2022-2025 Fabian Niesen
+                        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+                        files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, 
+                        merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+                        furnished to do so, subject to the following conditions:
+                        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+                        The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties 
+                        of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be 
+                        liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in 
+                        connection with the software or the use or other dealings in the Software.
+        Disclaimer :    This script is provided "as is" without warranty. Use at your own risk.
+                        The author assumes no responsibility for any damage or data loss caused by this script.
+                        Test thoroughly in a controlled environment before deploying to production.
+        GitHub     :    https://github.com/InfrastructureHeroes/Scipts       
+	#>
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)][string]$target,
@@ -139,125 +252,336 @@ Function Test-UDP {
     }
     return $Success
 }
+$ScriptVersion = "0.5"
+if ($Host.Name -eq "ServerRemoteHost") { Write-Error -Exception "RemoteShell detected" -Message "Please use local PowerShell, remote PowerShell Sessions are not supported" ; break }
 Set-Location $PSScriptRoot
 $ScriptName = $myInvocation.MyCommand.Name
 $ScriptName = $ScriptName.Substring(0, $scriptName.Length - 4)
 $LogName = (Get-Date -UFormat "%Y%m%d-%H%M") + "-" + $scriptName + "_" + $ENV:COMPUTERNAME +".log"
 Start-Transcript -Path "$logpath\$LogName" -Append
+Write-Output "Starting $ScriptName Version $ScriptVersion"
+$results = @()
+
 IF ( $DNSDomain -like "")
     {
-        Write-Warning "DNSDomain not Valid. Please use the Parameter >-DNSDomain domain.tld<"
-        Break
-    }
-Write-Verbose "Scan for Networkinterfaces"
-$networkConfig = Get-WmiObject Win32_NetworkAdapterConfiguration -filter "ipenabled = 'true'"
-Write-Verbose "Get IPv6 Status (Based on Microsoft KB929852)"
-Try {
-$IPv6State = Get-ItemPropertyValue "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" "DisabledComponents" -ErrorAction SilentlyContinue
-}
-Catch { $IPv6State = -1 }
-If ($IPv6State -eq 50 ) {Write-Output "IPv6 diabled on Interfaces and prefer IPv4 over IPv6 (Based on Microsoft KB929852)"} else { Write-Warning "IPv6 is not proper disabled!"}
-Write-Output " "
-Write-Output "DNSSearchSuffix: $((Get-DnsClientGlobalSetting).SuffixSearchList)"
-Foreach ( $nc in $networkConfig )
-{
-    $NIPI = Get-NetIPInterface -InterfaceIndex $($nc.InterfaceIndex)  -AddressFamily IPv4
-    Write-Output " "
-    Write-Output "InterfaceIndex: $($nc.InterfaceIndex) - InterfaceAlias: $($NIPI.ifAlias)"
-    Write-Output "Description: $($nc.Description)"
-    Write-Output "DnsDomain: $($nc.DnsDomain)"
-    Write-Output "DHCP is $($NIPI.Dhcp)"
-    Write-Verbose "Get DNSDomain"
-    Write-Verbose "Get NetBios over TCPIP"
-    $NetBios = $nc.TcpipNetbiosOptions
-    If ( $NetBios -eq 2) { write-output "NetBios over TCP/IP is disabled" } ELSE { Write-Warning "NetBios over TCP/IP is not disabled" }
-    $IP = $nc.IPAddress[0]
-    $DNSServer1 = $nc.DNSServerSearchOrder[0]
-    #Testen
-    IF ( $DNSServer1 -match $IP -or $DNSServer1 -match "127.*") { Write-Warning "Please Check DNS Serversetting, primary DNS is local Server" }
-    $MTU = $NIPI.NlMtu
-    IF ($targetMTU -eq $MTU ) { Write-Output "MTU as expected ($MTU)" } else { Write-warning "MTUSize is: $MTU expected is $targetMTU" }
-}
-# Test Domain access
-
-Write-Output " "
-Write-Output "Test DC connection"
-Write-Output "============================================"
-$DCs2 = (((nltest /dclist:$DNSDomain).trim() | Select-String -Pattern ".$DNSDomain") | Select-Object -skip 1 )
-$DCs2 = ($DCs2 -split " ") -match ".$DNSDomain"
-Write-Output "Found $DCs2"
-ForEach ($DC in $DCs2)
-{
-    [String]$IP = (Resolve-DNSname $DC -Type A ).IPAddress
-    Write-Output " "
-    Write-Output "Start Test for $DC - $IP"
-    Write-Output "============================================"
-    IF (Test-Connection -ComputerName $DC -Count 1 -ErrorAction SilentlyContinue )
-    {
-        Write-Output "$DC is reachable with ICMP"
-        Try { 
-            Get-ChildItem -Path \\$DC\sysvol\$DNSDomain\ -ErrorAction stop | Out-Null
-            Write-Output "Sysvol on $DC accessable"
-            } 
-        catch {Write-Warning "Sysvol on $DC NOT accessable"}
-        Write-Output "Testing MTU Size, asummed Overhead is $mtuoh."
-        $MTUPing = ping $DC -n 1 -l 1400 -f
-        IF ($MTUPing[2] -like "*fragmented*" ) { Write-Warning "$DC not reachable with MTU 1400" } ELSE { Write-Output "$DC is reachable with MTU 1400" }
-        $MTUPing = ping $DC -n 1 -l $($targetMTU-$mtuoh) -f
-        IF ($MTUPing[2] -like "*fragmented*" ) { Write-Warning "$DC not reachable with target MTU $targetMTU" } ELSE { Write-Output "$DC is reachable with target MTU $targetMTU" }
-        $MTUPing = ping $DC -n 1 -l $($MTU-$mtuoh) -f
-        IF ($MTUPing[2] -like "*fragmented*" ) { Write-Warning "$DC not reachable with local MTU $MTU" } ELSE { Write-Output "$DC is reachable with local MTU $MTU" }
-
-    } ELSE {
-        Write-Warning "$DC is not reachable with ICMP at all"
+        throw "DNSDomain not Valid. Please use the Parameter >-DNSDomain domain.tld<"
     }
 
-    Write-Output " "
-    Write-Output "Test Common TCP ports connection"
-    Write-Output "============================================"
-    Write-Output "WinRM (TCP 5985)         : $((Test-NetConnection -ComputerName $DC -CommonTCPPort WINRM -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
-    Write-Output "WinRMs (TCP 5986)        : $((Test-NetConnection -ComputerName $DC -Port 5986 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
-    Write-Output "Kerberos (TCP 88)        : $((Test-NetConnection -ComputerName $DC -Port 88 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue   ).TcpTestSucceeded)"
-    Write-Output "KerberosPW (TCP 464)     : $((Test-NetConnection -ComputerName $DC -Port 464 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue  ).TcpTestSucceeded)"
-    Write-Output "ADWS (TCP 9389)          : $((Test-NetConnection -ComputerName $DC -Port 9389 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
-    Write-Output "DNS (TCP 53)             : $((Test-NetConnection -ComputerName $DC -Port 53 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue   ).TcpTestSucceeded)"
-    Write-Output "RPC (TCP 135)            : $((Test-NetConnection -ComputerName $DC -Port 135 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue  ).TcpTestSucceeded)"
-    Write-Output "SMB (TCP 445)            : $((Test-NetConnection -ComputerName $DC -Port 445 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue  ).TcpTestSucceeded)"
-    Write-Output "Legacy NetBios (TCP 139) : $((Test-NetConnection -ComputerName $DC -Port 139 -ErrorAction SilentlyContinue -WarningAction SilentlyContinue  ).TcpTestSucceeded)"
-    Write-Output " "
-    Write-Output "Test Common UDP ports connection (True might be filltered / silently droped!)"
-    Write-Output "============================================" 
-    Write-Output "Kerberos (UDP 88)        : $(Test-UDP -target $DC -UDPport 88   )"
-    Write-Output "KerberosPW (UDP 464)     : $(Test-UDP -target $DC -UDPport 464  )"
-    Write-Output "DNS (UDP 53)             : $(Test-UDP -target $DC -UDPport 53   )"
-    Write-Output "SMB (UDP 445)            : $(Test-UDP -target $DC -UDPport 445  )"
-    Write-Output "W32Time / NTP (UDP 123)  : $(Test-UDP -target $DC -UDPport 123  )"
-    Write-Output "Legacy NetBios (UDP 137) : $(Test-UDP -target $DC -UDPport 137  )"
-    Write-Output "Legacy NetBios (UDP 138) : $(Test-UDP -target $DC -UDPport 138  )"
-
-    Write-Output " "
-    Write-Output "Test LDAP connection (Application Test)"
-    Write-Output "============================================"
-    Test-LDAP $DC
-
-    Write-Output " "
-    Write-Output "Test SMB connection (might not work for not Domainjoined Computers)"
-    Write-Output "============================================"
-    Get-ChildItem \\$DC\Sysvol\$env:USERDNSDOMAIN | Format-Table -AutoSize
-    Get-ChildItem \\$DC\NetLogon | Format-Table -AutoSize
+#region IPv6 Check
+try {
+    Write-Verbose "Get IPv6 Status (Based on Microsoft KB929852)"
+    $IPv6State = Get-ItemPropertyValue "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" "DisabledComponents" -ErrorAction SilentlyContinue
+    
+    if ($IPv6State -eq 50) {
+        $results += New-CheckResult -Name 'IPv6 Configuration' -Status 'OK' -Message "IPv6 disabled on Interfaces and prefer IPv4 over IPv6 (Based on Microsoft KB929852)"
+    } else {
+        $results += New-CheckResult -Name 'IPv6 Configuration' -Status 'Warning' -Message "IPv6 is not properly disabled (Value: $IPv6State)"
+    }
+} catch {
+    $results += New-CheckResult -Name 'IPv6 Configuration' -Status 'Warning' -Message "Could not determine IPv6 status"
 }
+#endregion IPv6 Check
 
-# Abfrage der SRV-Einträge für den KMS-Server
-$kmsInfo = nslookup -type=srv _vlmcs._tcp | Select-String -Pattern "port|svr hostname"
-IF ( $kmsInfo.count -gt 0)
-{
-    [int]$kmsport = (($kmsInfo | Select-String -Pattern "port" ) -split("="))[1].trim()
-    $kmsserver = (($kmsInfo | Select-String -Pattern "svr hostname") -split("="))[1].trim()
-    Write-Output " "
-    Write-Output "Found Microsoft Key Management server $kmsserver port $kmsport"
-    Write-Output "============================================"
-    Write-Output "MS KMS Server (TCP $kmsport) : $((Test-NetConnection -ComputerName $kmsserver -Port $kmsport -ErrorAction SilentlyContinue -WarningAction SilentlyContinue ).TcpTestSucceeded)"
-    Write-Output " "
-    c:\windows\system32\cscript.exe c:\windows\system32\slmgr.vbs -dli
-} Else { Write-Output "No MS KMS Server found"}
+#region DNS Search Suffix Check
+try {
+    $dnsSearchSuffix = (Get-DnsClientGlobalSetting).SuffixSearchList
+    if ($dnsSearchSuffix.Count -gt 0) {
+        $results += New-CheckResult -Name 'DNS Search Suffix' -Status 'OK' -Message "DNS Search Suffix: $($dnsSearchSuffix -join ', ')"
+    } else {
+        $results += New-CheckResult -Name 'DNS Search Suffix' -Status 'Warning' -Message "No DNS Search Suffix configured"
+    }
+} catch {
+    $results += New-CheckResult -Name 'DNS Search Suffix' -Status 'Failed' -Message $_.Exception.Message
+}
+#endregion DNS Search Suffix Check
+
+#region Network Interfaces Check
+try {
+    Write-Verbose "Scan for Networkinterfaces"
+    $networkConfig = Get-WmiObject Win32_NetworkAdapterConfiguration -filter "ipenabled = 'true'"
+    
+    foreach ($nc in $networkConfig) {
+        $NIPI = Get-NetIPInterface -InterfaceIndex $($nc.InterfaceIndex) -AddressFamily IPv4
+        $IP = $nc.IPAddress[0]
+        $checkName = "NIC: $($NIPI.ifAlias)"
+        
+        # NetBios Check
+        $NetBios = $nc.TcpipNetbiosOptions
+        if ($NetBios -eq 2) {
+            $results += New-CheckResult -Name "$checkName - NetBios" -Status 'OK' -Message "NetBios over TCP/IP is disabled"
+        } else {
+            $results += New-CheckResult -Name "$checkName - NetBios" -Status 'Warning' -Message "NetBios over TCP/IP is not disabled"
+        }
+        
+        # DNS Server Check
+        $DNSServer1 = $nc.DNSServerSearchOrder[0]
+        if ($DNSServer1 -match $IP -or $DNSServer1 -match "127.*") {
+            $results += New-CheckResult -Name "$checkName - DNS Server" -Status 'Warning' -Message "Primary DNS is local Server: $DNSServer1"
+        } else {
+            $results += New-CheckResult -Name "$checkName - DNS Server" -Status 'OK' -Message "Primary DNS: $DNSServer1"
+        }
+        
+        # MTU Check
+        $MTU = $NIPI.NlMtu
+        if ($targetMTU -eq $MTU) {
+            $results += New-CheckResult -Name "$checkName - MTU" -Status 'OK' -Message "MTU as expected ($MTU bytes)"
+        } else {
+            $results += New-CheckResult -Name "$checkName - MTU" -Status 'Warning' -Message "MTU Size is $MTU, expected $targetMTU bytes"
+        }
+        
+        # DHCP Check
+        $results += New-CheckResult -Name "$checkName - DHCP" -Status 'OK' -Message "DHCP is $($NIPI.Dhcp)"
+    }
+} catch {
+    $results += New-CheckResult -Name 'Network Interfaces' -Status 'Failed' -Message $_.Exception.Message
+}
+#endregion Network Interfaces Check
+
+#region Test Domain access
+try {
+    $DCs2 = (((nltest /dclist:$DNSDomain).trim() | Select-String -Pattern ".$DNSDomain") | Select-Object -skip 1)
+    $DCs2 = ($DCs2 -split " ") -match ".$DNSDomain"
+    
+    if ($DCs2.Count -gt 0) {
+        $results += New-CheckResult -Name "Domain Controllers" -Status 'OK' -Message "Found $($DCs2.Count) DC(s): $($DCs2 -join ', ')"
+    } else {
+        $results += New-CheckResult -Name "Domain Controllers" -Status 'Failed' -Message "No Domain Controllers found for domain $DNSDomain"
+    }
+    
+    ForEach ($DC in $DCs2) {
+        [String]$IP = (Resolve-DNSname $DC -Type A -ErrorAction SilentlyContinue).IPAddress
+        
+        # ICMP/Ping Check
+        if (Test-Connection -ComputerName $DC -Count 1 -ErrorAction SilentlyContinue) {
+            $results += New-CheckResult -Name "$DC - ICMP" -Status 'OK' -Message "$DC ($IP) is reachable with ICMP"
+            
+            # Sysvol Check
+            try {
+                Get-ChildItem -Path \\$DC\sysvol\$DNSDomain\ -ErrorAction Stop | Out-Null
+                $results += New-CheckResult -Name "$DC - Sysvol" -Status 'OK' -Message "Sysvol on $DC is accessible"
+            } catch {
+                $results += New-CheckResult -Name "$DC - Sysvol" -Status 'Warning' -Message "Sysvol on $DC NOT accessible"
+            }
+            
+            # MTU Tests
+            $MTUPing = ping $DC -n 1 -l 1400 -f
+            if ($MTUPing[2] -like "*fragmented*") {
+                $results += New-CheckResult -Name "$DC - MTU 1400" -Status 'Warning' -Message "$DC not reachable with MTU 1400"
+            } else {
+                $results += New-CheckResult -Name "$DC - MTU 1400" -Status 'OK' -Message "$DC is reachable with MTU 1400"
+            }
+            
+            $MTUPing = ping $DC -n 1 -l $($targetMTU - $mtuoh) -f
+            if ($MTUPing[2] -like "*fragmented*") {
+                $results += New-CheckResult -Name "$DC - Target MTU $targetMTU" -Status 'Warning' -Message "$DC not reachable with target MTU $targetMTU"
+            } else {
+                $results += New-CheckResult -Name "$DC - Target MTU $targetMTU" -Status 'OK' -Message "$DC is reachable with target MTU $targetMTU"
+            }
+            
+            $NIPI = Get-NetIPInterface -InterfaceIndex (Get-NetAdapter | Where-Object { $_.Status -eq 'Up' } | Select-Object -First 1).IfIndex -AddressFamily IPv4
+            $MTU = $NIPI.NlMtu
+            $MTUPing = ping $DC -n 1 -l $($MTU - $mtuoh) -f
+            if ($MTUPing[2] -like "*fragmented*") {
+                $results += New-CheckResult -Name "$DC - Local MTU $MTU" -Status 'Warning' -Message "$DC not reachable with local MTU $MTU"
+            } else {
+                $results += New-CheckResult -Name "$DC - Local MTU $MTU" -Status 'OK' -Message "$DC is reachable with local MTU $MTU"
+            }
+        } else {
+            $results += New-CheckResult -Name "$DC - ICMP" -Status 'Failed' -Message "$DC is not reachable with ICMP"
+        }
+        
+        # TCP Port Tests
+        $tcpPorts = @(
+            @{ Name = 'WinRM'; Port = 5985 },
+            @{ Name = 'WinRMs'; Port = 5986 },
+            @{ Name = 'Kerberos'; Port = 88 },
+            @{ Name = 'KerberosPW'; Port = 464 },
+            @{ Name = 'ADWS'; Port = 9389 },
+            @{ Name = 'DNS'; Port = 53 },
+            @{ Name = 'RPC'; Port = 135 },
+            @{ Name = 'SMB'; Port = 445 },
+            @{ Name = 'Legacy NetBios'; Port = 139 }
+        )
+        
+        foreach ($portTest in $tcpPorts) {
+            $tcpResult = Test-NetConnection -ComputerName $DC -Port $portTest.Port -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
+            if ($tcpResult.TcpTestSucceeded) {
+                $results += New-CheckResult -Name "$DC - TCP $($portTest.Name) (Port $($portTest.Port))" -Status 'OK' -Message "TCP Port $($portTest.Port) is open"
+            } else {
+                $results += New-CheckResult -Name "$DC - TCP $($portTest.Name) (Port $($portTest.Port))" -Status 'Warning' -Message "TCP Port $($portTest.Port) is closed or filtered"
+            }
+        }
+        
+        # UDP Port Tests
+        $udpPorts = @(
+            @{ Name = 'Kerberos'; Port = 88 },
+            @{ Name = 'KerberosPW'; Port = 464 },
+            @{ Name = 'DNS'; Port = 53 },
+            @{ Name = 'SMB'; Port = 445 },
+            @{ Name = 'W32Time/NTP'; Port = 123 },
+            @{ Name = 'Legacy NetBios'; Port = 137 },
+            @{ Name = 'Legacy NetBios'; Port = 138 }
+        )
+        
+        foreach ($portTest in $udpPorts) {
+            $udpResult = Test-UDP -target $DC -UDPport $portTest.Port
+            if ($udpResult) {
+                $results += New-CheckResult -Name "$DC - UDP $($portTest.Name) (Port $($portTest.Port))" -Status 'OK' -Message "UDP Port $($portTest.Port) responds (might be filtered)"
+            } else {
+                $results += New-CheckResult -Name "$DC - UDP $($portTest.Name) (Port $($portTest.Port))" -Status 'Warning' -Message "UDP Port $($portTest.Port) no response"
+            }
+        }
+        
+        # LDAP Connection Test
+        try {
+            $ldapResult = Test-LDAP $DC
+            if ($ldapResult.AvailablePorts) {
+                $results += New-CheckResult -Name "$DC - LDAP" -Status 'OK' -Message "LDAP available on ports: $($ldapResult.AvailablePorts)"
+            } else {
+                $results += New-CheckResult -Name "$DC - LDAP" -Status 'Warning' -Message "LDAP not available on any port"
+            }
+        } catch {
+            $results += New-CheckResult -Name "$DC - LDAP" -Status 'Failed' -Message $_.Exception.Message
+        }
+    }
+} catch {
+    $results += New-CheckResult -Name 'Domain Access' -Status 'Failed' -Message $_.Exception.Message
+}
+#endregion Test Domain access
+#region KMS Server Check
+try {
+    $kmsInfo = nslookup -type=srv _vlmcs._tcp | Select-String -Pattern "port|svr hostname"
+    
+    if ($kmsInfo.count -gt 0) {
+        [int]$kmsport = (($kmsInfo | Select-String -Pattern "port" ) -split("="))[1].trim()
+        $kmsserver = (($kmsInfo | Select-String -Pattern "svr hostname") -split("="))[1].trim()
+        
+        $results += New-CheckResult -Name "KMS Server Discovery" -Status 'OK' -Message "Found Microsoft KMS server: $kmsserver on port $kmsport"
+        
+        $kmsTest = Test-NetConnection -ComputerName $kmsserver -Port $kmsport -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
+        if ($kmsTest.TcpTestSucceeded) {
+            $results += New-CheckResult -Name "KMS Server Connection" -Status 'OK' -Message "MS KMS Server (TCP $kmsport) is accessible"
+        } else {
+            $results += New-CheckResult -Name "KMS Server Connection" -Status 'Warning' -Message "MS KMS Server (TCP $kmsport) is not accessible"
+        }
+    } else {
+        $results += New-CheckResult -Name "KMS Server Discovery" -Status 'Warning' -Message "No Microsoft Key Management server found"
+    }
+} catch {
+    $results += New-CheckResult -Name "KMS Server" -Status 'Failed' -Message $_.Exception.Message
+}
+#endregion KMS Server Check
+
+#region WSUS Server Check
+try {
+    $wsusReg = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
+    $wsusValues = @('WUServer','WUStatusServer','UpdateServiceUrlAlternate')
+    foreach ($name in $wsusValues) {
+        $val = $null
+        try { $val = (Get-ItemProperty -Path $wsusReg -Name $name -ErrorAction SilentlyContinue).$name } catch { $val = $null }
+        if (-not $val) {
+            $results += New-CheckResult -Name "WSUS - $name" -Status 'Warning' -Message "Registry value $name not set"
+            continue
+        }
+        $entries = @()
+        if ($val -is [array]) { $entries = $val } else { $entries = @($val) }
+        foreach ($entry in $entries) {
+            $entry = $entry.Trim()
+            $wsushost = $null
+            $portsToTest = @()
+            if ($entry -match '^\w+://') {
+                try { $uri = [uri]$entry } catch { $uri = $null }
+                if ($uri) {
+                    $wsushost = $uri.Host
+                    if ($entry -match ':\d+') {
+                        $portsToTest = @($uri.Port)
+                    } else {
+                        if ($uri.Scheme -eq 'https') { $portsToTest = @(8531,443) } else { $portsToTest = @(8530,80) }
+                    }
+                } else {
+                    $wsushost = $entry
+                    $portsToTest = @(8530,8531)
+                }
+            } else {
+                if ($entry -match '^(?<h>[^:]+):(?<p>\d+)$') {
+                    $wsushost = $matches['h']
+                    $portsToTest = @([int]$matches['p'])
+                } else {
+                    $wsushost = $entry
+                    $portsToTest = @(8530,8531)
+                }
+            }
+            If ($portsToTest -eq 8531) { $portsToTest += 8530 } 
+            elseif ($portsToTest -eq 443 ) { $portsToTest += 80}
+            $portsWorked = @()
+            foreach ($p in $portsToTest) {
+                $tcp = Test-NetConnection -ComputerName $wsushost -Port $p -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+                if ($tcp.TcpTestSucceeded) { $portsWorked += $p }
+            }
+            if ($portsWorked.Count -gt 0) {
+                $results += New-CheckResult -Name "WSUS - $name ($wsushost)" -Status 'OK' -Message "Reachable on ports: $($portsWorked -join ',')"
+            } else {
+                $results += New-CheckResult -Name "WSUS - $name ($wsushost)" -Status 'Warning' -Message "Not reachable (tested ports: $($portsToTest -join ','))"
+            }
+        }
+    }
+} catch {
+    $results += New-CheckResult -Name 'WSUS Server' -Status 'Failed' -Message $_.Exception.Message
+}
+#endregion WSUS Server Check
+
+#region Terminal Services License Servers
+try {
+    $tsReg = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\LicenseServers'
+    if (-not (Test-Path $tsReg)) {
+        Write-Output "Terminal Services LicenseServers registry path not found - skipping check"
+    } else {
+        $props = (Get-ItemProperty -Path $tsReg -ErrorAction SilentlyContinue).PSObject.Properties | Where-Object { $_.Name -notmatch '^PS' }
+        $servers = @()
+        foreach ($p in $props) {
+            if ($p.Value -is [array]) { $servers += $p.Value } else { $servers += $p.Value }
+        }
+        $servers = $servers | Where-Object { $_ -and $_.ToString().Trim() -ne '' } | ForEach-Object { $_.ToString().Trim() } | Sort-Object -Unique
+
+        if ($servers.Count -eq 0) {
+            $results += New-CheckResult -Name 'Terminal Services LicenseServers' -Status 'Warning' -Message 'No LicenseServers values configured'
+        } else {
+            foreach ($s in $servers) {
+                $host = $s
+                # Common ports to verify reachability for license/RDS related traffic
+                $ports = @(135,3389,1688)
+                $icmpOk = $false
+                try { $icmpOk = Test-Connection -ComputerName $host -Count 1 -Quiet -ErrorAction SilentlyContinue } catch { $icmpOk = $false }
+                $portsOk = @()
+                foreach ($p in $ports) {
+                    $res = Test-NetConnection -ComputerName $host -Port $p -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+                    if ($res.TcpTestSucceeded) { $portsOk += $p }
+                }
+                if ($icmpOk -or $portsOk.Count -gt 0) {
+                    $msg = "Reachable"
+                    if ($icmpOk) { $msg += " (ICMP)" }
+                    if ($portsOk.Count -gt 0) { $msg += " on ports: $($portsOk -join ',')" }
+                    $results += New-CheckResult -Name "Terminal Services LicenseServer ($host)" -Status 'OK' -Message $msg
+                } else {
+                    $results += New-CheckResult -Name "Terminal Services LicenseServer ($host)" -Status 'Warning' -Message "Not reachable (tested: ICMP, ports $($ports -join ','))"
+                }
+            }
+        }
+    }
+} catch {
+    $results += New-CheckResult -Name 'Terminal Services LicenseServers' -Status 'Failed' -Message $_.Exception.Message
+}
+#endregion Terminal Services License Servers
+
+#region Output Summary
+$results | Format-Table -AutoSize
+#endregion Output Summary
+# set exit code: non-zero if any Failed
+if ($results | Where-Object { $_.Status -match 'Failed' }) {
+        exit 2
+} elseif ($results | Where-Object { $_.Status -match 'Warning' }) {
+        exit 1
+} else {
+        exit 0
+}
 Stop-Transcript 
