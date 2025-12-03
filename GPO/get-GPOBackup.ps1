@@ -39,17 +39,24 @@ Switch to force an Warrning for testing
 Switch to force an Error with Warrning for testing
 
 .NOTES
-Author     : Fabian Niesen (www.fabian-niesen.de)
-Filename   : get-GPOBackup.ps1
-Requires   : PowerShell Version 4.0
-Version    : 1.7
-License    : GNU General Public License v3 (GPLv3)
-(c) 2014-2025 Fabian Niesen, www.infrastrukturhelden.de
-This script is licensed under the GNU General Public License v3 (GPLv3), except for 3rd party code (e.g. Function Get-GPPolicyKey). 
-You can redistribute it and/or modify it under the terms of the GPLv3 as published by the Free Software Foundation.
-This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
-See https://www.gnu.org/licenses/gpl-3.0.html for the full license text.
+Author     :  Fabian Niesen (infrastrukturhelden.de)
+Filename   :  get-GPOBackup.ps1
+Requires   :  PowerShell Version 4.0
+Version    :  1.8
+License    :  The MIT License (MIT)
+              Copyright (c) 2022-2025 Fabian Niesen
+              Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+              files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, 
+              merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+              furnished to do so, subject to the following conditions:
+              The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+              The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties 
+              of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be 
+              liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in 
+              connection with the software or the use or other dealings in the Software.
+Disclaimer :  This script is provided "as is" without warranty. Use at your own risk.
+              The author assumes no responsibility for any damage or data loss caused by this script.
+              Test thoroughly in a controlled environment before deploying to production.
 History    : 1.0.0   FN  27/07/14  initial version
             1.1.0   FN  25/08/14  Change script to handle new GUID on GPO backup
             1.1.1   FN  03/09/14  Fix Targetpath for secured enviorment
@@ -67,6 +74,7 @@ History    : 1.0.0   FN  27/07/14  initial version
             1.60    FN  13.10.22  Added PowerShell Creation for easier GPO export and import - only works with GPO Settings stored in Regestry Keys under HKEY_LOCAL_MACHINE and HKEY_CURRENT_USER Everthing under Software and System!
             1.61    FN  26.01.23  Small Improvements for Module loading
             1.7     FN  25.10.2025 Change License to GPLv3, except for 3rdparty code (e.g Function Get-GPPolicyKey)
+            1.8     FN  03.12.2025 Changed License to MIT, housekeeping Header
 
 .LINK
 https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/gruppenrichtlinien-richtig-sichern-und-dokumentieren.html
@@ -109,7 +117,8 @@ function Get-GPPolicyKey
 #endregion Functions 
 
 #Verknüfungsorte mit speichern
-$scriptversion = "1.7"
+$scriptversion = "1.8"
+Write-Output "Get-GPOBackup.ps1 Version $scriptversion "
 $ErrorActionPreference = "Stop"
 $GPList = @()
 $regex = "[$([regex]::Escape($characters))]"

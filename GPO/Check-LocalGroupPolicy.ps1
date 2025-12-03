@@ -12,11 +12,25 @@
 		Author     :    Fabian Niesen
 		Filename   :    Check-LocalGroupPolicy.ps1
 		Requires   :    PowerShell Version 4.0
-		
-		Version    :    0.3
-		History    :    0.3 23.12.2022 FN Some Cleanup and Housekeeping
-                    		0.2 08.03.2021 FN Found in personal archive and published to GitHub
-                    		0.1 FN 2016 Initial version.
+		License    :    The MIT License (MIT)
+                    Copyright (c) 2022-2025 Fabian Niesen
+                    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+                    files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, 
+                    merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+                    furnished to do so, subject to the following conditions:
+                    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+                    The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties 
+                    of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be 
+                    liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in 
+                    connection with the software or the use or other dealings in the Software.
+		Disclaimer :    This script is provided "as is" without warranty. Use at your own risk.
+                    The author assumes no responsibility for any damage or data loss caused by this script.
+                    Test thoroughly in a controlled environment before deploying to production.
+		Version    :    0.4
+		History    :    0.4 03.12.2025 FN Changed License to MIT, housekeeping Header
+                    0.3 23.12.2022 FN Some Cleanup and Housekeeping
+                    0.2 08.03.2021 FN Found in personal archive and published to GitHub
+                    0.1 FN 2016 Initial version.
     .LINK
         https://github.com/InfrastructureHeroes/Scipts/blob/master/GPO/Check-LocalGroupPolicy.ps1
 #>
@@ -27,6 +41,8 @@ Param(
 [Parameter(Mandatory=$false, Position=1, ValueFromPipeline=$False)]
 $logpath = "C:\Windows\System32\LogFiles\"
 )
+$scriptversion = "0.4"
+Write-Output "Check-LocalGroupPolicy.ps1 Version $scriptversion "
 $ScriptName = $myInvocation.MyCommand.Name
 $ScriptName = $ScriptName.Substring(0, $ScriptName.Length - 4)
 $LogName = $ScriptName + "_" + $env:computername + "_" + (Get-Date -UFormat "%Y%m%d") + ".log"
