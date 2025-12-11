@@ -53,8 +53,10 @@
         This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
         MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
         See https://www.gnu.org/licenses/gpl-3.0.html for the full license text.
-		Version    : 0.1
-		History    : 0.1   FN  26.04.2025  initial version
+		Version    : 0.2
+        History    : 
+                    0.2   FN  10.06.2025  Bugfix for missing Type parameter in Set-GPRegistryValue 
+                    0.1   FN  26.04.2025  initial version
                     
     .LINK
         Blog DE: folgt bei Gelegenheit - https://www.infrastrukturhelden.de/
@@ -150,7 +152,7 @@ Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SYSTEM\CurrentControlSet\Control
 Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\KeyExchangeAlgorithms\ECDH' -ValueName Enabled -Value $support2026 -Type DWord | Out-Null
 
 # RSA / PKCS Key Exchange is recommended till 2026 for TLS 1.2 (BSI-TR-02102-2 Chapter 3.3.3) # 
-Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\KeyExchangeAlgorithms\PKCS' -ValueName Enabled -Value $support2026 | Out-Null
+Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\KeyExchangeAlgorithms\PKCS' -ValueName Enabled -Value $support2026 -Type DWord | Out-Null
 
 # TLS 1.2 Chiphers (BSI-TR-02102-2 Chapter 3.3.4)
 $Chiphersuites = "TLS_AES_256_GCM_SHA384,TLS_AES_128_GCM_SHA256,TLS_AES_128_CCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"
