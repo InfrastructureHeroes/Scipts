@@ -49,8 +49,9 @@
                     The author assumes no responsibility for any damage or data loss caused by this script.
                     Test thoroughly in a controlled environment before deploying to production.
     GitHub     :    https://github.com/InfrastructureHeroes/Scipts
-    Version    :    0.5 FN 03.12.2025 Change Errorhandling and reporting. Add WSUS and Terminal Server License Server Check
+    Version    :    0.6 FN 17.12.2025 Change DC detection to DNS query, smaller bugfixes
     History    : 	
+                    0.5 FN 03.12.2025 Change Errorhandling and reporting. Add WSUS and Terminal Server License Server Check
                     0.4 FN 30.09.2024 Add KMS detection, add some ports
                     0.3 FN 12.09.2024 Add some Ports
                     0.2 FN 23.12.2022 Housekeeping & Cleanup
@@ -252,7 +253,7 @@ Function Test-UDP {
     }
     return $Success
 }
-$ScriptVersion = "0.5"
+$ScriptVersion = "0.6"
 if ($Host.Name -eq "ServerRemoteHost") { Write-Error -Exception "RemoteShell detected" -Message "Please use local PowerShell, remote PowerShell Sessions are not supported" ; break }
 Set-Location $PSScriptRoot
 $ScriptName = $myInvocation.MyCommand.Name
@@ -339,8 +340,7 @@ try {
 
 #region Test Domain access
 try {
-    $DCs2 = (((nltest /dclist:$DNSDomain).trim() | Select-String -Pattern ".$DNSDomain") | Select-Object -skip 1)
-    $DCs2 = ($DCs2 -split " ") -match ".$DNSDomain"
+    $DCs2 = (Resolve-DnsName -Name $("_ldap._tcp.dc._msdcs." + $DNSDomain) -DnsOnly -Server $DC -ErrorAction SilentlyContinue).NameTarget
     
     if ($DCs2.Count -gt 0) {
         $results += New-CheckResult -Name "Domain Controllers" -Status 'OK' -Message "Found $($DCs2.Count) DC(s): $($DCs2 -join ', ')"
@@ -547,23 +547,23 @@ try {
             $results += New-CheckResult -Name 'Terminal Services LicenseServers' -Status 'Warning' -Message 'No LicenseServers values configured'
         } else {
             foreach ($s in $servers) {
-                $host = $s
+                $target = $s
                 # Common ports to verify reachability for license/RDS related traffic
                 $ports = @(135,3389,1688)
                 $icmpOk = $false
-                try { $icmpOk = Test-Connection -ComputerName $host -Count 1 -Quiet -ErrorAction SilentlyContinue } catch { $icmpOk = $false }
+                try { $icmpOk = Test-Connection -ComputerName $target -Count 1 -Quiet -ErrorAction SilentlyContinue } catch { $icmpOk = $false }
                 $portsOk = @()
                 foreach ($p in $ports) {
-                    $res = Test-NetConnection -ComputerName $host -Port $p -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+                    $res = Test-NetConnection -ComputerName $target -Port $p -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
                     if ($res.TcpTestSucceeded) { $portsOk += $p }
                 }
                 if ($icmpOk -or $portsOk.Count -gt 0) {
                     $msg = "Reachable"
                     if ($icmpOk) { $msg += " (ICMP)" }
                     if ($portsOk.Count -gt 0) { $msg += " on ports: $($portsOk -join ',')" }
-                    $results += New-CheckResult -Name "Terminal Services LicenseServer ($host)" -Status 'OK' -Message $msg
+                    $results += New-CheckResult -Name "Terminal Services LicenseServer ($target)" -Status 'OK' -Message $msg
                 } else {
-                    $results += New-CheckResult -Name "Terminal Services LicenseServer ($host)" -Status 'Warning' -Message "Not reachable (tested: ICMP, ports $($ports -join ','))"
+                    $results += New-CheckResult -Name "Terminal Services LicenseServer ($target)" -Status 'Warning' -Message "Not reachable (tested: ICMP, ports $($ports -join ','))"
                 }
             }
         }
