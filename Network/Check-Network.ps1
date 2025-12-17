@@ -340,8 +340,8 @@ try {
 
 #region Test Domain access
 try {
-    $DCs2 = (Resolve-DnsName -Name $("_ldap._tcp.dc._msdcs." + $DNSDomain) -DnsOnly -Server $DC -ErrorAction SilentlyContinue).NameTarget
-    
+    $DCs2 = (Resolve-DnsName -Name $("_ldap._tcp.dc._msdcs." + $DNSDomain) -DnsOnly -Type SRV -ErrorAction SilentlyContinue).NameTarget
+    Write-Verbose "Found $($DCs2.Count) DC(s): $($DCs2 -join ', ')"
     if ($DCs2.Count -gt 0) {
         $results += New-CheckResult -Name "Domain Controllers" -Status 'OK' -Message "Found $($DCs2.Count) DC(s): $($DCs2 -join ', ')"
     } else {
