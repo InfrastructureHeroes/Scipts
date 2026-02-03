@@ -51,8 +51,9 @@ DISCLAIMER  :
             This script is provided "as is" without any warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. 
             Use of this script is at your own risk. The author assumes no responsibility for any damage or data loss caused by the use of this script.
 
-Version    : 1.1
+Version    : 1.2
 History    : 
+                1.2  Fabian Niesen  03.02.2026  Modify XML Query, add NTLM Version
                 1.1  Fabian Niesen  27.01.2026  Fix local DC with AllDcs switch, Catch for unreachable DCs
                 1.0  Fabian Niesen  17.02.2024  initial version
 
@@ -74,7 +75,7 @@ Param(
 - If Exportpath exists, rename instead delete
 #>
 #region init
-$ScriptVersion = "1.1"
+$ScriptVersion = "1.2"
 $script:ParentFolder = $PSScriptRoot | Split-Path -Parent
 $global:ScriptName = $myInvocation.MyCommand.Name
 $global:ScriptName = $ScriptName.Substring(0, $scriptName.Length - 4)
@@ -86,17 +87,7 @@ Write-Output -Message "Start $ScriptName $ScriptVersion - Executed on $($Env:COM
 Write-Warning "You need to activate NTLM Auditing to get the Events generated! Otherwise, this will not show anything."
 $start = $(Get-Date)
 Write-Output "Query Events for the last day. This will take some time. Start: $start"
-$xmlQuery = @'
-<QueryList>
-  <Query Id="0" Path="Security">
-    <Select Path="Security">
-      *[System[(EventID=4624)and TimeCreated[timediff(@SystemTime) &lt;= 86400000]]] 
-      and
-      *[EventData[Data[@Name='AuthenticationPackageName'] and (Data='NTLM') or (Data='MICROSOFT_AUTHENTICATION_PACKAGE_V1_0')]]
-	</Select>
-  </Query>
-</QueryList>
-'@
+$xmlQuery = '<QueryList><Query Id="0" Path="Security"><Select Path="Security">*[System[(EventID=4624)and TimeCreated[timediff(@SystemTime) &lt;= 86400000]]] and *[EventData[Data[@Name="AuthenticationPackageName"] and (Data="NTLM") or (Data="MICROSOFT_AUTHENTICATION_PACKAGE_V1_0")]]</Select></Query></QueryList>'
 $NTLMLogs = @()
 If ( $AllDCs ) {
     Write-Output "- Execute for all DCs -"
@@ -158,6 +149,7 @@ ForEach ( $NTLMEvent in $NTLMLogs )
     $data | Add-Member -MemberType NoteProperty -Name "Source" -Value $NTLMEvent.Properties[18].Value
     $data | Add-Member -MemberType NoteProperty -Name "Logon Process" -Value $NTLMEvent.Properties[9].Value
     $data | Add-Member -MemberType NoteProperty -Name "Package Name" -Value $NTLMEvent.Properties[10].Value
+    $data | Add-Member -MemberType NoteProperty -Name "NTLM Version" -Value $NTLMEvent.Properties[14].Value 
     $NTLMData += $data
 }
 Write-Progress -activity "Finish processing NTLM Events"  -Completed 100 -Id 2
