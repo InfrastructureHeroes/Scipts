@@ -6,6 +6,8 @@ Checks the security event logs for NTLM logons and analyses them.
 .DESCRIPTION
 Checks the security event logs for NTLM logons and analyses them. The participating systems and users as well as the login type are output.
 
+For Local NTLM analysis, use the Get-LocalNTLMlogs.ps1 script, which queries the NTLM Operational Log and provides more detailed information on the logon events.
+
 DISCLAIMER
 This script is provided "as is" without any warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. 
 Use of this script is at your own risk. The author assumes no responsibility for any damage or data loss caused by the use of this script.
@@ -51,15 +53,19 @@ DISCLAIMER  :
             This script is provided "as is" without any warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. 
             Use of this script is at your own risk. The author assumes no responsibility for any damage or data loss caused by the use of this script.
 
-Version    : 1.2
+Version    : 1.3
 History    : 
+                1.3  Fabian Niesen  10.02.2026  Minor housekeeping, update of comments and notes
                 1.2  Fabian Niesen  03.02.2026  Modify XML Query, add NTLM Version
                 1.1  Fabian Niesen  27.01.2026  Fix local DC with AllDcs switch, Catch for unreachable DCs
                 1.0  Fabian Niesen  17.02.2024  initial version
 
 
 .LINK
-https://www.infrastrukturhelden.de/
+https://github.com/InfrastructureHeroes/Scipts/blob/master/ActiveDirectory/Get-NTLMLogons.ps1
+Blog (DE): https://www.infrastrukturhelden.de/
+Blog (EN): https://www.InfrastructureHeroes.org/ 
+Get-LocalNTLMlogs.ps1 https://github.com/InfrastructureHeroes/Scipts/blob/master/ActiveDirectory/Get-LocalNTLMlogs.ps1
 #>
 
 Param(
@@ -69,19 +75,13 @@ Param(
     [Parameter(HelpMessage = 'Path to CSV file' )][string]$exportpath = "C:\Temp\NTLM.csv"
 
 )
-<# TODO
-- Verify Logging for NTLM
-- Integrate other Event IDs (NTLM Logs)
-- If Exportpath exists, rename instead delete
-#>
 #region init
-$ScriptVersion = "1.2"
-$script:ParentFolder = $PSScriptRoot | Split-Path -Parent
-$global:ScriptName = $myInvocation.MyCommand.Name
-$global:ScriptName = $ScriptName.Substring(0, $scriptName.Length - 4)
-$global:scriptsource = $myInvocation.MyCommand.Source
-$global:scriptparam = $MyInvocation.BoundParameters
-Write-Output -Message "Start $ScriptName $ScriptVersion - Executed on $($Env:COMPUTERNAME) by $($Env:USERNAME)" 
+$ScriptVersion = "1.3"
+$ScriptName = $($myInvocation.MyCommand.Name).Replace('.ps1', '')
+Write-Output "Start $ScriptName $ScriptVersion - Executed on $($Env:COMPUTERNAME) by $($Env:USERNAME)" 
+Write-Verbose "Parameters: Days=$Days, MaxEvents=$MaxEvents, ShowRawEventData=$ShowRawEventData, IncludeOriginalMessage=$IncludeOriginalMessage, CSVExportPath=$CSVExportPath"
+if (((Get-ComputerInfo).WindowsInstallationType) -like "Server Core") {$CoreVersion=$true} else {$CoreVersion = $false}
+Write-Verbose "CoreVersion: $CoreVersion"
 #endregion init
 
 Write-Warning "You need to activate NTLM Auditing to get the Events generated! Otherwise, this will not show anything."
