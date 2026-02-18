@@ -1,40 +1,40 @@
 # Infrastrukturhelden Script Collection
 
-PowerShell and infrastructure helper scripts by Fabian Niesen.
+PowerShell- und Infrastruktur-Hilfsskripte von Fabian Niesen.
 
-- Language versions: [English](README.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Français](README.fr.md)
+- Sprachversionen: [English](README.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Français](README.fr.md)
 
-> **Translation notice**
-> The non-English README files were created with AI assistance to make usage easier. In case of ambiguity, use `README.md` as the authoritative version.
+> **Hinweis zur Übersetzung**
+> Die nicht-englischen README-Dateien wurden mit KI-Unterstützung erstellt, um die Nutzung zu erleichtern. Bei Unklarheiten gilt `README.md` als maßgebliche Version.
 
-- German blog: [https://www.infrastrukturhelden.de](https://www.infrastrukturhelden.de)
-- English blog: [https://www.infrastructureheroes.org/](https://www.infrastructureheroes.org/)
+- Deutscher Blog: [https://www.infrastrukturhelden.de](https://www.infrastrukturhelden.de)
+- Englischer Blog: [https://www.infrastructureheroes.org/](https://www.infrastructureheroes.org/)
 
-> **Disclaimer**
-> This repository and all included scripts are provided "as is", without warranties or conditions of any kind, express or implied, including but not limited to merchantability, fitness for a particular purpose, and non-infringement.
-> You are solely responsible for reviewing, testing, and validating every script before use in any environment. The author and contributors are not liable for any direct, indirect, incidental, consequential, or special damages resulting from the use or misuse of these scripts.
+> **Haftungsausschluss**
+> Dieses Repository und alle enthaltenen Skripte werden „wie besehen“ bereitgestellt – ohne ausdrückliche oder stillschweigende Gewährleistungen, einschließlich (aber nicht beschränkt auf) Marktgängigkeit, Eignung für einen bestimmten Zweck und Nichtverletzung von Rechten.
+> Sie sind allein dafür verantwortlich, jedes Skript vor der Nutzung zu prüfen, zu testen und zu validieren. Der Autor und Mitwirkende haften nicht für direkte, indirekte, zufällige, Folge- oder besondere Schäden, die aus der Nutzung oder Fehlanwendung dieser Skripte entstehen.
 
-## Repository Overview
+## Repository-Überblick
 
-This repository contains administration scripts for:
+Dieses Repository enthält Administrationsskripte für:
 
-- Active Directory and identity operations
-- BitLocker and endpoint encryption
-- Group Policy (GPO)
-- WSUS operations and health checks
-- Intune packaging and troubleshooting
-- Azure tooling setup
-- Network diagnostics and client configuration
-- Exchange maintenance tasks
-- User lifecycle automation
-- Windows hardening and cleanup
-- Linux/Squid allowlists used in enterprise proxy setups
+- Active Directory- und Identitätsoperationen
+- BitLocker- und Endpunktverschlüsselung
+- Gruppenrichtlinien (GPO)
+- WSUS-Betrieb und Integritätsprüfungen
+- Intune-Paketierung und Fehleranalyse
+- Azure-Tooling-Setup
+- Netzwerkdiagnose und Clientkonfiguration
+- Exchange-Wartungsaufgaben
+- Benutzerlebenszyklus-Automatisierung
+- Windows-Härtung und Bereinigung
+- Linux/Squid-Allowlists für Enterprise-Proxy-Umgebungen
 
-## Table of Contents
+## Inhaltsverzeichnis
 
-- [Repository Overview](#repository-overview)
-- [Script Inventory (scanned from the repository)](#script-inventory-scanned-from-the-repository)
-  - [Root scripts](#root-scripts)
+- [Repository-Überblick](#repository-überblick)
+- [Skriptübersicht (aus dem Repository gescannt)](#skriptübersicht-aus-dem-repository-gescannt)
+    - [Hauptskripte](#hauptskripte)
   - [ActiveDirectory](#activedirectory)
   - [Azure](#azure)
   - [BitLocker](#bitlocker)
@@ -46,21 +46,21 @@ This repository contains administration scripts for:
   - [User](#user)
   - [Windows](#windows)
   - [WSUS](#wsus)
-- [Additional files](#additional-files)
+- [Zusätzliche Dateien](#zusätzliche-dateien)
 - [Notes](#notes)
 
 
-## Script Inventory (scanned from the repository)
+## Skriptübersicht (aus dem Repository gescannt)
 
-The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; otherwise they are inferred from script names/content.
+Die Beschreibungen basieren – sofern vorhanden – auf `.SYNOPSIS` / `.DESCRIPTION`; andernfalls wurden sie aus Skriptnamen und Inhalt abgeleitet.
 
-> **Version/License notes**
-> - **Version**: determined in this order: `$ScriptVersion` variable in the script, then `$script:BuildVer`, then `Version    :` in header notes, otherwise `n/a`.
-> - **License**: read from the header `.NOTES` section line `License    :`; if not present, `Not specified`.
+> **Hinweise zu Version/Lizenz**
+> - **Version**: wird in dieser Reihenfolge bestimmt: Variable `$ScriptVersion` im Skript, dann `$script:BuildVer`, dann `Version    :` im Header, sonst `n/a`.
+> - **Lizenz**: wird aus der Header-Sektion `.NOTES` aus der Zeile `License    :` gelesen; falls nicht vorhanden, `Not specified`.
 
-### Root scripts
+### Hauptskripte
 
-| File | Purpose | Version | License |
+| Datei | Zweck | Version | Lizenz |
 |---|---|---|---|
 | `Set-WinRelease.ps1` | Set registry keys to keep Windows 10 on a specific release. | 1.1 | The MIT License (MIT) |
 | `Get-WindowsSid.ps1` | Collect Windows SIDs from online AD computers via Sysinternals PSGetSid. | 1.2 | The MIT License (MIT) |
@@ -72,7 +72,7 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 
 ### ActiveDirectory
 
-| File | Purpose | Version | License |
+| Datei | Zweck | Version | Lizenz |
 |---|---|---|---|
 | `ActiveDirectory/Configure-AD.ps1` | Configure an AD domain (e.g., recycle bin, gMSA prep, central store, password policies, OU structure). | 0.2 | Not specified |
 | `ActiveDirectory/Get-ADPermissionsReport.ps1` | Export CSV report of Active Directory permissions. | 0.2 | Not specified |
@@ -94,14 +94,14 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 
 ### Azure
 
-| File | Purpose | Version | License |
+| Datei | Zweck | Version | Lizenz |
 |---|---|---|---|
 | `Azure/Install-AzCopy.ps1` | Download and install the latest AzCopy for the current user. | 1.0 | Not specified |
 | `Azure/Install-AzModule.ps1` | Install/update Azure PowerShell modules (`Az`). | n/a | Not specified |
 
 ### BitLocker
 
-| File | Purpose | Version | License |
+| Datei | Zweck | Version | Lizenz |
 |---|---|---|---|
 | `BitLocker/List-BitLockerrecoveryKeys.ps1` | List BitLocker recovery keys stored in Active Directory. | n/a | Not specified |
 | `BitLocker/Start-Bitlocker.ps1` | Start BitLocker encryption with predefined settings (including PIN workflows). | n/a | Not specified |
@@ -109,14 +109,14 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 
 ### Exchange
 
-| File | Purpose | Version | License |
+| Datei | Zweck | Version | Lizenz |
 |---|---|---|---|
 | `Exchange/Set-MaintananceMode.ps1` | Put an Exchange 2013 DAG node into maintenance mode. | 0.2 | Not specified |
 | `Exchange/Set-Ex2013Vdir.ps1` | Configure Exchange 2013 virtual directories/URLs. | 0.1 | Not specified |
 
 ### GPO
 
-| File | Purpose | Version | License |
+| Datei | Zweck | Version | Lizenz |
 |---|---|---|---|
 | `GPO/Check-LocalGroupPolicy.ps1` | Detect and fix local Group Policy processing issues based on event logs. | 0.4 | The MIT License (MIT) |
 | `GPO/get-GPOBackup.ps1` | Create timestamped GPO backups including HTML reports. | 1.8 | The MIT License (MIT) |
@@ -125,14 +125,14 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 
 ### Intune
 
-| File | Purpose | Version | License |
+| Datei | Zweck | Version | Lizenz |
 |---|---|---|---|
 | `Intune/create-package.ps1` | Build `.intunewin` packages from source folders. | 1.0 | Not specified |
 | `Intune/get-AutopilotLogs.ps1` | Collect logs and diagnostics for Autopilot pre-provisioning. | 1.0.2 | Not specified |
 
 ### Linux-Files
 
-| File | Purpose | Version | License |
+| Datei | Zweck | Version | Lizenz |
 |---|---|---|---|
 | `Linux-Files/allow_windowsupdate.squid` | Squid ACL allowlist for Windows Update endpoints. | n/a | Not specified |
 | `Linux-Files/allow_psgallery.squid` | Squid ACL allowlist for PowerShell Gallery / NuGet endpoints. | n/a | Not specified |
@@ -141,41 +141,41 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 
 ### Network
 
-| File | Purpose | Version | License |
+| Datei | Zweck | Version | Lizenz |
 |---|---|---|---|
 | `Network/Check-Network.ps1` | Validate client network connectivity and configuration. | 0.6 | Except for the LDAP Test Code, witch is licensed by Evotec under MIT License |
 | `Network/disable-NetBios.ps1` | Disable NetBIOS over TCP/IP on active adapters. | n/a | Not specified |
 
 ### User
 
-| File | Purpose | Version | License |
+| Datei | Zweck | Version | Lizenz |
 |---|---|---|---|
 | `User/create-user.ps1` | Create AD users (including Microsoft 365 onboarding patterns). | 0.3 | The MIT License (MIT) |
 | `User/Get-LastLogonOU.ps1` | Report last logon values for users in an OU (AD + Exchange context). | 0.2 FN 03.12.2025 Changed License to MIT, housekeeping Header | The MIT License (MIT) |
 
 ### Windows
 
-| File | Purpose | Version | License |
+| Datei | Zweck | Version | Lizenz |
 |---|---|---|---|
 | `Windows/set-cert4rdp.ps1` | Bind/set the RDP certificate from a specific issuing CA. | 0.2 | The MIT License (MIT) |
 | `Windows/Remove-AzureArc.ps1` | Remove Azure Arc agent/components and reboot automatically if required. | 1.1 | The MIT License (MIT) |
 
 ### WSUS
 
-| File | Purpose | Version | License |
+| Datei | Zweck | Version | Lizenz |
 |---|---|---|---|
 | `WSUS/decline-WSUSUpdatesTypes.ps1` | Decline selected update classifications/products in WSUS. | 1.8 | The MIT License (MIT) |
 | `WSUS/Reset-WSUSClient.cmd` | Reset WSUS client configuration and detection state. | n/a | Not specified |
 | `WSUS/start-WsusServerSync.ps1` | Start WSUS synchronization (supports recursive upstream/downstream and email logging). | n/a | Not specified |
 | `WSUS/Get-WsusHealth.ps1` | Run comprehensive WSUS health checks and generate diagnostic output. | 1.3 | Except for the LDAP Test Code, witch is licensed by Evotec under MIT License |
 
-## Additional files
+## Zusätzliche Dateien
 
-- `Intune/Readme.md` – Intune-specific notes (in German).
+- `Intune/Readme.md` – Intune-spezifische Hinweise (auf Deutsch).
 - `Dokumente/Zertifizierungsstellen mit Windows Server 2012R2.pdf` – PKI/CA documentation PDF.
 
-## Notes
+## Hinweise
 
-- Some scripts are mature and versioned.
-- Others are quick operational helpers collected for day-to-day administration.
-- Always validate scripts in a test environment before production use.
+- Einige Skripte sind ausgereift und versioniert.
+- Andere sind schnelle operative Helfer für den Administrationsalltag.
+- Skripte vor dem produktiven Einsatz immer in einer Testumgebung prüfen.
