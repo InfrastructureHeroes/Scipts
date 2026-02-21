@@ -2,10 +2,12 @@
 
 ## Table of Contents
 
-- [English](#english)
-- [Deutsch](#deutsch)
-- [Español](#español)
-- [Français](#français)
+- [README](#readme)
+  - [Table of Contents](#table-of-contents)
+  - [English](#english)
+  - [Deutsch](#deutsch)
+  - [Español](#español)
+  - [Français](#français)
 
 ---
 
@@ -21,7 +23,9 @@
 
 Example Group Policy Object (GPO) for the article  
 *“Windows 11 – Controlling communication with cloud services in accordance with German IT Basic Protection”*  
-published on **InfrastructureHeroes.org**.
+published on **InfrastructureHeroes.org**. (To Be Translated...)
+
+German Article: [Windows 11 – Kommunikation mit Clouddiensten gemäß IT-Grundschutz steuern](https://www.infrastrukturhelden.de/microsoft-infrastruktur/windows-kommunikation-mit-clouddiensten-gemaess-it-grundschutz-steuern/)
 
 **Important notes**
 
@@ -61,8 +65,7 @@ www.InfrastructureHeroes.org
 **Beschreibung**
 
 Beispiel-Gruppenrichtlinie (GPO) zum Artikel  
-*„Windows 11 – Kommunikation mit Clouddiensten gemäß IT-Grundschutz steuern“*  
-auf **InfrastrukturHelden.de**.
+[Windows 11 – Kommunikation mit Clouddiensten gemäß IT-Grundschutz steuern](https://www.infrastrukturhelden.de/microsoft-infrastruktur/windows-kommunikation-mit-clouddiensten-gemaess-it-grundschutz-steuern/)
 
 **Wichtige Hinweise**
 
