@@ -1,4 +1,4 @@
-﻿##requires -version 2.0
+﻿##requires -version 5.1
 ##requires -modules activedirectory
 
 <#
@@ -9,6 +9,12 @@
         Based upon an TechNet article from "The Scripting guys". Thanks also to Shawn Johnson, Paul Wetter, SteveLarson for providing SCCM extension and more schema versions.
         http://blogs.technet.com/b/heyscriptingguy/archive/2012/01/05/how-to-find-active-directory-schema-update-history-by-using-powershell.aspx
         Require the ActiveDirectory PowerShell Module, no admin permisions needed.
+        
+        DISCLAIMER
+        This script is provided "as is" without any warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. 
+        Use of this script is at your own risk. The author assumes no responsibility for any damage or data loss caused by the use of this script.
+
+        (c) 2015-2026 Fabian Niesen, www.infrastrukturhelden.de - Since V0.6 License: GNU General Public License v3 (GPLv3), see notes for details
 	.EXAMPLE  
         get-adinfo
 	.INPUTS
@@ -18,37 +24,42 @@
 	.NOTES
 		Author     : Fabian Niesen
 		Filename   : get-adinfo.ps1
-		Requires   : PowerShell Version 2.0
+		Requires   : PowerShell Version 5.1
+        License    : GNU General Public License v3 (GPLv3)
+                    (c) 2026 Fabian Niesen, www.infrastrukturhelden.de
+                    This script is licensed under the GNU General Public License v3 (GPLv3). 
+                    You can redistribute it and/or modify it under the terms of the GPLv3 as published by the Free Software Foundation.
+                    This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+                    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
+                    See https://www.gnu.org/licenses/gpl-3.0.html for the full license text.
 		
-		Version    : 0.5
-		History    : 0.5   FN  19.02.2021  
-                     0.4   FN  15.07.2020  Update Schemas, integrate LAPS detection
-                     0.3   FN  21.07.2016  Add Windows Server 2016, Exchange multiple CU and 2016, some SystemCenter and Sign Script
-                     0.2   FN  10.03.2015  Add SCCM R2 CU1-4 and SCCM CU5
-                     0.1   FN  18.02.2015  initial version
+		Version    : 0.6
+		History    : 0.6  FN  26.03.2026 Update Schema versions, change License, add replication connections
+                    0.5   FN  19.02.2021  
+                    0.4   FN  15.07.2020  Update Schemas, integrate LAPS detection
+                    0.3   FN  21.07.2016  Add Windows Server 2016, Exchange multiple CU and 2016, some SystemCenter and Sign Script
+                    0.2   FN  10.03.2015  Add SCCM R2 CU1-4 and SCCM CU5
+                    0.1   FN  18.02.2015  initial version
                     
     .LINK
-        https://gallery.technet.microsoft.com/Gesamtstruktur-Informations-63719eec
+        https://github.com/InfrastructureHeroes/Scipts/blob/master/ActiveDirectory/get-adinfo.ps1
 #>
 
 [cmdletbinding()]
 Param(
-    $logfile="C:\Temp\log.txt"
+    $logpath="C:\Temp\"
 )
-
-<#
-Param(
-	[Parameter(Mandatory=$false, ValueFromPipeline=$True)]
-	[switch]$Verbose = $false
-)
-
-$oldverbose = $VerbosePreference
-IF ($Verbose -eq $True) 
-{
-  $VerbosePreference = "Continue"
-}
-#>
-"Get-ADInfo.ps1 by Fabian Niesen" | Out-file -FilePath $logfile | Write-Output
+IF ($logpath.EndsWith("\") -like "False") { $logpath =$logpath+"\" }
+IF (!(Test-Path $logpath)) { new-item -Path $logpath -ItemType directory }
+#region init
+$ScriptVersion = "0.6"
+$ScriptName = $($myInvocation.MyCommand.Name).Replace('.ps1', '')
+$logfile=$logpath + $ScriptName + ".log"
+"Start $ScriptName $ScriptVersion - Executed on $($Env:COMPUTERNAME) by $($Env:USERNAME)" | Tee-Object -FilePath $logfile -Append | Write-Output
+if (((Get-ComputerInfo).WindowsInstallationType) -like "Server Core") {$CoreVersion=$true} else {$CoreVersion = $false}
+"CoreVersion: $CoreVersion" | Out-file -FilePath $logfile | Write-Output
+#endregion init
+"Get-ADInfo.ps1 by Fabian Niesen, www.infrastrukturhelden.de - Since V0.6 License: GNU General Public License v3 (GPLv3), see notes for details" | Out-file -FilePath $logfile | Write-Output
 get-date -format yyyyMMdd-HHmm | Tee-Object -FilePath $logfile -Append | Write-Output
 
 
@@ -63,7 +74,10 @@ catch
     Write-Warning "PowerShell module for Active Directory not found!"
     break
 }
-
+[String]$DNSDomain = (Get-ADDomain).DNSRoot.toLower()
+#$localisDC
+$ComputerSystem = Get-WmiObject Win32_ComputerSystem
+$IsDomainController = ($ComputerSystem.DomainRole -ge 4)
 # Forrest creation
 "Creation date of the domains" | Tee-Object -FilePath $logfile -Append | Write-Output
 "============================" | Tee-Object -FilePath $logfile -Append | Write-Output
@@ -73,8 +87,8 @@ $Doms | Format-Table dnsRoot, NETBIOSName, whenCreated -AutoSize
 # Fuctional Levels
 "Funtional Level and FSMO roles" | Tee-Object -FilePath $logfile -Append | Write-Output
 "==============================" | Tee-Object -FilePath $logfile -Append | Write-Output
-Get-ADForest | fl Name,ForestMode,SchemaMaster,DomainNamingMaster
-$Doms.Netbiosname | Get-ADDomain | FL Name,NetBiosName,DNSRoot,DomainMode,PDCEmulator,RIDMaster,InfrastructureMaster 
+Get-ADForest | Format-List Name,ForestMode,SchemaMaster,DomainNamingMaster
+$Doms.Netbiosname | Get-ADDomain | Format-List Name,NetBiosName,DNSRoot,DomainMode,PDCEmulator,RIDMaster,InfrastructureMaster 
 
 # List DCs
 "List of all domain controllers" | Tee-Object -FilePath $logfile -Append | Write-Output
@@ -87,33 +101,46 @@ try
         { 
             "Cannot connect to current forest." 
         } 
-$Forest.domains | ForEach-Object {$_.DomainControllers} | FT Name,OSVersion,SiteName -AutoSize -GroupBy Domain
+$Forest.domains | ForEach-Object {$_.DomainControllers} | Format-Table Name,OSVersion,SiteName -AutoSize -GroupBy Domain
 
-# User Objects normal & Password age180+
+# Check DNS 
+"List of all domain controler for $DNSDomain in DNS"| Tee-Object -FilePath $logfile -Append | Write-Output
+"=================================================" | Tee-Object -FilePath $logfile -Append | Write-Output
+Resolve-DnsName -Name _ldap._tcp.dc._msdcs.contoso.local -Type SRV | Tee-Object -FilePath $logfile -Append | Write-Output
 
-
-
-# Computer Objects  normal & Password age180+
-
-
+# Replication connections
+"ADReplication Information" | Tee-Object -FilePath $logfile -Append | Write-Output
+"=========================" | Tee-Object -FilePath $logfile -Append | Write-Output
+$ADReplicationPartnerMetadata = Get-ADReplicationPartnerMetadata -Target * 
+$ADReplicationPartnerMetadata | Write-Output -FilePath $logfile -Append
+If ($CoreVersion -eq $true) {$ADReplicationPartnerMetadata } ELSE { $ADReplicationPartnerMetadata | Out-GridView }
+$ADReplicationFailure = Get-ADReplicationFailure -Target * 
+$ADReplicationFailure | Write-Output -FilePath $logfile -Append
+If ($CoreVersion -eq $true) {$ADReplicationFailure } ELSE { $ADReplicationFailure | Out-GridView }
+IF ($IsDomainController){
+    $repadmincsv = $logpath + "repadmin.csv"
+    "Export Replication data from >repadmin< to $repadmincsv"| Tee-Object -FilePath $logfile -Append | Write-Output
+    repadmin /showrepl * /csv > $repadmincsv
+}
 
 # SchemaVersionen
 
 $SchemaVersions = @()
 
 $SchemaHashAD = @{ 
- 13="Windows 2000 Server"; 
- 30="Windows Server 2003"; 
- 31="Windows Server 2003 R2"; 
- 44="Windows Server 2008"; 
- 47="Windows Server 2008 R2";
- 51="!!! Windows Server 8 Developer Preview !!!";
- 52="!!! Windows Server 8 BETA !!!";
- 56="Windows Server 2012";
- 69="Windows Server 2012 R2";
- 72="!!! Windows Server vNext Technical Preview (Build 9841) !!!";
- 87="Windows Server 2016";
- 88="Windows Server 2019";
+13="Windows 2000 Server"; 
+30="Windows Server 2003"; 
+31="Windows Server 2003 R2"; 
+44="Windows Server 2008"; 
+47="Windows Server 2008 R2";
+51="!!! Windows Server 8 Developer Preview !!!";
+52="!!! Windows Server 8 BETA !!!";
+56="Windows Server 2012";
+69="Windows Server 2012 R2";
+72="!!! Windows Server vNext Technical Preview (Build 9841) !!!";
+87="Windows Server 2016";
+88="Windows Server 2019 / 2022";
+91="Windows Server 2025";
 }
 
 Write-Verbose "Starting AD Schema"
@@ -155,7 +182,8 @@ $SchemaHashExchange = @{
 15333="Exchange 2016 CU19";
 17000="Exchange 2019 RTM/CU1";
 17001="Exchange 2019 CU2-CU7";
-17002="Exchange 2019 CU8";
+17002="Exchange 2019 CU8-CU9";
+17003="Exchange 2019 CU10-CU15 / Exchange SE RTM";
 }
 
 Write-Verbose "Starting Exchange Schema"
@@ -263,6 +291,17 @@ $SchemaHashSCCM = @{
 "5.00.9012.1000" = "SCCM 2006";
 "5.00.9040.1000" = "SCCM 2010";
 "5.00.9040.1019" = "SCCM 2010 (KB4594177)";
+"5.00.9049.1000" = "SCCM 2103";
+"5.00.9058.1000" = "SCCM 2107";
+"5.00.9068.1000" = "SCCM 2111";
+"5.00.9078.1000" = "SCCM 2203";
+"5.00.9088.1000" = "SCCM 2207";
+"5.00.9096.1000" = "SCCM 2211";
+"5.00.9106.1000" = "SCCM 2303";
+"5.00.9122.1000" = "SCCM 2309";
+"5.00.9128.1000" = "SCCM 2403";
+"5.00.9132.1000" = "SCCM 2409";
+"5.00.9135.1000" = "SCCM 2503";
 }
 
 Write-Verbose "Starting SCCM Schema"
