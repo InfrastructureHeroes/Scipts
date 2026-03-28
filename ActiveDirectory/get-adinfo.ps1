@@ -8,7 +8,8 @@
 		Get basic information upon the Active Directory Forrest, like the cration date of the domains, a list off all DC and a Report the Schema versions (AD, Exchange, Lync and SCCM).
         Based upon an TechNet article from "The Scripting guys". Thanks also to Shawn Johnson, Paul Wetter, SteveLarson for providing SCCM extension and more schema versions.
         http://blogs.technet.com/b/heyscriptingguy/archive/2012/01/05/how-to-find-active-directory-schema-update-history-by-using-powershell.aspx
-        Require the ActiveDirectory PowerShell Module, no admin permisions needed.
+        Require the ActiveDirectory PowerShell Module, no admin permisions needed for most functions.
+        Will provide more details about replication and replication errors is executed on a Domain Controller
         
         DISCLAIMER
         This script is provided "as is" without any warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. 
@@ -16,11 +17,13 @@
 
         (c) 2015-2026 Fabian Niesen, www.infrastrukturhelden.de - Since V0.6 License: GNU General Public License v3 (GPLv3), see notes for details
 	.EXAMPLE  
-        get-adinfo
+        get-adinfo.ps1
 	.INPUTS
 		Keine.
 	.OUTPUTS
 		Keine.
+    .PARAMETER Logpath
+        Path to create Logfiles and CSV Exports. Default: C:\Temp
 	.NOTES
 		Author     : Fabian Niesen
 		Filename   : get-adinfo.ps1
@@ -33,8 +36,9 @@
                     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
                     See https://www.gnu.org/licenses/gpl-3.0.html for the full license text.
 		
-		Version    : 0.6
-		History    : 0.6  FN  26.03.2026 Update Schema versions, change License, add replication connections
+		Version    : 0.7
+		History    : 0.7  FN  28.03.2026 Add mor features to support DC replacement article, optimization for core server
+                    0.6   FN  26.03.2026 Update Schema versions, change License, add replication connections
                     0.5   FN  19.02.2021  
                     0.4   FN  15.07.2020  Update Schemas, integrate LAPS detection
                     0.3   FN  21.07.2016  Add Windows Server 2016, Exchange multiple CU and 2016, some SystemCenter and Sign Script
@@ -49,25 +53,63 @@
 Param(
     $logpath="C:\Temp\"
 )
+#region Functions
+Function Get-DC {
+    Begin { Write-Host "Start DC detection" }
+    Process {
+        Try {
+            IF ( (Get-WindowsFeature -Name RSAT-AD-PowerShell).InstallState -like "Installed") 
+            {
+                Write-Host "Use RSAT-AD-PowerShell for DC detection"
+                $DC=(Get-ADDomainController -Filter {OperationMasterRoles -like "PDC*"}).Hostname
+                if ((Test-Connection $DC -Count 1) -eq $false)
+                    {
+                        Write-Warning "Found RSAT-AD-PowerShell - PDC not reachable - Fallback mode" 
+                        $DC = (Get-ADDomainController).Hostname
+                        if ((Test-Connection $DC -Count 1) -eq $false)
+                        {
+                            Write-Warning "DC not reachable - Abort" 
+                            Break;                
+                        }
+                    } Else {
+                        Write-Host "PDC is reachable - Using $DC"
+                    }
+            }
+            else {
+                Write-Host "RSAT-AD-PowerShell not found, fall back to NLtest - the determined DC might not be the PDC!"
+                $DCs = (((nltest /dclist:$DNSDomain).trim() | Select-String -Pattern ".$DNSDomain") | Select-Object -skip 1 )
+                $DCs = ($DCs -split " ") -match ".$DNSDomain"
+                $DC = $DCs[0].ToString()
+                Write-Host "Set DC to $DC"
+            }
+        }
+        Catch {
+            Write-Host "GET-DC - $($_.Exception.Message)" 
+            $DCs = (((nltest /dclist:$DNSDomain).trim() | Select-String -Pattern ".$DNSDomain") | Select-Object -skip 1 )
+            $DCs = ($DCs -split " ") -match ".$DNSDomain"
+            $DC = $DCs[0].ToString()
+            Write-Host "Set DC to $DC"
+        }
+    }
+    END { return $DC }
+}
+#endregion Functions
+$timestamp = get-date -format yyyyMMdd-HHmm 
 IF ($logpath.EndsWith("\") -like "False") { $logpath =$logpath+"\" }
 IF (!(Test-Path $logpath)) { new-item -Path $logpath -ItemType directory }
-#region init
-$ScriptVersion = "0.6"
+$ScriptVersion = "0.7"
 $ScriptName = $($myInvocation.MyCommand.Name).Replace('.ps1', '')
-$logfile=$logpath + $ScriptName + ".log"
-"Start $ScriptName $ScriptVersion - Executed on $($Env:COMPUTERNAME) by $($Env:USERNAME)" | Tee-Object -FilePath $logfile -Append | Write-Output
+$logfile = $logpath + $timestamp + "-" + $ScriptName + ".log"
+"Get-ADInfo.ps1 by Fabian Niesen, www.infrastrukturhelden.de - Since V0.6 License: GNU General Public License v3 (GPLv3), see notes for details" | Tee-Object -FilePath $logfile | Write-Output
+"Start $ScriptName $ScriptVersion - Executed on $($Env:COMPUTERNAME) by $($Env:USERNAME) at $(get-date -format 'HH:mm dd.MM.yyyy' )" | Tee-Object -FilePath $logfile -Append | Write-Output
 if (((Get-ComputerInfo).WindowsInstallationType) -like "Server Core") {$CoreVersion=$true} else {$CoreVersion = $false}
-"CoreVersion: $CoreVersion" | Out-file -FilePath $logfile | Write-Output
-#endregion init
-"Get-ADInfo.ps1 by Fabian Niesen, www.infrastrukturhelden.de - Since V0.6 License: GNU General Public License v3 (GPLv3), see notes for details" | Out-file -FilePath $logfile | Write-Output
-get-date -format yyyyMMdd-HHmm | Tee-Object -FilePath $logfile -Append | Write-Output
-
-
+"Is Windows Server Core: $CoreVersion" | Tee-Object -FilePath $logfile -Append | Write-Output
+$dc = Get-DC
 $ErrorActionPreference = "SilentlyContinue"
 $before = Get-Date
 Try
 {
-    Import-Module ActiveDirectory
+    Import-Module ActiveDirectory -Verbose:$false
 }
 catch
 {
@@ -78,21 +120,24 @@ catch
 #$localisDC
 $ComputerSystem = Get-WmiObject Win32_ComputerSystem
 $IsDomainController = ($ComputerSystem.DomainRole -ge 4)
+IF ($IsDomainController) { "Localhost detected as Domain Controller" | Tee-Object -FilePath $logfile -Append | Write-Output }
 # Forrest creation
-"Creation date of the domains" | Tee-Object -FilePath $logfile -Append | Write-Output
-"============================" | Tee-Object -FilePath $logfile -Append | Write-Output
-$Doms = Get-ADObject -SearchBase (Get-ADForest).PartitionsContainer -LDAPFilter "(&(objectClass=crossRef)(systemFlags=3))" -Property dnsRoot, nETBIOSName, whenCreated |Sort-Object whenCreated 
-$Doms | Format-Table dnsRoot, NETBIOSName, whenCreated -AutoSize
+" "| Tee-Object -FilePath $logfile -Append | Write-Output
+"> Creation date of the domains" | Tee-Object -FilePath $logfile -Append | Write-Output
+"===============================================================" | Tee-Object -FilePath $logfile -Append | Write-Output
+$Doms = Get-ADObject -SearchBase (Get-ADForest).PartitionsContainer -LDAPFilter "(&(objectClass=crossRef)(systemFlags=3))" -Property dnsRoot, nETBIOSName, whenCreated |Sort-Object whenCreated #| Tee-Object -FilePath $logfile -Append | Write-Output
+$Doms | Select-Object dnsRoot, NETBIOSName, whenCreated  | Tee-Object -FilePath $logfile -Append | Format-Table -AutoSize -Wrap
 
 # Fuctional Levels
-"Funtional Level and FSMO roles" | Tee-Object -FilePath $logfile -Append | Write-Output
-"==============================" | Tee-Object -FilePath $logfile -Append | Write-Output
-Get-ADForest | Format-List Name,ForestMode,SchemaMaster,DomainNamingMaster
-$Doms.Netbiosname | Get-ADDomain | Format-List Name,NetBiosName,DNSRoot,DomainMode,PDCEmulator,RIDMaster,InfrastructureMaster 
-
+" "| Tee-Object -FilePath $logfile -Append | Write-Output
+"> Funtional Level and FSMO roles" | Tee-Object -FilePath $logfile -Append | Write-Output
+"===============================================================" | Tee-Object -FilePath $logfile -Append | Write-Output
+Get-ADForest | Select-Object Name,ForestMode,SchemaMaster,DomainNamingMaster | Tee-Object -FilePath $logfile -Append | Format-List
+$Doms.Netbiosname | Get-ADDomain | Select-Object Name,NetBiosName,DNSRoot,DomainMode,PDCEmulator,RIDMaster,InfrastructureMaster | Tee-Object -FilePath $logfile -Append | Format-List
 # List DCs
-"List of all domain controllers" | Tee-Object -FilePath $logfile -Append | Write-Output
-"==============================" | Tee-Object -FilePath $logfile -Append | Write-Output
+" "| Tee-Object -FilePath $logfile -Append | Write-Output
+"> List of all domain controllers" | Tee-Object -FilePath $logfile -Append | Write-Output
+"===============================================================" | Tee-Object -FilePath $logfile -Append | Write-Output
 try 
         { 
             $Forest = [system.directoryservices.activedirectory.Forest]::GetCurrentForest()     
@@ -101,32 +146,79 @@ try
         { 
             "Cannot connect to current forest." 
         } 
-$Forest.domains | ForEach-Object {$_.DomainControllers} | Format-Table Name,OSVersion,SiteName -AutoSize -GroupBy Domain
-
-# Check DNS 
-"List of all domain controler for $DNSDomain in DNS"| Tee-Object -FilePath $logfile -Append | Write-Output
-"=================================================" | Tee-Object -FilePath $logfile -Append | Write-Output
-Resolve-DnsName -Name _ldap._tcp.dc._msdcs.contoso.local -Type SRV | Tee-Object -FilePath $logfile -Append | Write-Output
-
-# Replication connections
-"ADReplication Information" | Tee-Object -FilePath $logfile -Append | Write-Output
-"=========================" | Tee-Object -FilePath $logfile -Append | Write-Output
+$DCData = @()
+[int]$i = 0
+$dcs = $($Forest.domains).DomainControllers
+ForEach ( $DC in $DCS )
+{
+    $i++
+    Write-Progress -activity "Processing Domain Controllers: $($DC.Name)" -PercentComplete (($i / $dcs.count)*100) -Id 2
+    Write-Verbose "$DC $i of $($dcs.count)"
+    $data = New-Object PSObject
+    $GADDC = Get-ADDomainController -Identity $DC.Name 
+    $data | Add-Member -MemberType NoteProperty -Name "Name" -Value $DC.Name
+    $data | Add-Member -MemberType NoteProperty -Name "OSVersion" -Value $DC.OSVersion
+    $data | Add-Member -MemberType NoteProperty -Name "SiteName" -Value $DC.SiteName
+    $data | Add-Member -MemberType NoteProperty -Name "InboundConnections" -Value $DC.InboundConnections 
+    $data | Add-Member -MemberType NoteProperty -Name "OutboundConnections" -Value $DC.OutboundConnections 
+    $data | Add-Member -MemberType NoteProperty -Name "InvocationId" -Value $GADDC.InvocationId
+    $data | Add-Member -MemberType NoteProperty -Name "IPv4Address" -Value $GADDC.IPv4Address
+    $data | Add-Member -MemberType NoteProperty -Name "IPv6Address" -Value $GADDC.IPv6Address
+    $data | Add-Member -MemberType NoteProperty -Name "IsGlobalCatalog" -Value $GADDC.IsGlobalCatalog
+    $data | Add-Member -MemberType NoteProperty -Name "IsReadOnly" -Value $GADDC.IsReadOnly
+    Try {
+        Get-ChildItem -Path \\$DC\sysvol\$DNSDomain\ -ErrorAction Stop | Out-Null
+        $data | Add-Member -MemberType NoteProperty -Name "SysVol" -Value "Reachable"
+    } Catch {$data | Add-Member -MemberType NoteProperty -Name "SysVol" -Value "ERROR"}
+    Try {
+        Get-ChildItem -Path \\$DC\NetLogon\ -ErrorAction Stop | Out-Null
+        $data | Add-Member -MemberType NoteProperty -Name "NetLogon" -Value "Reachable"
+    } Catch {$data | Add-Member -MemberType NoteProperty -Name "NetLogon" -Value "ERROR"}
+    $DCData += $data
+}
+Write-Progress -activity "Finish processing Domain Controllers"  -Completed 100 -Id 2
+$DCData | Select-Object Name,OSVersion,SiteName,@{Name='InboundConnections'; Expression={ $_.InboundConnections -join ',' }},@{Name='OutboundConnections'; Expression={ $_.OutboundConnections -join ',' }},InvocationId,IPv4Address,IPv6Address,IsGlobalCatalog,IsReadOnly,SysVol,NetLogon | ConvertTo-Csv -Delimiter ";" -NoTypeInformation | Out-File -FilePath $($logpath + $timestamp + "-" + "DC_List.csv") -Force -NoClobber 
+IF ($CoreVersion) {$DCData | Format-List -Property * } else {$DCData | Out-GridView -Title "List of Domain Contollers"}
+"DC List is available as CSV file at $($logpath + $timestamp + "-" + "DC_List.csv")" | Tee-Object -FilePath $logfile -Append | Write-Output
+$msdcs = "_msdcs." + $DNSDomain
+" "| Tee-Object -FilePath $logfile -Append | Write-Output
+"> List of all domain controler for $DNSDomain in DNS"| Tee-Object -FilePath $logfile -Append | Write-Output
+"===============================================================" | Tee-Object -FilePath $logfile -Append | Write-Output
+Resolve-DnsName -Name _ldap._tcp.dc.$msdcs -Type SRV | Tee-Object -FilePath $logfile -Append | Write-Output
+Try 
+{ 
+    $GDSRR = Get-DnsServerResourceRecord -ZoneName $msdcs  -RRType CNAME -ComputerName $DC -ErrorAction Stop 
+    " "| Tee-Object -FilePath $logfile -Append | Write-Output
+    ">> List of all CName Records for $msdcs in DNS"| Tee-Object -FilePath $logfile -Append | Write-Output
+    "===============================================================" | Tee-Object -FilePath $logfile -Append | Write-Output
+    If ($CoreVersion -eq $true) {$GDSRR | Format-List } ELSE { $GDSRR | Out-GridView -Title "List of all CName Records for $msdcs in DNS" }
+}
+catch {"Read Access to $msdcs DNS Zone on DNS Server $dc not possible - Maybe not enough permissions or DNS RSAT missing"| Tee-Object -FilePath $logfile -Append | Write-Warning}
+#Region Replication connections
+" "| Tee-Object -FilePath $logfile -Append | Write-Output
+"> ADReplication Information" | Tee-Object -FilePath $logfile -Append | Write-Output
+"===============================================================" | Tee-Object -FilePath $logfile -Append | Write-Output
 $ADReplicationPartnerMetadata = Get-ADReplicationPartnerMetadata -Target * 
 $ADReplicationPartnerMetadata | Write-Output -FilePath $logfile -Append
-If ($CoreVersion -eq $true) {$ADReplicationPartnerMetadata } ELSE { $ADReplicationPartnerMetadata | Out-GridView }
-$ADReplicationFailure = Get-ADReplicationFailure -Target * 
-$ADReplicationFailure | Write-Output -FilePath $logfile -Append
-If ($CoreVersion -eq $true) {$ADReplicationFailure } ELSE { $ADReplicationFailure | Out-GridView }
+If ($CoreVersion -eq $true) {$ADReplicationPartnerMetadata | Format-List } ELSE { $ADReplicationPartnerMetadata | Out-GridView -Title "AD Replication Partner Metadata" }
 IF ($IsDomainController){
-    $repadmincsv = $logpath + "repadmin.csv"
+    " "| Tee-Object -FilePath $logfile -Append | Write-Output
+    ">> AD Replication Failures"| Tee-Object -FilePath $logfile -Append | Write-Output
+    "===============================================================" | Tee-Object -FilePath $logfile -Append | Write-Output
+    $ADReplicationFailure = Get-ADReplicationFailure -Target * 
+    $ADReplicationFailure | Write-Output -FilePath $logfile -Append
+    If ($CoreVersion -eq $true) {$ADReplicationFailure  | Format-List } ELSE { $ADReplicationFailure | Out-GridView -Title "AD Replication Failures"}
+    " "| Tee-Object -FilePath $logfile -Append | Write-Output
+    ">> Repadmin /showrepl"| Tee-Object -FilePath $logfile -Append | Write-Output
+    "===============================================================" | Tee-Object -FilePath $logfile -Append | Write-Output
+    $repadmincsv = $logpath + $timestamp + "-" + "repadmin.csv"
     "Export Replication data from >repadmin< to $repadmincsv"| Tee-Object -FilePath $logfile -Append | Write-Output
     repadmin /showrepl * /csv > $repadmincsv
-}
-
-# SchemaVersionen
-
+    If ($CoreVersion -eq $true) {& notepad.exe $repadmincsv} ELSE {$repadmincsv | convertfrom-csv | out-gridview}
+} Else { "For more replication information like Replication Failures, execute this script on a Domain Controller" | Tee-Object -FilePath $logfile -Append | Write-Output}
+#Endregion Replication connections
+#Region SchemaVersionen
 $SchemaVersions = @()
-
 $SchemaHashAD = @{ 
 13="Windows 2000 Server"; 
 30="Windows Server 2003"; 
@@ -142,15 +234,12 @@ $SchemaHashAD = @{
 88="Windows Server 2019 / 2022";
 91="Windows Server 2025";
 }
-
 Write-Verbose "Starting AD Schema"
 $SchemaPartition = (Get-ADRootDSE).NamingContexts | Where-Object {$_ -like "*Schema*"} 
 $SchemaVersionAD = (Get-ADObject $SchemaPartition -Property objectVersion).objectVersion 
 write-verbose "SchemaVersionAD: $SchemaVersionAD"
 $SchemaVersions += 1 | Select-Object @{name="Product";expression={"AD"}}, @{name="Schema";expression={$SchemaVersionAD}}, @{name="Version";expression={$SchemaHashAD.Item($SchemaVersionAD)}}
-
 #------------------------------------------------------------------------------
-
 $SchemaHashExchange = @{ 
 0="No Exchange Schema extension installed";
 4397="Exchange Server 2000 RTM"; 
@@ -185,7 +274,6 @@ $SchemaHashExchange = @{
 17002="Exchange 2019 CU8-CU9";
 17003="Exchange 2019 CU10-CU15 / Exchange SE RTM";
 }
-
 Write-Verbose "Starting Exchange Schema"
 $SchemaPathExchange = "CN=ms-Exch-Schema-Version-Pt,$SchemaPartition" 
 If (Test-Path "AD:$SchemaPathExchange") { 
@@ -195,11 +283,8 @@ Write-Verbose "SchemaVersionExchange: $SchemaVersionExchange"
 } Else { 
 $SchemaVersionExchange = 0 
 }
-
 $SchemaVersions += 1 | Select-Object @{name="Product";expression={"Exchange"}}, @{name="Schema";expression={$SchemaVersionExchange}}, @{name="Version";expression={$SchemaHashExchange.Item($SchemaVersionExchange)}}
-
 #------------------------------------------------------------------------------
-
 $SchemaHashLync = @{ 
 0="No Lync / OCS / S4B Schema extension installed";
 1006="LCS 2005"; 
@@ -208,7 +293,6 @@ $SchemaHashLync = @{
 1100="Lync Server 2010";
 1150="Lync Server 2013 / Skype 4 Business 2015" 
 }
-
 Write-Verbose "Starting Lync / Skype4Business Schema"
 $SchemaPathLync = "CN=ms-RTC-SIP-SchemaVersion,$SchemaPartition" 
 If (Test-Path "AD:$SchemaPathLync") { 
@@ -218,9 +302,7 @@ Write-Verbose "SchemaVersionLync: $SchemaVersionLync"
 } Else { 
 $SchemaVersionLync = 0 
 }
-
 $SchemaVersions += 1 | Select-Object @{name="Product";expression={"Lync"}}, @{name="Schema";expression={$SchemaVersionLync}}, @{name="Version";expression={$SchemaHashLync.Item($SchemaVersionLync)}}
-
 $SchemaHashSCCM = @{ 
 0="No SCCM Schema extension installed";
 "4.00.5135.0000"="SCCM 2007 Beta 1";
@@ -303,7 +385,6 @@ $SchemaHashSCCM = @{
 "5.00.9132.1000" = "SCCM 2409";
 "5.00.9135.1000" = "SCCM 2503";
 }
-
 Write-Verbose "Starting SCCM Schema"
 $SchemaPathSCCM = "CN=System Management," + (Get-ADDomain).SystemsContainer
 if (Test-Path "AD:$SchemaPathSCCM") {
@@ -319,26 +400,19 @@ IF ( $SchemaVersionSCCM -eq $null) { Write-Warning "Ops, SCCM Schema found but c
 Write-Verbose "No SCCM Schema found"
 $SchemaVersionSCCM = 0
 }
-
 Write-Verbose "Add SCCM Version to Schemaextension List"
 $SchemaVersions += 1 | Select-Object @{name="Product";expression={"SCCM"}}, @{name="Schema";expression={$SchemaVersionSCCM}}, @{name="Version";expression={$SchemaHashSCCM.Item($SchemaVersionSCCM)}}
-
-"Known current schema version of products"  | Tee-Object -FilePath $logfile -Append | Write-Output
-"========================================" | Tee-Object -FilePath $logfile -Append | Write-Output
+" "| Tee-Object -FilePath $logfile -Append | Write-Output
+"> Known current schema version of products"  | Tee-Object -FilePath $logfile -Append | Write-Output
+"===============================================================" | Tee-Object -FilePath $logfile -Append | Write-Output
 $SchemaVersions | Format-Table * -AutoSize  | Tee-Object -FilePath $logfile -Append | Write-Output
 IF ((Get-ADObject -Filter  'Name -like "ms-Mcs-AdmPwd"' -SearchBase $Schemapath -Properties Name)) { "Schema is LAPS ready" | Tee-Object -FilePath $logfile -Append | Write-Output } Else  { "Schema is NOT LAPS ready" | Tee-Object -FilePath $logfile -Append | Write-Output }
-
-
+#Endregion SchemaVersionen
+"To test full network connectivity to Domain Controllers checkout Check-Network.ps1: https://github.com/InfrastructureHeroes/Scipts/blob/master/Network/Check-Network.ps1"| Tee-Object -FilePath $logfile -Append | Write-Output
 $after = Get-Date
-
 $time = $after - $before
-$buildTime = "`nBuild finished in ";
-if ($time.Minutes -gt 0)
-{
-    $buildTime += "{0} minute(s) " -f $time.Minutes;
-}
-
+$buildTime = "`nScript finished in ";
+if ($time.Minutes -gt 0) { $buildTime += "{0} minute(s) " -f $time.Minutes; }
 $buildTime += "{0} second(s)" -f $time.Seconds;
 "$buildTime"
-$VerbosePreference = $oldverbose 
-$logfile | Write-Host
+"Logfile written to: $logfile" | Write-Host
