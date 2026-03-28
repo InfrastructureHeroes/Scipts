@@ -1,5 +1,5 @@
-﻿##requires -version 5.1
-##requires -modules activedirectory
+﻿#requires -version 5.1
+#requires -modules activedirectory
 
 <#
 	.SYNOPSIS
@@ -37,7 +37,7 @@
                     See https://www.gnu.org/licenses/gpl-3.0.html for the full license text.
 		
 		Version    : 0.7
-		History    : 0.7  FN  28.03.2026 Add mor features to support DC replacement article, optimization for core server
+		History    : 0.7  FN  28.03.2026 Add more features to support DC replacement article, optimization for core server
                     0.6   FN  26.03.2026 Update Schema versions, change License, add replication connections
                     0.5   FN  19.02.2021  
                     0.4   FN  15.07.2020  Update Schemas, integrate LAPS detection
