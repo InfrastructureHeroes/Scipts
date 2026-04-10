@@ -39,6 +39,12 @@ Sie stellen **keine 1:1-Vorlagen** dar und müssen vor einem produktiven Einsatz
 
 - **Windows 11 24H2 – IT-Grundschutz (Darksite / eingeschränkte Cloud-Kommunikation)**  
   → [`Win11-24H2-IT-Grundschutz-Darksite.md`](./Win11-24H2-IT-Grundschutz-Darksite.md)
+- **Windows 11 – Copilot deaktivieren**  
+  → [`Win11-Disable-Copilot.md`](./Win11-Disable-Copilot.md)
+- **Microsoft Office – Copilot deaktivieren**  
+  → [`MSOffice-Deactivate-Copilot.md`](./MSOffice-Deactivate-Copilot.md)
+- **Visual Studio – Copilot deaktivieren**  
+  → [`VisualStudio-Deactivate-Copilot.md`](./VisualStudio-Deactivate-Copilot.md)
 
 Weitere Templates, Varianten und Versionen werden fortlaufend ergänzt.
 
@@ -87,6 +93,12 @@ They are **not** 1:1 templates and must always be evaluated, tested, and adapted
 
 - **Windows 11 24H2 – IT Basic Protection (Darksite / restricted cloud communication)**  
   → [`Win11-24H2-IT-Grundschutz-Darksite.md`](./Win11-24H2-IT-Grundschutz-Darksite.md)
+- **Windows 11 – Disable Copilot**  
+  → [`Win11-Disable-Copilot.md`](./Win11-Disable-Copilot.md)
+- **Microsoft Office – Disable Copilot**  
+  → [`MSOffice-Deactivate-Copilot.md`](./MSOffice-Deactivate-Copilot.md)
+- **Visual Studio – Disable Copilot**  
+  → [`VisualStudio-Deactivate-Copilot.md`](./VisualStudio-Deactivate-Copilot.md)
 
 ---
 
@@ -132,6 +144,12 @@ Las GPO proporcionadas son **configuraciones de referencia y ejemplo**.
 
 - **Windows 11 24H2 – IT-Grundschutz (Darksite / comunicación limitada con la nube)**  
   → [`Win11-24H2-IT-Grundschutz-Darksite.md`](./Win11-24H2-IT-Grundschutz-Darksite.md)
+- **Windows 11 – Desactivar Copilot**  
+  → [`Win11-Disable-Copilot.md`](./Win11-Disable-Copilot.md)
+- **Microsoft Office – Desactivar Copilot**  
+  → [`MSOffice-Deactivate-Copilot.md`](./MSOffice-Deactivate-Copilot.md)
+- **Visual Studio – Desactivar Copilot**  
+  → [`VisualStudio-Deactivate-Copilot.md`](./VisualStudio-Deactivate-Copilot.md)
 
 ---
 
@@ -177,6 +195,12 @@ Elles **ne constituent pas** des modèles 1:1 et doivent être évaluées, test�
 
 - **Windows 11 24H2 – IT-Grundschutz (Darksite / communication cloud restreinte)**  
   → [`Win11-24H2-IT-Grundschutz-Darksite.md`](./Win11-24H2-IT-Grundschutz-Darksite.md)
+- **Windows 11 – Désactiver Copilot**  
+  → [`Win11-Disable-Copilot.md`](./Win11-Disable-Copilot.md)
+- **Microsoft Office – Désactiver Copilot**  
+  → [`MSOffice-Deactivate-Copilot.md`](./MSOffice-Deactivate-Copilot.md)
+- **Visual Studio – Désactiver Copilot**  
+  → [`VisualStudio-Deactivate-Copilot.md`](./VisualStudio-Deactivate-Copilot.md)
 
 ---
 
