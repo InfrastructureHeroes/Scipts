@@ -26,6 +26,7 @@ Example Group Policy Object (GPO) for the article
 published on **InfrastructureHeroes.org**. (To Be Translated...)
 
 German Article: [Windows 11 – Kommunikation mit Clouddiensten gemäß IT-Grundschutz steuern](https://www.infrastrukturhelden.de/microsoft-infrastruktur/windows-kommunikation-mit-clouddiensten-gemaess-it-grundschutz-steuern/)
+English Article: [Windows – Control Communication with Cloud Services in Accordance with German IT Baseline Protection](https://www.infrastructureheroes.org/microsoft-infrastructure/active-directory/windows-control-communication-with-cloud-services-in-accordance-with-german-it-baseline-protection/)
 
 **Important notes**
 
@@ -66,6 +67,7 @@ www.InfrastructureHeroes.org
 
 Beispiel-Gruppenrichtlinie (GPO) zum Artikel  
 [Windows 11 – Kommunikation mit Clouddiensten gemäß IT-Grundschutz steuern](https://www.infrastrukturhelden.de/microsoft-infrastruktur/windows-kommunikation-mit-clouddiensten-gemaess-it-grundschutz-steuern/)
+Englische Übersetzung: [Windows – Control Communication with Cloud Services in Accordance with German IT Baseline Protection](https://www.infrastructureheroes.org/microsoft-infrastructure/active-directory/windows-control-communication-with-cloud-services-in-accordance-with-german-it-baseline-protection/)
 
 **Wichtige Hinweise**
 
@@ -103,7 +105,7 @@ www.InfrastructureHeroes.org
 **Descripción**
 
 Objeto de directiva de grupo (GPO) de ejemplo para el artículo  
-*“Windows 11 – Controlar la comunicación con servicios en la nube conforme a la Protección Básica de TI alemana”*  
+[Windows – Control Communication with Cloud Services in Accordance with German IT Baseline Protection](https://www.infrastructureheroes.org/microsoft-infrastructure/active-directory/windows-control-communication-with-cloud-services-in-accordance-with-german-it-baseline-protection/)
 publicado en **InfrastructureHeroes.org**.
 
 **Notas importantes**
@@ -137,7 +139,7 @@ www.InfrastructureHeroes.org
 **Description**
 
 Objet de stratégie de groupe (GPO) d’exemple pour l’article  
-*« Windows 11 – Contrôler la communication avec les services cloud conformément à la protection de base IT allemande »*  
+[Windows – Control Communication with Cloud Services in Accordance with German IT Baseline Protection](https://www.infrastructureheroes.org/microsoft-infrastructure/active-directory/windows-control-communication-with-cloud-services-in-accordance-with-german-it-baseline-protection/)
 publié sur **InfrastructureHeroes.org**.
 
 **Remarques importantes**

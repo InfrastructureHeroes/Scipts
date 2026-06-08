@@ -2,10 +2,12 @@
 
 ## Table of Contents
 
-- [English](#english)
-- [Deutsch](#deutsch)
-- [Español](#español)
-- [Français](#français)
+- [README](#readme)
+  - [Table of Contents](#table-of-contents)
+  - [English](#english)
+  - [Deutsch](#deutsch)
+  - [Español](#español)
+  - [Français](#français)
 
 ---
 
@@ -20,8 +22,9 @@
 **Description**
 
 Example Group Policy Object (GPO) for the article  
-*“Windows 11 – Disable Microsoft Copilot and AI features”*  
-published on **InfrastructureHeroes.org**.
+
+  * [EN: Windows 11 – Disable Microsoft Copilot and AI Features](https://www.infrastructureheroes.org/microsoft-infrastructure/windows-11-disable-microsoft-copilot-and-ai-features/)
+  * [DE: Windows 11 – Microsoft Copilot und KI-Funktionen deaktivieren](https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/gruppenrichtlinen/windows-11-microsoft-copilot-und-ki-funktionen-deaktivieren/)
 
 **Important notes**
 
@@ -62,8 +65,9 @@ www.InfrastructureHeroes.org
 **Beschreibung**
 
 Beispiel-Gruppenrichtlinie (GPO) zum Artikel  
-*„Windows 11 – Microsoft Copilot und KI-Funktionen deaktivieren“*  
-auf **InfrastrukturHelden.de**.
+
+  * [EN: Windows 11 – Disable Microsoft Copilot and AI Features](https://www.infrastructureheroes.org/microsoft-infrastructure/windows-11-disable-microsoft-copilot-and-ai-features/)
+  * [DE: Windows 11 – Microsoft Copilot und KI-Funktionen deaktivieren](https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/gruppenrichtlinen/windows-11-microsoft-copilot-und-ki-funktionen-deaktivieren/)
 
 **Wichtige Hinweise**
 
@@ -102,8 +106,9 @@ www.InfrastructureHeroes.org
 **Descripción**
 
 Objeto de directiva de grupo (GPO) de ejemplo para el artículo  
-*“Windows 11 – Desactivar Microsoft Copilot y las funciones de IA”*  
-publicado en **InfrastructureHeroes.org**.
+
+  * [EN: Windows 11 – Disable Microsoft Copilot and AI Features](https://www.infrastructureheroes.org/microsoft-infrastructure/windows-11-disable-microsoft-copilot-and-ai-features/)
+  * [DE: Windows 11 – Microsoft Copilot und KI-Funktionen deaktivieren](https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/gruppenrichtlinen/windows-11-microsoft-copilot-und-ki-funktionen-deaktivieren/)
 
 **Notas importantes**
 
@@ -138,8 +143,10 @@ www.InfrastructureHeroes.org
 **Description**
 
 Objet de stratégie de groupe (GPO) d’exemple pour l’article  
-*« Windows 11 – Désactiver Microsoft Copilot et les fonctions d’IA »*  
-publié sur **InfrastructureHeroes.org**.
+
+  * [EN: Windows 11 – Disable Microsoft Copilot and AI Features](https://www.infrastructureheroes.org/microsoft-infrastructure/windows-11-disable-microsoft-copilot-and-ai-features/)
+  * [DE: Windows 11 – Microsoft Copilot und KI-Funktionen deaktivieren](https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/gruppenrichtlinen/windows-11-microsoft-copilot-und-ki-funktionen-deaktivieren/)
+
 
 **Remarques importantes**
 
