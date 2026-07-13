@@ -34,6 +34,10 @@
         Acceptable values: 0 (disable), 1 (enable)
         Default: 0
 
+    .PARAMETER YesIknowtheRisksAndItIsMyOwnFault
+        A switch parameter that, when set, indicates that the user acknowledges the risks associated with running.
+        If this switch is set, the script will skip the disclaimer prompt and proceed with execution.
+
     .EXAMPLE
         .\set-BSI-TR-02102-2.ps1 -DCgpoName "BSI-TR-02102-2" -support2026 1
         This example creates or updates a GPO named "BSI-TR-02102-2" and enables support for cryptographic settings recommended until 2026.
@@ -53,8 +57,10 @@
         This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
         MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
         See https://www.gnu.org/licenses/gpl-3.0.html for the full license text.
-		Version    : 0.2
+		Version    : 0.3
         History    : 
+                    
+                    0.3   FN  13.07.2026  Add Parameter to supress confirmation prompt for automated execution
                     0.2   FN  10.06.2025  Bugfix for missing Type parameter in Set-GPRegistryValue 
                     0.1   FN  26.04.2025  initial version
                     
@@ -68,7 +74,8 @@
 [cmdletbinding()]
 Param(
 [Parameter(Mandatory=$false)][string]$DCgpoName = 'BSI-TR-02102-2',
-[Parameter(Mandatory=$false)][ValidateSet(0, 1)][int]$support2026 = 1 
+[Parameter(Mandatory=$false)][ValidateSet(0, 1)][int]$support2026 = 1,
+[Parameter(Mandatory=$false)][switch]$YesIknowtheRisksAndItIsMyOwnFault
 )
 Write-Host "DISCLAIMER:" -ForegroundColor Yellow
 Write-Host "This script is provided 'as is' without any warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement." -ForegroundColor Yellow
@@ -78,8 +85,12 @@ Write-Host "It is strongly recommended to test this script in a controlled envir
 Write-Host "Ensure you have proper backups and a rollback plan in place before applying any changes." -ForegroundColor Yellow
 Write-Host "Verify that your Domain Controller, Kerberos and all other Windows certificates are compatible with the settings applied by this script." -ForegroundColor Yellow
 Write-Host "Compatibility with third-party systems, applications, or devices is not guaranteed and must be verified by the user." -ForegroundColor Yellow
-$consent = Read-Host "Do you agree to proceed? Type 'Y' to continue or any other key to exit"
-if ($consent -ne 'Y') { Write-Host "You did not agree to the disclaimer. Exiting script." -ForegroundColor Red ; exit }
+IF (!($YesIknowtheRisksAndItIsMyOwnFault)) {
+    $consent = Read-Host "Do you agree to proceed? Type 'Y' to continue or any other key to exit"
+    if ($consent -ne 'Y') { Write-Host "You did not agree to the disclaimer. Exiting script." -ForegroundColor Red ; exit }
+} Else {
+    Write-Host "User has acknowledged the risks and will proceed with the script." -ForegroundColor Green
+}
 
 Write-Output "Create GPO for BSI-TR-02102-2: $DCgpoName"
 Try { New-GPO -Name $DCgpoName -Comment 'Please check https:// for more information' -ErrorAction Stop } Catch { Write-Host 'GPO already exists' -ForegroundColor Yellow }
@@ -163,15 +174,15 @@ IF ( $support2026 -eq 1) {
 } 
 Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\Software\Policies\Microsoft\Cryptography\Configuration\SSL\00010002' -Type String -ValueName "Functions" -Value $Chiphersuites | Out-Null
 
-#ECC Curven
+# ECC Curven
 $ECCCurves = "brainpoolP512r1","brainpoolP384r1","brainpoolP256r1","curve25519"
 Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\Software\Policies\Microsoft\Cryptography\Configuration\SSL\00010002' -ValueName 'EccCurves' -Value $ECCCurves -Type MultiString | Out-Null
 
-#Schlüssellänge für Diffie-Hellman und RSA (BSI-TR-02102-2 Chapter 3.6.1)
+# Schlüssellänge for Diffie-Hellman and RSA (BSI-TR-02102-2 Chapter 3.6.1)
 Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\KeyExchangeAlgorithms\Diffie-Hellman' -ValueName ClientMinKeyBitLength -Value 0xBB8 -Type DWord | Out-Null
 Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\KeyExchangeAlgorithms\PKCS' -ValueName ClientMinKeyBitLength -Value 0xBB8 -Type DWord | Out-Null
 
-#Stron Crypto für .Net
+# Strong Crypto for .Net
 Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SOFTWARE\Microsoft\.NetFramework\v4.0.30319' -Valuename 'SchUseStrongCrypto' -value 1 -Type DWord  | Out-Null
 Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SOFTWARE\WOW6432Node\Microsoft\.NetFramework\v4.0.30319' -Valuename 'SchUseStrongCrypto' -value 1 -Type DWord | Out-Null 
 Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SOFTWARE\Microsoft\.NetFramework\v4.0.30319' -Valuename 'SystemDefaultTlsVersions' -value 1 -Type DWord  | Out-Null
@@ -182,11 +193,11 @@ Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SOFTWARE\Microsoft\.NetFramework
 Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SOFTWARE\WOW6432Node\Microsoft\.NetFramework\v2.0.50727' -Valuename 'SystemDefaultTlsVersions' -value 1 -Type DWord | Out-Null
 
 
-#WinRm
+# WinRm
 Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp' -ValueName DefaultSecureProtocols -Value 0x2800 -Type DWord | Out-Null
 Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp' -ValueName DefaultSecureProtocols -Value 0x2800 -Type DWord | Out-Null
 
-#WinINET
+# WinINET
 Set-GPRegistryValue -Name $DCgpoName -Key 'HKLM\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\Internet Settings' -ValueName SecureProtocols -Value 0x2800 -Type DWord | Out-Null
 
 Write-Output "GPO $DCgpoName created and settings applied."
