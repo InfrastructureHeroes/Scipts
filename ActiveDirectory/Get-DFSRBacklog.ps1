@@ -183,8 +183,9 @@ Try {
                             $Direction="outbound"
                         }
                     
-                        $BLCommand = "dfsrdiag Backlog /RGName:'" + $RGName + "' /RFName:'" + $RFName + "' /SendingMember:" + $SendingMember + " /ReceivingMember:" + $ReceivingMember
-                        $Backlog = Invoke-Expression -Command $BLCommand
+                        $BLArgs = @("Backlog", "/RGName:$RGName", "/RFName:$RFName", "/SendingMember:$SendingMember", "/ReceivingMember:$ReceivingMember")
+                        Write-Verbose "dfsrdiag $BLArgs"
+                        $Backlog = & dfsrdiag.exe @BLArgs
                     
                         $BackLogFilecount = 0
                         foreach ($item in $Backlog)

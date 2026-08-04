@@ -135,7 +135,7 @@ Param(
     [Parameter(Position=26)]
     [switch]$SmtpAuth,
     [Parameter(Position=27)]
-    [string]$smtppw = "",
+    [System.Security.SecureString]$smtppw,
     [Parameter(Position=28)]
     [string]$smtpuser = "",
     [Parameter(Position=29)]
@@ -185,7 +185,10 @@ IF ($Default) { $Preview = $true; $Itanium = $true ; $LanguageFeatureOnDemand = 
 		$SmtpMessage.IsBodyHTML = $BodyAsHtml
 		$SmtpClient = New-Object System.Net.Mail.SmtpClient $SmtpServer 
         IF ($TLS) { $SmtpClient.EnableSsl = $true }
-        IF ($SmtpAuth) { $SmtpClient.Credentials = New-Object System.Net.NetworkCredential($smtpuser, $smtppw) }
+        IF ($SmtpAuth) {
+            IF (-not $smtppw) { $smtppw = Read-Host -Prompt "Password for SMTP user $smtpuser" -AsSecureString }
+            $SmtpClient.Credentials = New-Object System.Net.NetworkCredential($smtpuser, $smtppw)
+        }
 		$SmtpClient.Send($SmtpMessage)
 		If($? -eq $False){Write-Warning "$($Error[0].Exception.Message) | $($Error[0].Exception.GetBaseException().Message)"}
 		$SmtpMessage.Dispose()

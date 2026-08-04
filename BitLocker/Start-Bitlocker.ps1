@@ -1,4 +1,7 @@
-$Pin = ConvertTo-SecureString "123456" -AsPlainText -Force
+Param(
+    [System.Security.SecureString]$Pin
+)
+IF (-not $Pin) { $Pin = Read-Host -Prompt "BitLocker startup PIN" -AsSecureString }
 Add-BitlockerKeyProtector -MountPoint $env:SystemDrive -RecoveryPasswordProtector
 $BLV = Get-BitLockerVolume -MountPoint "C:"Backup-BitLockerKeyProtector -MountPoint "C:" -KeyProtectorId $BLV.KeyProtector[0].KeyProtectorId
 Enable-BitLocker -MountPoint C: -TpmAndPinProtector -Pin $Pin -SkipHardwareTest -UsedSpaceOnly

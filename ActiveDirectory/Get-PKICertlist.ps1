@@ -2,8 +2,10 @@
     [switch]$revoked,
     [switch]$denied,
     [string]$CAserver,
-    [String]$SeachFilter
+    [String]$SeachFilter = ""
 )
+
+$CertUtilScriptBlock = { param ([string[]]$CertUtilArgs) & certutil.exe @CertUtilArgs }
 
 IF (-not $CAserver){
     [String]$LDAPDOM = (Get-ADDomain).DistinguishedName
@@ -12,9 +14,9 @@ IF (-not $CAserver){
 $DispositionFilters = @()
 IF ($revoked) {$DispositionFilters += "Revoked"}
 IF ($denied) {$DispositionFilters += "Denied"}
-$certutilCommand = "certutil -out 'Request ID,Issued Common Name,Certificate Template,Request Disposition,Certificate Expiration Date,Certificate Effective Date,Revocation Date,Issued Email Address,Requester Name,Caller Name,Public Key Length,Serial Number' -view csv"
-Write-Verbose $certutilCommand
-$certificates = Invoke-Command -ComputerName $CAserver -ScriptBlock { param ($cmd) Invoke-Expression $cmd } -ArgumentList $certutilCommand 
+$certutilArgs = @("-out", "Request ID,Issued Common Name,Certificate Template,Request Disposition,Certificate Expiration Date,Certificate Effective Date,Revocation Date,Issued Email Address,Requester Name,Caller Name,Public Key Length,Serial Number", "-view", "csv")
+Write-Verbose "certutil $certutilArgs"
+$certificates = Invoke-Command -ComputerName $CAserver -ScriptBlock $CertUtilScriptBlock -ArgumentList (,$certutilArgs) 
 Write-progress -Activity "Analysiere Zertifikate" -Status "Verbinde zu $CAserver" -id 1 -PercentComplete 0
 $i = 0
 $CAcerts = @()
@@ -22,8 +24,8 @@ $CAcerts = $certificates[1..($certificates.Length - 1)].Replace("EMPTY","") | Fo
     $i++
     Write-Progress -activity "Analysiere Zertifikate " -Status "$i von $($certificates.Length - 1)" -PercentComplete (($i / $certificates.Length *100)) -id 1
     $fields = $_ -split '","'
-    $SANCommand = 'certutil -restrict "RequestId = ' +$fields[0].Replace('"','') +'" -view '
-    Try {$SAN = (Invoke-Command -ComputerName $CAserver -ScriptBlock { param ($cmd) Invoke-Expression $cmd } -ArgumentList $SANCommand | Where-Object { $_ -like "*DNS Name*" -or $_ -like "*IP Address*" }).trim().Replace("DNS Name=","").Replace("IP Address=", "") -join ","}
+    $SANArgs = @("-restrict", "RequestId = $([int]$fields[0].Replace('"',''))", "-view")
+    Try {$SAN = (Invoke-Command -ComputerName $CAserver -ScriptBlock $CertUtilScriptBlock -ArgumentList (,$SANArgs) | Where-Object { $_ -like "*DNS Name*" -or $_ -like "*IP Address*" }).trim().Replace("DNS Name=","").Replace("IP Address=", "") -join ","}
     Catch {$SAN = $null}
     [PSCustomObject]@{
         RequestID              = [int]$fields[0].Replace('"','')
@@ -87,9 +89,11 @@ if ($proceed -eq "j") {
             4 = Zertifikat wurde ersetzt (Superseded)
             5 = System wurde deprovisioniert
             Welcher Grund soll angegeben werden: [1|4|5] "
-            $revokecmd = "certutil.exe -revoke $($cert.SerialNumber) $reason"
-            Write-Output "CMD: $revokecmd"
-            Try {Invoke-Command -ComputerName $CAserver -ScriptBlock { param ($cmd) Invoke-Expression $cmd } -ArgumentList $revokecmd }
+            IF ($cert.SerialNumber -notmatch '^[0-9a-fA-F]+$') { Write-Warning "Ungültige Seriennummer, überspringe: $($cert.SerialNumber)" ; continue }
+            IF ($reason -notin @(1,4,5)) { Write-Warning "Ungültiger Grund $reason, überspringe Zertifikat" ; continue }
+            $revokeArgs = @("-revoke", $cert.SerialNumber, "$reason")
+            Write-Output "CMD: certutil $revokeArgs"
+            Try {Invoke-Command -ComputerName $CAserver -ScriptBlock $CertUtilScriptBlock -ArgumentList (,$revokeArgs) }
             Catch {$SAN = $null}
         }
 

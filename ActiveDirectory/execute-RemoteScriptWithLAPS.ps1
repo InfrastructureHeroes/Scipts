@@ -37,7 +37,7 @@ https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/powe
 
 Param(
 [Parameter(Mandatory=$true)][string]$computer, #Computer to which the connection is established
-[string]$ScriptBlock, 
+[scriptblock]$ScriptBlock, 
 [string]$admin = "Administrator"
 )
 #Imports the required module 
@@ -52,9 +52,9 @@ IF ( $($password).count -gt 0 ) {
     #Create the credentials
     $FQDN= $computer + "."+ $(Get-ADDomain).DNSRoot
     #To avoid a certificate error the FQDN must be used to establish the connection
-    IF ($ScriptBlock -ne "")
+    IF ($null -ne $ScriptBlock)
     {
-        Invoke-Command -ComputerName $FQDN -ScriptBlock { $ScriptBlock } -credential $cred -UseSSL
+        Invoke-Command -ComputerName $FQDN -ScriptBlock $ScriptBlock -credential $cred -UseSSL
     }
     Else 
     { 
