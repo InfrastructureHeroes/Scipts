@@ -65,8 +65,9 @@
   Disclaimer :  This script is provided "as is" without warranty. Use at your own risk.
                 The author assumes no responsibility for any damage or data loss caused by this script.
                 Test thoroughly in a controlled environment before deploying to production.
-  Version    :  1.8
-  History    :  1.8 FN 03.12.2025  change to MIT License, housekeeping Header, add Edge Beta / Dev channel to Preview filter
+  Version    :  1.9
+  History    :  1.9 FN 04.08.2026  Use shared helper functions from Modules\IH.Common
+                1.8 FN 03.12.2025  change to MIT License, housekeeping Header, add Edge Beta / Dev channel to Preview filter
                 1.7  Add "Dev" to filter for -Preview (#3), Replace powershell alias with full commands
                 1.6  Add WSUS internal Cleanup Trigger
                 1.5  Add ARM64, LTSB2015, LTSB2016, LTSC2019 to script
@@ -150,7 +151,7 @@ Param(
     [switch]$load
 )
 
-$scriptversion = "1.8"
+$scriptversion = "1.9"
 Write-Output "Starting decline-WSUSUpdatesTypes.ps1 version $scriptversion"
 $conffile = "./decline-WSUSUpdatesType.clixml"
 
@@ -174,24 +175,25 @@ IF ($load)
         }
     }
 
+#Shared helper functions (Send-EmailStatus, Get-HtmlReportStyle) live in Modules\IH.Common
+Import-Module (Join-Path $PSScriptRoot "..\Modules\IH.Common\IH.Common.psd1") -Force -ErrorAction Stop
+
 $TestBody = "<h1>Testmail from $WsusServer</h1><BR>Send over: $SmtpServer"
-$Style = "<Style>BODY{font-size:12px;font-family:verdana,sans-serif;color:navy;font-weight:normal;}" + "TABLE{border-width:1px;cellpadding=10;border-style:solid;border-color:navy;border-collapse:collapse;}" + "TH{font-size:12px;border-width:1px;padding:10px;border-style:solid;border-color:navy;}" + "TD{font-size:10px;border-width:1px;padding:10px;border-style:solid;border-color:navy;}</Style>"
+$Style = Get-HtmlReportStyle
 $Table = @{Name="Title";Expression={[string]$_.Title}},@{Name="KB Article";Expression={[string]::join(' | ',$_.KnowledgebaseArticles[0])}},@{Name="Classification";Expression={[string]$_.UpdateClassificationTitle}},@{Name="Product Title";Expression={[string]::join(' | ',$_.ProductTitles[0])}},@{Name="MsrcSeverity";Expression={[string]::join(' | ',$_.MsrcSeverity)}},@{Name="CreationDate";Expression={[string]::join(' | ',$_.CreationDate)}},@{Name="Product Family";Expression={[string]::join(' | ',$_.ProductFamilyTitles[0])}},@{Name="Kind of Patch";Expression={[string]::join(' | ',$_.PatchType)}}
 
 IF ($Default) { $Preview = $true; $Itanium = $true ; $LanguageFeatureOnDemand = $true}
-	
-    Function SendEmailStatus($From, $To, $Subject, $SmtpServer, $BodyAsHtml, $Body)
-	{	$SmtpMessage = New-Object System.Net.Mail.MailMessage $From, $To, $Subject, $Body
-		$SmtpMessage.IsBodyHTML = $BodyAsHtml
-		$SmtpClient = New-Object System.Net.Mail.SmtpClient $SmtpServer 
-        IF ($TLS) { $SmtpClient.EnableSsl = $true }
-        IF ($SmtpAuth) { $SmtpClient.Credentials = New-Object System.Net.NetworkCredential($smtpuser, $smtppw) }
-		$SmtpClient.Send($SmtpMessage)
-		If($? -eq $False){Write-Warning "$($Error[0].Exception.Message) | $($Error[0].Exception.GetBaseException().Message)"}
-		$SmtpMessage.Dispose()
-		Remove-Variable SmtpClient
-		Remove-Variable SmtpMessage
-	}
+
+# Common parameters for all mails sent by this script
+$MailParam = @{
+    From       = $From
+    To         = $To
+    Subject    = $Subject
+    SmtpServer = $SmtpServer
+    BodyAsHtml = $true
+}
+IF ($TLS) { $MailParam.UseTls = $true }
+IF ($SmtpAuth) { $MailParam.Credential = New-SmtpCredential -UserName $smtpuser -Password $smtppw }
 $Updates = $null
 [reflection.assembly]::LoadWithPartialName("Microsoft.UpdateServices.Administration") | out-null
 $WsusServerAdminProxy = [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer($WsusServer,$UseSSL,$PortNumber);
@@ -477,5 +479,5 @@ IF ($ListNeeded -eq $true)
     {"No Needed Updates found to list. Come back next 'Patch Tuesday' and you may have better luck."}
 }
 
-If($TestMail){SendEmailStatus -From $From -To $To -Subject $Subject -SmtpServer $SmtpServer -BodyAsHtml $True -Body $TestBody }
-If($EmailLog){SendEmailStatus -From $From -To $To -Subject $Subject -SmtpServer $SmtpServer -BodyAsHtml $True -Body $Body}
+If($TestMail){Send-EmailStatus @MailParam -Body $TestBody }
+If($EmailLog){Send-EmailStatus @MailParam -Body $Body}

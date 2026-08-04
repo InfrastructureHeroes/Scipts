@@ -49,8 +49,9 @@
                     The author assumes no responsibility for any damage or data loss caused by this script.
                     Test thoroughly in a controlled environment before deploying to production.
     GitHub     :    https://github.com/InfrastructureHeroes/Scipts
-    Version    :    0.6 FN 17.12.2025 Change DC detection to DNS query, smaller bugfixes
+    Version    :    0.7 FN 04.08.2026 Use shared helper functions from Modules\IH.Common
     History    : 	
+                    0.6 FN 17.12.2025 Change DC detection to DNS query, smaller bugfixes
                     0.5 FN 03.12.2025 Change Errorhandling and reporting. Add WSUS and Terminal Server License Server Check
                     0.4 FN 30.09.2024 Add KMS detection, add some ports
                     0.3 FN 12.09.2024 Add some Ports
@@ -70,26 +71,8 @@ param (
     [string]$logpath = "C:\Windows\System32\LogFiles"
 )
 #region Helper Functions
-function New-CheckResult {
-	<#
-	.SYNOPSIS
-		Creates a standardized check result object
-	.PARAMETER Name
-		Name of the check
-	.PARAMETER Status
-		Status of the check (OK, Warning, Failed)
-	.PARAMETER Message
-		Detailed message about the check result
-	#>
-	param($Name, $Status, $Message)
-	[PSCustomObject]@{
-		Check   = $Name
-		Status  = $Status
-		Message = $Message
-		Time    = (Get-Date)
-	}
-}
-
+#Shared helper functions (New-CheckResult) live in Modules\IH.Common
+Import-Module (Join-Path $PSScriptRoot "..\Modules\IH.Common\IH.Common.psd1") -Force -ErrorAction Stop
 #endregion Helper Functions
 
 #region EVOTec Test LDAP
@@ -253,7 +236,7 @@ Function Test-UDP {
     }
     return $Success
 }
-$ScriptVersion = "0.6"
+$ScriptVersion = "0.7"
 if ($Host.Name -eq "ServerRemoteHost") { Write-Error -Exception "RemoteShell detected" -Message "Please use local PowerShell, remote PowerShell Sessions are not supported" ; break }
 Set-Location $PSScriptRoot
 $ScriptName = $myInvocation.MyCommand.Name

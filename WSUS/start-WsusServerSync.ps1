@@ -18,6 +18,8 @@ Begin
 	{	throw "Loading Microsoft.UpdateServices.Administration failed. Are you running this on a machine with the WSUS 3.0 SP2 Administration Console installed? http://technet.microsoft.com/en-us/library/dd939875(v=ws.10).aspx"}
 
 	$ErrorActionPreference = "SilentlyContinue"
+	#Shared helper functions (Send-EmailStatus, Get-HtmlReportStyle, Start-Wait) live in Modules\IH.Common
+	Import-Module (Join-Path $PSScriptRoot "..\Modules\IH.Common\IH.Common.psd1") -Force -ErrorAction Stop
 	If($EmailLog)
 	{	If($Recursive)
 		{	$Table = @{Name="Parent Wsus Server";expression={$_.ParentWsusServer}},@{Name="Wsus Server";expression={$_.WsusServer}},@{Name="Port Number";expression={$_.PortNumber}},@{Name="Using SSL";expression={$_.UsingSSL}},@{Name="Version";expression={$_.Version}},@{Name="Start";expression={$_.Start}},@{Name="Finish";expression={$_.Finish}}
@@ -28,20 +30,7 @@ Begin
 		If($TrialRun -eq $False)
 		{	$Table += @{Name="Categories";expression={$_.Categories}},@{Name="Updates";expression={$_.Updates}},@{Name="Approvals";expression={$_.Approvals}},@{Name="LastSyncResult";expression={$_.LastSyncResult}}
 		}
-		$Style = "<Style>BODY{font-size:12px;font-family:verdana,sans-serif;color:navy;font-weight:normal;}" + `
-		"TABLE{border-width:1px;cellpadding=10;border-style:solid;border-color:navy;border-collapse:collapse;}" + `
-		"TH{font-size:12px;border-width:1px;padding:10px;border-style:solid;border-color:navy;}" + `
-		"TD{font-size:10px;border-width:1px;padding:10px;border-style:solid;border-color:navy;}</Style>"
-		Function SendEmailStatus($From, $To, $Subject, $SmtpServer, $BodyAsHtml, $Body)
-		{	$SmtpMessage = New-Object System.Net.Mail.MailMessage $From, $To, $Subject, $Body
-			$SmtpMessage.IsBodyHTML = $BodyAsHtml
-			$SmtpClient = New-Object System.Net.Mail.SmtpClient $SmtpServer
-			$SmtpClient.Send($SmtpMessage)
-			If($? -eq $False){Write-Warning "$($Error[0].Exception.Message) | $($Error[0].Exception.GetBaseException().Message)"}
-			$SmtpMessage.Dispose()
-			rv SmtpClient
-			rv SmtpMessage
-		}
+		$Style = Get-HtmlReportStyle
 	}
 
 	function Get-HKLMValue
@@ -64,22 +53,6 @@ Begin
 		}
 	}
 
-	function Start-Pause
-	{	Param(
-			[int]$SleepTime = 10,
-			[int]$ID = 1,
-			[int]$ParentID,
-			[string]$Activity = "Just taking a quick breather after all that activity..."
-		)
-		for($x = 1 ; $x -le $SleepTime; $x++)
-		{	If(!$ParentID)
-			{	Write-progress -Activity $Activity -Status "Seconds Remaining: $($SleepTime-$x)" -PercentComplete ($x/$SleepTime*100) -ID $ID}
-			Else	
-			{	Write-progress -Activity $Activity -Status "Seconds Remaining: $($SleepTime-$x)" -PercentComplete ($x/$SleepTime*100) -ID $ID -ParentId $ParentID}
-			Sleep 1
-		}
-		Write-progress -Activity $Activity -Status "Done sleeping..." -Completed -ID $ID
-	}
 
 	Function Sync-WsusServer
 	{	Param(
@@ -151,7 +124,7 @@ Begin
 				$Object.Finish = (get-date).DateTime
 				$Object
 				If($EmailLog){$script:Output += $Object}
-				If($Recursive -And $TrialRun -eq $False){Start-Pause -Activity "Processed $($script:ProcessedServers.Count) server(s). The script is pausing for $SleepTime seconds starting at $((get-date).DateTime)." -SleepTime $SleepTime -ID 3 -ParentID 2}
+				If($Recursive -And $TrialRun -eq $False){Start-Wait -Activity "Processed $($script:ProcessedServers.Count) server(s). The script is pausing for $SleepTime seconds starting at $((get-date).DateTime)." -SleepTime $SleepTime -ID 3 -ParentID 2}
 				If($Recursive)
 				{	Write-Progress -Activity "Retrieving Downstream Servers on $WsusServer..." -Status "Started at $((get-date).DateTime)" -ID 3 -ParentID 2
 					$WsusDownstreamServers = $WsusServerAdminProxy.GetDownstreamServers()
@@ -171,6 +144,6 @@ Process
 	}
 }
 End
-{	If($EmailLog){SendEmailStatus -From $From -To $To -Subject $Subject -SmtpServer $SmtpServer -BodyAsHtml $True -Body ($Output | Select $Table | ConvertTo-HTML -head $Style)}
+{	If($EmailLog){Send-EmailStatus -From $From -To $To -Subject $Subject -SmtpServer $SmtpServer -BodyAsHtml -Body ($Output | Select-Object $Table | ConvertTo-HTML -head $Style)}
 	$ErrorActionPreference = $script:CurrentErrorActionPreference
 }
