@@ -1,8 +1,8 @@
-# README
+# Microsoft Office – Disable Copilot and AI features
 
 ## Table of Contents
 
-- [README](#readme)
+- [Microsoft Office – Disable Copilot and AI features](#microsoft-office--disable-copilot-and-ai-features)
   - [Table of Contents](#table-of-contents)
   - [English](#english)
   - [Deutsch](#deutsch)

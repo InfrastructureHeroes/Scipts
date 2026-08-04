@@ -1,8 +1,8 @@
-# README
+# Windows 11 – Disable Microsoft Copilot and AI features
 
 ## Table of Contents
 
-- [README](#readme)
+- [Windows 11 – Disable Microsoft Copilot and AI features](#windows-11--disable-microsoft-copilot-and-ai-features)
   - [Table of Contents](#table-of-contents)
   - [English](#english)
   - [Deutsch](#deutsch)

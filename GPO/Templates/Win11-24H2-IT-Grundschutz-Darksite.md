@@ -1,8 +1,8 @@
-# README
+# Windows 11 24H2 – IT-Grundschutz (Darksite)
 
 ## Table of Contents
 
-- [README](#readme)
+- [Windows 11 24H2 – IT-Grundschutz (Darksite)](#windows-11-24h2--it-grundschutz-darksite)
   - [Table of Contents](#table-of-contents)
   - [English](#english)
   - [Deutsch](#deutsch)

@@ -32,7 +32,7 @@
     Created    :    12.10.2022
     Updated    :    03.12.2025
     LastModBy  :    Fabian Niesen
-    License    :    Except for the LDAP Test Code, witch is licensed by Evotec under MIT License 
+    License    :    Except for the LDAP Test Code, which is licensed by Evotec under MIT License 
                     (Code for LDAP Test from https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/ under MIT license),
                     The MIT License (MIT)
                     Copyright (c) 2022-2025 Fabian Niesen
@@ -218,7 +218,7 @@ Function Test-UDP {
     .NOTES
         Author     :    Fabian Niesen
 		Requires   :    PowerShell Version 5.1
-        License    :    Except for the LDAP Test Code, witch is licensed by Evotec under MIT License 
+        License    :    Except for the LDAP Test Code, which is licensed by Evotec under MIT License 
                         (Code for LDAP Test from https://evotec.xyz/testing-ldap-and-ldaps-connectivity-with-powershell/ under MIT license),
                         The MIT License (MIT)
                         Copyright (c) 2022-2025 Fabian Niesen

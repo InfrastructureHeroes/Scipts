@@ -2,10 +2,10 @@
 
 <#
 	.SYNOPSIS
-		Remove Azure Arc Setup if installed. Reboot will happend automaticaly.
+		Remove Azure Arc Setup if installed. Reboot happens automatically if required.
 	
     .DESCRIPTION
-		Remove Azure Arc Setup if installed. Reboot will happend automaticaly.
+		Remove Azure Arc Setup if installed. Reboot happens automatically if required.
 
 	.EXAMPLE  
         Remove-AzureArc.ps1

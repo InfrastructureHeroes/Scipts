@@ -1,0 +1,36 @@
+name: docs
+
+on:
+  push:
+    paths:
+      - '**.ps1'
+      - '**.cmd'
+      - '**.squid'
+      - 'README*.md'
+      - 'GPO/Templates/**'
+      - 'Tools/**'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    paths:
+      - '**.ps1'
+      - '**.cmd'
+      - '**.squid'
+      - 'README*.md'
+      - 'GPO/Templates/**'
+      - 'Tools/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readme:
+    name: README inventory up to date
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Verify generated README tables
+        shell: pwsh
+        run: ./Tools/Update-Readme.ps1 -Check
