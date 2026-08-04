@@ -34,7 +34,7 @@ Subject of the Mail
 Switch if SMTP needs authentication
 
 .PARAMETER smtppw
-Password for SMTP User. Only need with SmtpAuth.
+Password for SMTP User as SecureString. Only need with SmtpAuth. Example: -smtppw (Read-Host -AsSecureString)
 
 .PARAMETER smtpuser
 SMTP Username. Only need with SmtpAuth.
@@ -92,7 +92,7 @@ Param(
     [Parameter(Position=22)]
     [switch]$SmtpAuth,
     [Parameter(Position=23)]
-    [string]$smtppw,
+    [System.Security.SecureString]$smtppw,
     [Parameter(Position=24)]
     [string]$smtpuser,
     [Parameter(Position=25)]
@@ -104,8 +104,8 @@ $schriptversion = "1.3"
 Write-Output "send-files.ps1 Version $scriptversion "
 IF ($SmtpAuth) {
     Write-Debug "Using SMTP Auth"
-    $password = ConvertTo-SecureString $smtppw -AsPlainText -Force
-    $cred = New-Object System.Management.Automation.PSCredential ($smtpuser, $password)
+    IF (-not $smtppw) { $smtppw = Read-Host -Prompt "Password for SMTP user $smtpuser" -AsSecureString }
+    $cred = New-Object System.Management.Automation.PSCredential ($smtpuser, $smtppw)
     }
 IF ($SmtpPort) { $SmtpClient.Port = $SmtpPort }
 $sources = Get-ChildItem $sourcepath -Filter $filetype -Depth 0

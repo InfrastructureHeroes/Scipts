@@ -23,7 +23,7 @@
 # Variable declaration
 $DOM =""
 $NETBIOS =""
-$SMADMIPW =""
+$SMADMIPW = Read-Host -Prompt "Directory Services Restore Mode password" -AsSecureString
 
 # End of declaration - do not edit below this Point!
 
@@ -51,7 +51,7 @@ If (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
   -NoRebootOnCompletion:$false `
   -SysvolPath "C:\Windows\SYSVOL" `
   -Force:$true `
-  -SafeModeAdministratorPassword (ConvertTo-SecureString $SMADMIPW -AsPlainText -Force)
+  -SafeModeAdministratorPassword $SMADMIPW
 
 
 
