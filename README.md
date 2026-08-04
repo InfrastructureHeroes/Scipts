@@ -46,6 +46,7 @@ This repository contains administration scripts for:
   - [User](#user)
   - [Windows](#windows)
   - [WSUS](#wsus)
+- [Tests](#tests)
 - [Additional files](#additional-files)
 - [Notes](#notes)
 
@@ -169,8 +170,19 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 | `WSUS/start-WsusServerSync.ps1` | Start WSUS synchronization (supports recursive upstream/downstream and email logging). | n/a | Not specified |
 | `WSUS/Get-WsusHealth.ps1` | Run comprehensive WSUS health checks and generate diagnostic output. | 1.3 | Except for the LDAP Test Code, witch is licensed by Evotec under MIT License |
 
+## Tests
+
+The Pester test suite lives in [`Tests/`](Tests/README.md):
+
+```powershell
+Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck
+.\Tests\Invoke-Tests.ps1                  # run all tests
+.\Tests\Get-TestCoverageReport.ps1        # coverage overview per script and function
+```
+
 ## Additional files
 
+- `Tests/README.md` – how the test suite is structured and how to add tests.
 - `Intune/Readme.md` – Intune-specific notes (in German).
 - `Dokumente/Zertifizierungsstellen mit Windows Server 2012R2.pdf` – PKI/CA documentation PDF.
 
