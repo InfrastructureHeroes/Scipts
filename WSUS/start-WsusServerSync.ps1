@@ -13,11 +13,11 @@ Begin
 {	$script:CurrentErrorActionPreference = $ErrorActionPreference
 	$script:Output = @()
 	$script:ProcessedServers = @()
+	$script:FailedServers = @()
 	$WsusAssembly = [reflection.assembly]::LoadWithPartialName("Microsoft.UpdateServices.Administration")
 	If($WsusAssembly -eq $Null)
 	{	throw "Loading Microsoft.UpdateServices.Administration failed. Are you running this on a machine with the WSUS 3.0 SP2 Administration Console installed? http://technet.microsoft.com/en-us/library/dd939875(v=ws.10).aspx"}
 
-	$ErrorActionPreference = "SilentlyContinue"
 	If($EmailLog)
 	{	If($Recursive)
 		{	$Table = @{Name="Parent Wsus Server";expression={$_.ParentWsusServer}},@{Name="Wsus Server";expression={$_.WsusServer}},@{Name="Port Number";expression={$_.PortNumber}},@{Name="Using SSL";expression={$_.UsingSSL}},@{Name="Version";expression={$_.Version}},@{Name="Start";expression={$_.Start}},@{Name="Finish";expression={$_.Finish}}
@@ -36,11 +36,13 @@ Begin
 		{	$SmtpMessage = New-Object System.Net.Mail.MailMessage $From, $To, $Subject, $Body
 			$SmtpMessage.IsBodyHTML = $BodyAsHtml
 			$SmtpClient = New-Object System.Net.Mail.SmtpClient $SmtpServer
-			$SmtpClient.Send($SmtpMessage)
-			If($? -eq $False){Write-Warning "$($Error[0].Exception.Message) | $($Error[0].Exception.GetBaseException().Message)"}
-			$SmtpMessage.Dispose()
-			rv SmtpClient
-			rv SmtpMessage
+			try { $SmtpClient.Send($SmtpMessage) }
+			catch { Write-Warning "Could not send mail to $To`: $($_.Exception.Message) | $($_.Exception.GetBaseException().Message)" }
+			finally
+			{	$SmtpMessage.Dispose()
+				rv SmtpClient
+				rv SmtpMessage
+			}
 		}
 	}
 
@@ -53,14 +55,21 @@ Begin
   		[switch]$REG_DWORD
   	)
 		$HKLM = 2147483650
-		$reg = [wmiclass]"\\$computername\root\default:StdRegprov"
-		If($REG_SZ)
-		{	$Result = $reg.GetStringValue($HKLM,$key,$value)
-			If($Result.ReturnValue -eq 0){$Result.sValue}
+		try
+		{	$reg = [wmiclass]"\\$computername\root\default:StdRegprov"
+			If($REG_SZ)
+			{	$Result = $reg.GetStringValue($HKLM,$key,$value)
+				If($Result.ReturnValue -eq 0){$Result.sValue}
+				Else{Write-Warning "Could not read $key\$value from $computername (ReturnValue $($Result.ReturnValue))."}
+			}
+			If($REG_DWORD)
+			{	$Result = $reg.GetDwordValue($HKLM,$key,$value)
+				If($Result.ReturnValue -eq 0){$Result.uValue}
+				Else{Write-Warning "Could not read $key\$value from $computername (ReturnValue $($Result.ReturnValue))."}
+			}
 		}
-		If($REG_DWORD)
-		{	$Result = $reg.GetDwordValue($HKLM,$key,$value)
-			If($Result.ReturnValue -eq 0){$Result.uValue}
+		catch
+		{	Write-Warning "Registry access to $computername failed: $($_.Exception.Message)"
 		}
 	}
 
@@ -115,10 +124,15 @@ Begin
 					Add-Member NoteProperty LastSyncResult ""
 			}
 			Write-Progress -Activity "Connecting to UpdateServices AdminProxy..." -Status "Started at $((get-date).DateTime)" -ID 3 -ParentID 2
-			$WsusServerAdminProxy = [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer($WsusServer,$UsingSSL,$PortNumber)
-			If ($? -eq $False)
-			{	$Object.Version = $Error[0]
-				Write-Warning "Failed to connect to $WsusServer $($Error[0])"
+			$WsusServerAdminProxy = $null
+			$ConnectError = $null
+			try { $WsusServerAdminProxy = [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer($WsusServer,$UsingSSL,$PortNumber) }
+			catch { $ConnectError = $_ }
+			If ($ConnectError -or $null -eq $WsusServerAdminProxy)
+			{	If(!$ConnectError){$ConnectError = "AdminProxy returned null."}
+				$Object.Version = $ConnectError
+				Write-Warning "Failed to connect to $WsusServer`: $ConnectError"
+				$script:FailedServers += $WsusServer
 				$Object.Finish = (get-date).DateTime
 				$Object
 				If($EmailLog){$script:Output += $Object}
@@ -129,7 +143,16 @@ Begin
 				{	Write-Progress -Activity "Connecting to the Subscription..." -Status "Started at $((get-date).DateTime)" -ID 3 -ParentID 2
 					$Subscription = $WsusServerAdminProxy.GetSubscription();
 					Write-Progress -Activity "Calling StartSynchronization on $WsusServer" -Status "Started at $((get-date).DateTime)" -ID 3 -ParentID 2
-					$Subscription.StartSynchronization()
+					try { $Subscription.StartSynchronization() }
+					catch
+					{	Write-Warning "Failed to start the synchronization on $WsusServer`: $($_.Exception.Message)"
+						$script:FailedServers += $WsusServer
+						$Object.LastSyncResult = "Failed to start: $($_.Exception.Message)"
+						$Object.Finish = (get-date).DateTime
+						$Object
+						If($EmailLog){$script:Output += $Object}
+						return
+					}
 					$SynchronizationProgress = $Subscription.GetSynchronizationProgress()
 					While ($SynchronizationProgress.Phase.ToString() -eq "NotProcessing")
 					{	Start-Sleep -Milliseconds 100
@@ -173,4 +196,7 @@ Process
 End
 {	If($EmailLog){SendEmailStatus -From $From -To $To -Subject $Subject -SmtpServer $SmtpServer -BodyAsHtml $True -Body ($Output | Select $Table | ConvertTo-HTML -head $Style)}
 	$ErrorActionPreference = $script:CurrentErrorActionPreference
+	If($script:FailedServers.Count -gt 0)
+	{	Write-Error "Synchronization failed for $($script:FailedServers.Count) server(s): $($script:FailedServers -join ', ')"
+	}
 }

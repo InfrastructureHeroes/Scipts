@@ -27,8 +27,9 @@
     Disclaimer :  This script is provided "as is" without warranty. Use at your own risk.
                   The author assumes no responsibility for any damage or data loss caused by this script.
                   Test thoroughly in a controlled environment before deploying to production.
-		Version    : 0.1
-		History    : 0.1 Los geht es
+		Version    : 0.2
+		History    : 0.2 Fehlerbehandlung: "existiert bereits" wird von echten Fehlern unterschieden, echte Fehler brechen das Skript ab
+		             0.1 Los geht es
     .LINK
         http://wiki.domain.tld/
 		
@@ -66,8 +67,34 @@ try
 }
 catch
 {
-Write-Warning "ActiveDirectory Module ist missing. Please install first"
-break
+  Throw "ActiveDirectory Module is missing or could not be loaded. Please install first. Error: $($_.Exception.Message)"
+}
+
+<#
+.SYNOPSIS
+Fuehrt eine AD-Operation aus und ignoriert nur "existiert bereits"-Fehler.
+
+.DESCRIPTION
+Alle anderen Fehler (fehlende Berechtigungen, falsche OU, kein DC erreichbar) werden weitergereicht,
+damit sie nicht als "existiert bereits" fehlinterpretiert werden.
+#>
+function Invoke-ADStepIgnoreExisting
+{
+  [CmdletBinding()]
+  Param(
+    [Parameter(Mandatory=$true)][scriptblock]$Action,
+    [Parameter(Mandatory=$true)][string]$ExistsMessage
+  )
+  try { & $Action }
+  catch
+  {
+    # 8305 = ERROR_DS_OBJ_STRING_NAME_EXISTS, 1378 = ERROR_MEMBER_IN_ALIAS
+    if ($_.Exception.ErrorCode -eq 8305 -or $_.Exception.ErrorCode -eq 1378 -or $_.Exception.Message -match 'already exists|bereits vorhanden|is already a member|ist bereits ein Mitglied')
+    {
+      Write-Warning $ExistsMessage
+    }
+    else { Throw }
+  }
 }
 
 If ($Animal -eq "!notset!") { 
@@ -95,22 +122,15 @@ $GroupEditor = $GroupPreFix+$Animal+"-Editor"
 $GroupManager = $GroupPreFix+$Animal+"-Manager"
 $GroupAdmins = $GroupPreFix+$Animal+"-Admins"
 
-try { New-ADGroup -Name $GroupRead -SamAccountName $GroupRead -GroupCategory Security -GroupScope Global -DisplayName $GroupRead -Path $GroupOU -Description "Leserechte für das Wiki $Animal"}
-catch {Write-Warning "Die Gruppe $GroupRead existiert bereits"}
-try { New-ADGroup -Name $GroupEditor -SamAccountName $GroupEditor -GroupCategory Security -GroupScope Global -DisplayName $GroupEditor -Path $GroupOU -Description "Editorrechte für das Wiki $Animal"}
-catch {Write-Warning "Die Gruppe $GroupEditor existiert bereits"}
-try { New-ADGroup -Name $GroupManager -SamAccountName $GroupManager -GroupCategory Security -GroupScope Global -DisplayName $GroupManager -Path $GroupOU -Description "Managementrechte für das Wiki $Animal"}
-catch {Write-Warning "Die Gruppe $GroupManager existiert bereits"}
-try { New-ADGroup -Name $GroupAdmins -SamAccountName $GroupAdmins -GroupCategory Security -GroupScope Global -DisplayName $GroupAdmins -Path $GroupOU -Description "Adminrechte für das Wiki $Animal"}
-catch {Write-Warning "Die Gruppe $GroupAdmins existiert bereits"}
+Invoke-ADStepIgnoreExisting -ExistsMessage "Die Gruppe $GroupRead existiert bereits" -Action { New-ADGroup -Name $GroupRead -SamAccountName $GroupRead -GroupCategory Security -GroupScope Global -DisplayName $GroupRead -Path $GroupOU -Description "Leserechte für das Wiki $Animal" }
+Invoke-ADStepIgnoreExisting -ExistsMessage "Die Gruppe $GroupEditor existiert bereits" -Action { New-ADGroup -Name $GroupEditor -SamAccountName $GroupEditor -GroupCategory Security -GroupScope Global -DisplayName $GroupEditor -Path $GroupOU -Description "Editorrechte für das Wiki $Animal" }
+Invoke-ADStepIgnoreExisting -ExistsMessage "Die Gruppe $GroupManager existiert bereits" -Action { New-ADGroup -Name $GroupManager -SamAccountName $GroupManager -GroupCategory Security -GroupScope Global -DisplayName $GroupManager -Path $GroupOU -Description "Managementrechte für das Wiki $Animal" }
+Invoke-ADStepIgnoreExisting -ExistsMessage "Die Gruppe $GroupAdmins existiert bereits" -Action { New-ADGroup -Name $GroupAdmins -SamAccountName $GroupAdmins -GroupCategory Security -GroupScope Global -DisplayName $GroupAdmins -Path $GroupOU -Description "Adminrechte für das Wiki $Animal" }
 
 Write-Host "Füge die Wiki-Admins zu den Admins hinzu hinzu, befülle die Lesegruppe mit Editoren, Manager und Admins."
-try { Add-ADGroupMember $GroupAdmins $wikiadmins}
-catch {Write-Warning "$wikiadmins sind bereits in $GroupAdmins enthalten"}
-try { Add-ADGroupMember $GroupRead $GroupEditor,$GroupManager,$GroupAdmins}
-catch {Write-Warning "Die Editoren, Manager und Admins haben bereits Leserechte"}
-try { Add-ADGroupMember "RG-WEB-Wiki-Benutzer" $GroupRead}
-catch {Write-Warning "Die Gruppe $GroupRead ist bereits in der Gruppe RG-WEB-Wiki-Benutzer enthalten"}
+Invoke-ADStepIgnoreExisting -ExistsMessage "$wikiadmins sind bereits in $GroupAdmins enthalten" -Action { Add-ADGroupMember $GroupAdmins $wikiadmins }
+Invoke-ADStepIgnoreExisting -ExistsMessage "Die Editoren, Manager und Admins haben bereits Leserechte" -Action { Add-ADGroupMember $GroupRead $GroupEditor,$GroupManager,$GroupAdmins }
+Invoke-ADStepIgnoreExisting -ExistsMessage "Die Gruppe $GroupRead ist bereits in der Gruppe RG-WEB-Wiki-Benutzer enthalten" -Action { Add-ADGroupMember "RG-WEB-Wiki-Benutzer" $GroupRead }
 Write-Host ""
 
 Write-Verbose "Setzte NTFS Rechte"

@@ -44,8 +44,9 @@ Param(
 )
 $schriptversion = "0.2"
 Write-Output "Get-LastLogonOU.ps1 Version $scriptversion "
-$ErrorActionPreference = "SilentlyContinue"
-import-module activedirectory
+$ErrorActionPreference = "Stop"
+try { Import-Module ActiveDirectory }
+catch { Throw "ActiveDirectory Module is missing or could not be loaded. Please install first. Error: $($_.Exception.Message)" }
 $CSV = @()
 Write-Verbose "Ersteller Userliste"
 Get-ADUser -SearchBase $OU -filter * -ResultSetSize 5000 -Properties SamAccountName,displayName,lastLogonTimestamp | Sort-Object lastLogonTimestamp |Select-Object SamAccountName,DisplayName,Enabled,@{Name="lastLogonAD"; Expression={[DateTime]::FromFileTime($_.lastLogonTimestamp).ToString('dd.MM.yyyy hh:mm')}} | export-csv $Export -Delimiter ";" -NoTypeInformation -Encoding UTF8
@@ -61,9 +62,18 @@ ForEach ($Entry in $CSV)
   {
     $Entry.ExchangeLastLogon = $(Get-MailboxStatistics $SamAccountName -ErrorAction Stop).LastLogonTime 
   }
-  catch 
+  catch
   {
-    $Entry.ExchangeLastLogon = "no Mailbox"
+    # Only "mailbox does not exist" is expected here, everything else is a real error
+    if ($_.Exception.GetType().Name -eq 'ManagementObjectNotFoundException' -or $_.Exception.Message -match "couldn't be found|wurde nicht gefunden")
+    {
+      $Entry.ExchangeLastLogon = "no Mailbox"
+    }
+    else
+    {
+      Write-Warning "Could not read the mailbox statistics for $SamAccountName`: $($_.Exception.Message)"
+      $Entry.ExchangeLastLogon = "ERROR: $($_.Exception.Message)"
+    }
   }
 }
 $CSV | Export-Csv $Export -NoTypeInformation -Delimiter ";" -Encoding UTF8
