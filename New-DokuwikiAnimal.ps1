@@ -39,7 +39,10 @@
 [cmdletbinding()]
 Param(
 	[Parameter(Mandatory=$false, Position=1, ValueFromPipeline=$False)]
-	[String]$Animal="!notset!"
+	[ValidatePattern('^[A-Za-z0-9 _-]+$')]
+	[String]$Animal="!notset!",
+	[Parameter(Mandatory=$false, Position=2, ValueFromPipeline=$False)]
+	[System.Management.Automation.PSCredential]$WikiBindCredential
 )
 
 clear-host 
@@ -103,7 +106,10 @@ If ($Animal -eq "!notset!") {
   Write-Host ""
 }
 
-#Check Sonderzeichen und Leerzeichen !!!!!!!!!!!
+IF ($Animal -notmatch '^[A-Za-z0-9 _-]+$') { Throw "Der Name '$Animal' enthält nicht erlaubte Zeichen. Erlaubt sind Buchstaben, Zahlen, Leerzeichen, '-' und '_'." }
+
+IF (-not $WikiBindCredential) { $WikiBindCredential = Get-Credential -Message "Dienstkonto für die AD-Anbindung des Wiki (authad admin_username/admin_password)" }
+
 $cleananimal = $($Animal -replace " ","").ToLower()
 
 $animalpath = $farmpath+"\"+$cleananimal
@@ -224,8 +230,11 @@ Write-Host "Befülle die Konfiguration $lc"
 "`$conf['plugin']['authad']['sso'] = 1;" | Out-File $lc -Append 
 "`$conf['plugin']['authad']['expirywarn'] = 5;" | Out-File $lc -Append 
 "`$conf['plugin']['authad']['recursive_groups'] = 1;" | Out-File $lc -Append 
-"`$conf['plugin']['authad']['admin_username'] = 'SVC-WEB-WikiSSO';" | Out-File $lc -Append 
-"`$conf['plugin']['authad']['admin_password'] = 'Pa$$w0rd';" | Out-File $lc -Append 
+$bindUser = $WikiBindCredential.UserName -replace "'","\'"
+$bindPassword = $WikiBindCredential.GetNetworkCredential().Password -replace "'","\'"
+"`$conf['plugin']['authad']['admin_username'] = '$bindUser';" | Out-File $lc -Append 
+"`$conf['plugin']['authad']['admin_password'] = '$bindPassword';" | Out-File $lc -Append 
+Remove-Variable bindPassword
 "`$conf['basedir'] = '/$cleananimal/';" | Out-File $lc -Append 
 "`$conf['useheading'] = 'content';" | Out-File $lc -Append 
 "`$conf['sneaky_index'] = 1;" | Out-File $lc -Append 

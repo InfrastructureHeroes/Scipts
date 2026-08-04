@@ -90,7 +90,7 @@ param(
         [switch]$SmtpTLS,
         [switch]$SmtpAuth,
         [string]$SmtpUser = "",
-        [string]$SmtpPw = "",
+        [System.Security.SecureString]$SmtpPw,
         [int]$SmtpPort = 25,
         [switch]$EmailLog,
         [switch]$TestMail,
@@ -135,7 +135,10 @@ Function SendEmailStatus {
                 $SmtpMessage.IsBodyHTML = $BodyAsHtml
                 $SmtpClient = New-Object System.Net.Mail.SmtpClient($SmtpServer, $SmtpPort)
                 if ($SmtpTLS) { $SmtpClient.EnableSsl = $true }
-                if ($SmtpAuth) { $SmtpClient.Credentials = New-Object System.Net.NetworkCredential($SmtpUser, $SmtpPw) }
+                if ($SmtpAuth) {
+                        if (-not $SmtpPw) { $SmtpPw = Read-Host -Prompt "Password for SMTP user $SmtpUser" -AsSecureString }
+                        $SmtpClient.Credentials = New-Object System.Net.NetworkCredential($SmtpUser, $SmtpPw)
+                }
                 $SmtpClient.Send($SmtpMessage)
                 Write-Output "Email sent successfully."
                 $SmtpMessage.Dispose()

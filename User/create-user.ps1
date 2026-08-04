@@ -39,7 +39,7 @@ Param(
 [string] $OU="OU=Benutzer,DC=ADG,DC=local",
 [string] $Vorname="",
 [string] $Nachname="",
-[string] $Password="Pa$$w0rd!1",
+[System.Security.SecureString] $Password,
 [string] $Username=$Vorname+"."+$Nachname ,
 [string] $Email="demo.held@niesenf.onmicrosoft.com",
 [string] $UPN="demo.held@adg.local",
@@ -57,7 +57,7 @@ Param(
 [string] $To,
 [switch] $TLS,
 [switch] $SmtpAuth,
-[string] $smtppw = "",
+[System.Security.SecureString] $smtppw,
 [string] $smtpuser = "",
 [int] $SmtpPort =""
 )
@@ -75,7 +75,10 @@ Function SendEmailStatus($From, $To, $Subject, $SmtpServer, $BodyAsHtml, $Body)
     $SmtpMessage.IsBodyHTML = $BodyAsHtml
     $SmtpClient = New-Object System.Net.Mail.SmtpClient $SmtpServer 
     IF ($TLS) { $SmtpClient.EnableSsl = $true }
-    IF ($SmtpAuth) { $SmtpClient.Credentials = New-Object System.Net.NetworkCredential($smtpuser, $smtppw) }
+    IF ($SmtpAuth) {
+      IF (-not $smtppw) { $smtppw = Read-Host -Prompt "Password for SMTP user $smtpuser" -AsSecureString }
+      $SmtpClient.Credentials = New-Object System.Net.NetworkCredential($smtpuser, $smtppw)
+    }
     IF ($SmtpPort) { $SmtpClient.Port = $SmtpPort }
     try { $SmtpClient.Send($SmtpMessage) }
     catch { Write-Warning "Could not send mail to $To`: $($_.Exception.Message) | $($_.Exception.GetBaseException().Message)" }
@@ -105,10 +108,10 @@ IF ( $O365 )
   }
   Connect-AzureAD
 }
-$SecPass = $Password | ConvertTo-SecureString -AsPlainText -Force
+IF (-not $Password) { $Password = Read-Host -Prompt "Initial password for $Username" -AsSecureString }
 #Zeichenlimit für SAM Account
 Write-Verbose "Lege Benutzer an"
-New-ADUser -Name $Username -GivenName $Vorname -Surname $Nachname -Path $OU -AccountPassword $SecPass -DisplayName $($Vorname+" "+$Nachname) -EmailAddress $Email -UserPrincipalName $UPN -OtherAttributes @{proxyAddresses=$("SMPT:"+$Email)} -Server $DC
+New-ADUser -Name $Username -GivenName $Vorname -Surname $Nachname -Path $OU -AccountPassword $Password -DisplayName $($Vorname+" "+$Nachname) -EmailAddress $Email -UserPrincipalName $UPN -OtherAttributes @{proxyAddresses=$("SMPT:"+$Email)} -Server $DC
 Start-Sleep -Seconds 10
 IF ( $PWwechsel ) { Set-ADUser -Identity $Username -ChangePasswordAtLogon $true -Server $DC } ELSE { Set-ADUser -Identity $Username -ChangePasswordAtLogon $false -Server $DC } 
 IF ( $Aktiviert ) { Set-ADUser -Identity $Username -Enabled $true -Server $DC ; Write-Verbose "Aktiviere $Username" }

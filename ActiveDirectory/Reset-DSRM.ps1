@@ -64,20 +64,41 @@ Param(
     [string]$logPath = "C:\Windows\System32\LogFiles\"
 )
 $ErrorActionPreference =  "Stop"
-IF (RandomPW) {
+Function Get-CryptoRandomChars {
+	param(
+		[Char[]]$InputObject,
+		[int]$Count
+	)
+	$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+	try {
+		$bytes = [Byte[]]::new(4)
+		1..$Count | ForEach-Object {
+			# Rejection sampling to keep the distribution uniform
+			$limit = [uint32]([uint32]::MaxValue - ([uint32]::MaxValue % $InputObject.Length) - 1)
+			do {
+				$rng.GetBytes($bytes)
+				$value = [System.BitConverter]::ToUInt32($bytes, 0)
+			} while ($value -gt $limit)
+			$InputObject[$value % $InputObject.Length]
+		}
+	}
+	finally { $rng.Dispose() }
+}
+
+IF ($RandomPW) {
 	$TokenSet = @{
 		U = [Char[]]'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 		L = [Char[]]'abcdefghijklmnopqrstuvwxyz'
 		N = [Char[]]'0123456789'
 		S = [Char[]]'(~!@#$%^&*_-+=\(){}[]:;<>,.?/)'
 	}
-	$Upper = Get-Random -Count 10 -InputObject $TokenSet.U
-	$Lower = Get-Random -Count 10 -InputObject $TokenSet.L
-	$Number = Get-Random -Count 7 -InputObject $TokenSet.N
-	$Special = Get-Random -Count 7 -InputObject $TokenSet.S    
+	$Upper = Get-CryptoRandomChars -InputObject $TokenSet.U -Count 10
+	$Lower = Get-CryptoRandomChars -InputObject $TokenSet.L -Count 10
+	$Number = Get-CryptoRandomChars -InputObject $TokenSet.N -Count 7
+	$Special = Get-CryptoRandomChars -InputObject $TokenSet.S -Count 7
 	$StringSet = $Upper + $Lower + $Number + $Special
 	
-	[String]$PW = (Get-Random -Count 30 -InputObject $StringSet) -join ''
+	[String]$PW = (Get-CryptoRandomChars -InputObject $StringSet -Count 30) -join ''
 }
 Write-Host "Please note this Password someware Safe: $PW"
 Write-Warning "Be Aware, you need to enter the Password during the execution twice. This can not be automated. Sorry."
