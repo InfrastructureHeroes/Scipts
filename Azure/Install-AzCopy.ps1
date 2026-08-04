@@ -44,4 +44,4 @@ Remove-Item $zipfile -Force
 Get-ChildItem $($azfolder +"\*\azcopy.exe") | Move-Item -Destination $azfolder -Force
 #Set Path for the user
 $userenvpath = [System.Environment]::GetEnvironmentVariable("Path", "User")
-IF ($userenvpath.contains($azfolder)) { Write-Output "Path already set" } Else { [System.Environment]::SetEnvironmentVariable("PATH", $userenv + ";"+$azfolder , "User") }
+IF ($userenvpath.contains($azfolder)) { Write-Output "Path already set" } Else { [System.Environment]::SetEnvironmentVariable("PATH", $userenvpath + ";"+$azfolder , "User") }

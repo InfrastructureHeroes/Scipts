@@ -91,7 +91,7 @@ param(
         [switch]$SmtpTLS,
         [switch]$SmtpAuth,
         [string]$SmtpUser = "",
-        [string]$SmtpPw = "",
+        [System.Security.SecureString]$SmtpPw,
         [int]$SmtpPort = 25,
         [switch]$EmailLog,
         [switch]$TestMail,

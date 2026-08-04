@@ -78,8 +78,9 @@ Describe "Start-Log and Write-Log" {
 }
 
 Describe "New-SmtpCredential" {
-    It "builds a credential from user name and password" {
-        $credential = New-SmtpCredential -UserName "wsus@domain.local" -Password "Pa55w0rd"
+    It "builds a credential from user name and secure password" {
+        $secure = ConvertTo-SecureString "Pa55w0rd" -AsPlainText -Force
+        $credential = New-SmtpCredential -UserName "wsus@domain.local" -Password $secure
         $credential | Should -BeOfType [System.Management.Automation.PSCredential]
         $credential.UserName | Should -Be "wsus@domain.local"
         $credential.GetNetworkCredential().Password | Should -Be "Pa55w0rd"

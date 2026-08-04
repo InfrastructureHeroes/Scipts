@@ -39,7 +39,7 @@ Param(
 [string] $OU="OU=Benutzer,DC=ADG,DC=local",
 [string] $Vorname="",
 [string] $Nachname="",
-[string] $Password="Pa$$w0rd!1",
+[System.Security.SecureString] $Password,
 [string] $Username=$Vorname+"."+$Nachname ,
 [string] $Email="demo.held@niesenf.onmicrosoft.com",
 [string] $UPN="demo.held@adg.local",
@@ -57,7 +57,7 @@ Param(
 [string] $To,
 [switch] $TLS,
 [switch] $SmtpAuth,
-[string] $smtppw = "",
+[System.Security.SecureString] $smtppw,
 [string] $smtpuser = "",
 [int] $SmtpPort =""
 )
@@ -89,10 +89,10 @@ if(@(get-module | where-object {$_.Name -eq "ActiveDirectory"} ).count -eq 0) {i
 Import-Module ActiveDirectory
 IF ($DC -eq "") { $DC = $(Get-ADDomainController).HostName ; Write-Verbose "Kein DC angegeben, nutze $DC"  }
 IF ( $O365 ) { Try { Connect-AzureAD } catch { Write-Verbose "Installiere AzureAD Modul" ; Install-Module -Name AzureAD -Force ; Connect-AzureAD } }
-$SecPass = $Password | ConvertTo-SecureString -AsPlainText -Force
+IF (-not $Password) { $Password = Read-Host -Prompt "Initial password for $Username" -AsSecureString }
 #Zeichenlimit für SAM Account
 Write-Verbose "Lege Benutzer an"
-New-ADUser -Name $Username -GivenName $Vorname -Surname $Nachname -Path $OU -AccountPassword $SecPass -DisplayName $($Vorname+" "+$Nachname) -EmailAddress $Email -UserPrincipalName $UPN -OtherAttributes @{proxyAddresses=$("SMPT:"+$Email)} -Server $DC
+New-ADUser -Name $Username -GivenName $Vorname -Surname $Nachname -Path $OU -AccountPassword $Password -DisplayName $($Vorname+" "+$Nachname) -EmailAddress $Email -UserPrincipalName $UPN -OtherAttributes @{proxyAddresses=$("SMPT:"+$Email)} -Server $DC
 Start-Sleep -Seconds 10
 IF ( $PWwechsel ) { Set-ADUser -Identity $Username -ChangePasswordAtLogon $true -Server $DC } ELSE { Set-ADUser -Identity $Username -ChangePasswordAtLogon $false -Server $DC } 
 IF ( $Aktiviert ) { Set-ADUser -Identity $Username -Enabled $true -Server $DC ; Write-Verbose "Aktiviere $Username" }

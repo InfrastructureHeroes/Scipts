@@ -337,27 +337,26 @@ function Send-EmailStatus {
 function New-SmtpCredential {
     <#
     .SYNOPSIS
-        Builds a PSCredential from a user name and a plain text password.
+        Builds a PSCredential for SMTP authentication.
     .DESCRIPTION
-        Builds a PSCredential from a user name and a plain text password. Convenience helper
-        for the scripts that still accept SMTP credentials as script parameters.
+        Builds a PSCredential from a user name and a secure string password. If no password is
+        passed, it is prompted for interactively.
     .PARAMETER UserName
         SMTP user name.
     .PARAMETER Password
-        SMTP password as plain text.
+        SMTP password as secure string. Prompted for when omitted.
     .EXAMPLE
         Send-EmailStatus @mailParam -Credential (New-SmtpCredential -UserName $SmtpUser -Password $SmtpPw)
     #>
     [CmdletBinding()]
     [OutputType([System.Management.Automation.PSCredential])]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUsernameAndPasswordParams', '', Justification = 'Converts the plain text SMTP parameters of the existing scripts into a PSCredential')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', Justification = 'Converts the plain text SMTP parameters of the existing scripts into a PSCredential')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Converts the plain text SMTP parameters of the existing scripts into a PSCredential')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUsernameAndPasswordParams', '', Justification = 'Converts the SMTP parameters of the existing scripts into a PSCredential')]
     param(
         [Parameter(Mandatory = $true)][string]$UserName,
-        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Password
+        [System.Security.SecureString]$Password
     )
-    New-Object System.Management.Automation.PSCredential($UserName, (ConvertTo-SecureString $Password -AsPlainText -Force))
+    If (-not $Password) { $Password = Read-Host -Prompt "Password for SMTP user $UserName" -AsSecureString }
+    New-Object System.Management.Automation.PSCredential($UserName, $Password)
 }
 
 Export-ModuleMember -Function Test-AdminRights, Get-DefaultLogPath, Start-Log, Get-LogFilePath, Write-Log,

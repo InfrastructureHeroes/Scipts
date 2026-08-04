@@ -136,7 +136,7 @@ Param(
     [Parameter(Position=26)]
     [switch]$SmtpAuth,
     [Parameter(Position=27)]
-    [string]$smtppw = "",
+    [System.Security.SecureString]$smtppw,
     [Parameter(Position=28)]
     [string]$smtpuser = "",
     [Parameter(Position=29)]
