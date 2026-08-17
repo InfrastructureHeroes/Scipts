@@ -1,0 +1,619 @@
+{
+  "$comment": "Curated data for Tools/Update-Readme.ps1. Purpose texts are maintained here (one entry per language); Version, License and Article columns are read from the script headers at generation time. Add an entry here whenever a script is added to the repository - Update-Readme.ps1 fails if a script has no entry.",
+  "languages": [
+    {
+      "code": "en",
+      "file": "README.md",
+      "labels": {
+        "file": "File",
+        "purpose": "Purpose",
+        "version": "Version",
+        "license": "License",
+        "article": "Article",
+        "template": "Template",
+        "backup": "GPO backup",
+        "notSpecified": "Not specified",
+        "notAvailable": "n/a",
+        "none": "&ndash;"
+      }
+    },
+    {
+      "code": "de",
+      "file": "README.de.md",
+      "labels": {
+        "file": "Datei",
+        "purpose": "Zweck",
+        "version": "Version",
+        "license": "Lizenz",
+        "article": "Artikel",
+        "template": "Template",
+        "backup": "GPO-Backup",
+        "notSpecified": "Nicht angegeben",
+        "notAvailable": "k. A.",
+        "none": "&ndash;"
+      }
+    },
+    {
+      "code": "es",
+      "file": "README.es.md",
+      "labels": {
+        "file": "Archivo",
+        "purpose": "Propósito",
+        "version": "Versión",
+        "license": "Licencia",
+        "article": "Artículo",
+        "template": "Plantilla",
+        "backup": "Copia de seguridad de GPO",
+        "notSpecified": "No especificada",
+        "notAvailable": "n/d",
+        "none": "&ndash;"
+      }
+    },
+    {
+      "code": "fr",
+      "file": "README.fr.md",
+      "labels": {
+        "file": "Fichier",
+        "purpose": "Objet",
+        "version": "Version",
+        "license": "Licence",
+        "article": "Article",
+        "template": "Modèle",
+        "backup": "Sauvegarde GPO",
+        "notSpecified": "Non spécifiée",
+        "notAvailable": "n/d",
+        "none": "&ndash;"
+      }
+    }
+  ],
+  "licenses": {
+    "MIT": {
+      "en": "The MIT License (MIT)",
+      "de": "MIT-Lizenz (MIT)",
+      "es": "Licencia MIT (MIT)",
+      "fr": "Licence MIT (MIT)"
+    },
+    "GPLv3": {
+      "en": "GNU General Public License v3 (GPLv3)",
+      "de": "GNU General Public License v3 (GPLv3)",
+      "es": "GNU General Public License v3 (GPLv3)",
+      "fr": "GNU General Public License v3 (GPLv3)"
+    },
+    "MIT-EVOTEC": {
+      "en": "MIT (LDAP test code: MIT &copy; Evotec)",
+      "de": "MIT (LDAP-Testcode: MIT &copy; Evotec)",
+      "es": "MIT (código de prueba LDAP: MIT &copy; Evotec)",
+      "fr": "MIT (code de test LDAP : MIT &copy; Evotec)"
+    }
+  },
+  "categories": [
+    {
+      "id": "root",
+      "titles": {
+        "en": "Root scripts",
+        "de": "Hauptskripte",
+        "es": "Scripts principales",
+        "fr": "Scripts racine"
+      }
+    },
+    { "id": "ActiveDirectory", "titles": { "en": "ActiveDirectory", "de": "ActiveDirectory", "es": "ActiveDirectory", "fr": "ActiveDirectory" } },
+    { "id": "Azure", "titles": { "en": "Azure", "de": "Azure", "es": "Azure", "fr": "Azure" } },
+    { "id": "BitLocker", "titles": { "en": "BitLocker", "de": "BitLocker", "es": "BitLocker", "fr": "BitLocker" } },
+    { "id": "Exchange", "titles": { "en": "Exchange", "de": "Exchange", "es": "Exchange", "fr": "Exchange" } },
+    { "id": "GPO", "titles": { "en": "GPO", "de": "GPO", "es": "GPO", "fr": "GPO" } },
+    { "id": "Intune", "titles": { "en": "Intune", "de": "Intune", "es": "Intune", "fr": "Intune" } },
+    { "id": "Linux-Files", "titles": { "en": "Linux-Files", "de": "Linux-Files", "es": "Linux-Files", "fr": "Linux-Files" } },
+    { "id": "Network", "titles": { "en": "Network", "de": "Network", "es": "Network", "fr": "Network" } },
+    { "id": "User", "titles": { "en": "User", "de": "User", "es": "User", "fr": "User" } },
+    { "id": "Windows", "titles": { "en": "Windows", "de": "Windows", "es": "Windows", "fr": "Windows" } },
+    { "id": "WSUS", "titles": { "en": "WSUS", "de": "WSUS", "es": "WSUS", "fr": "WSUS" } }
+  ],
+  "scripts": [
+    {
+      "path": "Set-WinRelease.ps1",
+      "purpose": {
+        "en": "Set registry keys to keep Windows on a specific release (feature update target version).",
+        "de": "Registry-Schlüssel setzen, um Windows auf einem bestimmten Release zu halten (Ziel-Version für Funktionsupdates).",
+        "es": "Establecer claves del registro para mantener Windows en una versión concreta (versión de destino de las actualizaciones de características).",
+        "fr": "Définir des clés de registre pour maintenir Windows sur une version précise (version cible des mises à jour de fonctionnalités)."
+      }
+    },
+    {
+      "path": "Get-WindowsSid.ps1",
+      "purpose": {
+        "en": "Collect Windows SIDs from online AD computers via Sysinternals PSGetSid.",
+        "de": "Windows-SIDs von erreichbaren AD-Computern mit Sysinternals PSGetSid sammeln.",
+        "es": "Recopilar los SID de Windows de los equipos de AD accesibles mediante Sysinternals PSGetSid.",
+        "fr": "Collecter les SID Windows des ordinateurs AD accessibles via Sysinternals PSGetSid."
+      }
+    },
+    {
+      "path": "install-greenshot.ps1",
+      "purpose": {
+        "en": "Install the ZIP version of Greenshot and create Start Menu entries.",
+        "de": "Die ZIP-Variante von Greenshot installieren und Startmenü-Einträge anlegen.",
+        "es": "Instalar la versión ZIP de Greenshot y crear entradas en el menú Inicio.",
+        "fr": "Installer la version ZIP de Greenshot et créer les entrées du menu Démarrer."
+      }
+    },
+    {
+      "path": "Set-Network.ps1",
+      "purpose": {
+        "en": "Apply common network settings (DNS domain, NetBIOS, IPv6).",
+        "de": "Gängige Netzwerkeinstellungen setzen (DNS-Domäne, NetBIOS, IPv6).",
+        "es": "Aplicar configuraciones de red habituales (dominio DNS, NetBIOS, IPv6).",
+        "fr": "Appliquer les paramètres réseau courants (domaine DNS, NetBIOS, IPv6)."
+      }
+    },
+    {
+      "path": "New-DokuwikiAnimal.ps1",
+      "purpose": {
+        "en": "Create a DokuWiki \"animal\" structure with matching AD groups and shares.",
+        "de": "Eine DokuWiki-\"Animal\"-Struktur samt passender AD-Gruppen und Freigaben erstellen.",
+        "es": "Crear una estructura \"animal\" de DokuWiki con los grupos de AD y los recursos compartidos correspondientes.",
+        "fr": "Créer une structure DokuWiki « animal » avec les groupes AD et les partages correspondants."
+      }
+    },
+    {
+      "path": "send-files.ps1",
+      "purpose": {
+        "en": "Send files from a directory via email.",
+        "de": "Dateien aus einem Verzeichnis per E-Mail versenden.",
+        "es": "Enviar por correo electrónico los archivos de un directorio.",
+        "fr": "Envoyer par e-mail les fichiers d'un répertoire."
+      }
+    },
+    {
+      "path": "generate-hosts.ps1",
+      "purpose": {
+        "en": "Generate a hosts file based on Active Directory.",
+        "de": "Eine hosts-Datei auf Basis von Active Directory erzeugen.",
+        "es": "Generar un archivo hosts a partir de Active Directory.",
+        "fr": "Générer un fichier hosts à partir d'Active Directory."
+      }
+    },
+    {
+      "path": "ActiveDirectory/Configure-AD.ps1",
+      "purpose": {
+        "en": "Configure an AD domain (e.g., recycle bin, gMSA prep, central store, password policies, OU structure).",
+        "de": "Eine AD-Domäne konfigurieren (u. a. Papierkorb, gMSA-Vorbereitung, Central Store, Kennwortrichtlinien, OU-Struktur).",
+        "es": "Configurar un dominio de AD (papelera de reciclaje, preparación de gMSA, almacén central, directivas de contraseñas, estructura de OU).",
+        "fr": "Configurer un domaine AD (corbeille, préparation gMSA, magasin central, stratégies de mot de passe, structure d'OU)."
+      }
+    },
+    {
+      "path": "ActiveDirectory/Get-ADPermissionsReport.ps1",
+      "purpose": {
+        "en": "Export CSV report of Active Directory permissions.",
+        "de": "CSV-Bericht der Active-Directory-Berechtigungen exportieren.",
+        "es": "Exportar un informe CSV de los permisos de Active Directory.",
+        "fr": "Exporter un rapport CSV des autorisations Active Directory."
+      }
+    },
+    {
+      "path": "ActiveDirectory/Get-DFSRBacklog.ps1",
+      "purpose": {
+        "en": "Check the DFSR backlog and generate replication reports (optional CSV export and hash comparison).",
+        "de": "DFSR-Backlog prüfen und Replikationsberichte erzeugen (optional CSV-Export und Hash-Vergleich).",
+        "es": "Comprobar el backlog de DFSR y generar informes de replicación (exportación CSV y comparación de hashes opcionales).",
+        "fr": "Contrôler le backlog DFSR et générer des rapports de réplication (export CSV et comparaison de hachages en option)."
+      }
+    },
+    {
+      "path": "ActiveDirectory/Get-LAPSAuditReport.ps1",
+      "purpose": {
+        "en": "Query security events for Microsoft LAPS-related audit activity.",
+        "de": "Sicherheitsereignisse zu Microsoft-LAPS-Auditaktivitäten auswerten.",
+        "es": "Consultar los eventos de seguridad relacionados con la auditoría de Microsoft LAPS.",
+        "fr": "Interroger les événements de sécurité liés à l'audit de Microsoft LAPS."
+      }
+    },
+    {
+      "path": "ActiveDirectory/Get-LocalNTLMlogs.ps1",
+      "purpose": {
+        "en": "Analyze local `Microsoft-Windows-NTLM/Operational` events with classification.",
+        "de": "Lokale `Microsoft-Windows-NTLM/Operational`-Ereignisse analysieren und klassifizieren.",
+        "es": "Analizar y clasificar los eventos locales `Microsoft-Windows-NTLM/Operational`.",
+        "fr": "Analyser et classifier les événements locaux `Microsoft-Windows-NTLM/Operational`."
+      }
+    },
+    {
+      "path": "ActiveDirectory/Get-NTLMLogons.ps1",
+      "purpose": {
+        "en": "Analyze security logs for NTLM logons and authentication usage.",
+        "de": "Sicherheitsprotokolle auf NTLM-Anmeldungen und Authentifizierungsnutzung auswerten.",
+        "es": "Analizar los registros de seguridad en busca de inicios de sesión NTLM y uso de autenticación.",
+        "fr": "Analyser les journaux de sécurité pour les ouvertures de session NTLM et l'usage de l'authentification."
+      }
+    },
+    {
+      "path": "ActiveDirectory/Get-PKICertlist.ps1",
+      "purpose": {
+        "en": "Enumerate certificates/templates from AD CS / PKI context.",
+        "de": "Zertifikate und Vorlagen aus dem AD CS-/PKI-Kontext auflisten.",
+        "es": "Enumerar certificados y plantillas del contexto de AD CS / PKI.",
+        "fr": "Énumérer les certificats et modèles du contexte AD CS / PKI."
+      }
+    },
+    {
+      "path": "ActiveDirectory/Locate-46xx.ps1",
+      "purpose": {
+        "en": "Locate AD lockout-related events (46xx security events).",
+        "de": "AD-Sperrungsereignisse (46xx-Sicherheitsereignisse) aufspüren.",
+        "es": "Localizar los eventos de bloqueo de AD (eventos de seguridad 46xx).",
+        "fr": "Localiser les événements de verrouillage AD (événements de sécurité 46xx)."
+      }
+    },
+    {
+      "path": "ActiveDirectory/Locate-ADLockout.ps1",
+      "purpose": {
+        "en": "Locate user lockout sources in Active Directory.",
+        "de": "Quellen von Benutzersperrungen in Active Directory finden.",
+        "es": "Localizar el origen de los bloqueos de usuario en Active Directory.",
+        "fr": "Identifier la source des verrouillages de comptes dans Active Directory."
+      }
+    },
+    {
+      "path": "ActiveDirectory/Repair-DFSR.ps1",
+      "purpose": {
+        "en": "Repair DFS-R replication (including SYSVOL) on domain controllers.",
+        "de": "DFS-R-Replikation (inkl. SYSVOL) auf Domänencontrollern reparieren.",
+        "es": "Reparar la replicación DFS-R (incluido SYSVOL) en controladores de dominio.",
+        "fr": "Réparer la réplication DFS-R (y compris SYSVOL) sur les contrôleurs de domaine."
+      }
+    },
+    {
+      "path": "ActiveDirectory/Reset-DSRM.ps1",
+      "purpose": {
+        "en": "Reset DSRM password on a domain controller.",
+        "de": "DSRM-Kennwort auf einem Domänencontroller zurücksetzen.",
+        "es": "Restablecer la contraseña de DSRM en un controlador de dominio.",
+        "fr": "Réinitialiser le mot de passe DSRM sur un contrôleur de domaine."
+      }
+    },
+    {
+      "path": "ActiveDirectory/execute-RemoteScriptWithLAPS.ps1",
+      "purpose": {
+        "en": "Run remote scripts with local admin credentials managed by Microsoft LAPS.",
+        "de": "Remote-Skripte mit lokalen Administratorkonten ausführen, die von Microsoft LAPS verwaltet werden.",
+        "es": "Ejecutar scripts remotos con credenciales de administrador local gestionadas por Microsoft LAPS.",
+        "fr": "Exécuter des scripts distants avec des comptes administrateur locaux gérés par Microsoft LAPS."
+      }
+    },
+    {
+      "path": "ActiveDirectory/get-CVE20201472Events.ps1",
+      "purpose": {
+        "en": "Check domain controllers for Netlogon CVE-2020-1472-related event IDs (5827-5829).",
+        "de": "Domänencontroller auf Netlogon-Ereignisse zu CVE-2020-1472 (IDs 5827-5829) prüfen.",
+        "es": "Comprobar en los controladores de dominio los eventos de Netlogon relacionados con CVE-2020-1472 (5827-5829).",
+        "fr": "Vérifier sur les contrôleurs de domaine les événements Netlogon liés à CVE-2020-1472 (5827-5829)."
+      }
+    },
+    {
+      "path": "ActiveDirectory/get-adinfo.ps1",
+      "purpose": {
+        "en": "Collect core AD forest/domain information and report details.",
+        "de": "Zentrale Informationen zu AD-Forest und -Domäne sammeln und berichten.",
+        "es": "Recopilar la información principal del bosque y del dominio de AD y generar el informe.",
+        "fr": "Collecter les informations principales de la forêt et du domaine AD et générer le rapport."
+      }
+    },
+    {
+      "path": "ActiveDirectory/install-AD.ps1",
+      "purpose": {
+        "en": "Install and bootstrap a new Active Directory domain.",
+        "de": "Eine neue Active-Directory-Domäne installieren und initial einrichten.",
+        "es": "Instalar e inicializar un nuevo dominio de Active Directory.",
+        "fr": "Installer et initialiser un nouveau domaine Active Directory."
+      }
+    },
+    {
+      "path": "ActiveDirectory/install-DC.ps1",
+      "purpose": {
+        "en": "Install/promote an additional domain controller.",
+        "de": "Einen zusätzlichen Domänencontroller installieren bzw. heraufstufen.",
+        "es": "Instalar o promover un controlador de dominio adicional.",
+        "fr": "Installer ou promouvoir un contrôleur de domaine supplémentaire."
+      }
+    },
+    {
+      "path": "ActiveDirectory/move-FSMO.ps1",
+      "purpose": {
+        "en": "Move FSMO roles to a new domain controller.",
+        "de": "FSMO-Rollen auf einen neuen Domänencontroller übertragen.",
+        "es": "Transferir los roles FSMO a un nuevo controlador de dominio.",
+        "fr": "Transférer les rôles FSMO vers un nouveau contrôleur de domaine."
+      }
+    },
+    {
+      "path": "ActiveDirectory/set-BSI-TR-02102-2.ps1",
+      "purpose": {
+        "en": "Configure Windows cryptographic settings according to BSI TR-02102-2 (TLS/cipher hardening).",
+        "de": "Kryptografische Windows-Einstellungen gemäß BSI TR-02102-2 konfigurieren (TLS-/Cipher-Härtung).",
+        "es": "Configurar los ajustes criptográficos de Windows según BSI TR-02102-2 (endurecimiento de TLS y cifrados).",
+        "fr": "Configurer les paramètres cryptographiques de Windows selon BSI TR-02102-2 (durcissement TLS et suites de chiffrement)."
+      }
+    },
+    {
+      "path": "Azure/Install-AzCopy.ps1",
+      "purpose": {
+        "en": "Download and install the latest AzCopy for the current user.",
+        "de": "Aktuelles AzCopy für den aktuellen Benutzer herunterladen und installieren.",
+        "es": "Descargar e instalar la última versión de AzCopy para el usuario actual.",
+        "fr": "Télécharger et installer la dernière version d'AzCopy pour l'utilisateur courant."
+      }
+    },
+    {
+      "path": "Azure/Install-AzModule.ps1",
+      "purpose": {
+        "en": "Install/update Azure PowerShell modules (`Az`).",
+        "de": "Azure-PowerShell-Module (`Az`) installieren bzw. aktualisieren.",
+        "es": "Instalar o actualizar los módulos de Azure PowerShell (`Az`).",
+        "fr": "Installer ou mettre à jour les modules Azure PowerShell (`Az`)."
+      }
+    },
+    {
+      "path": "BitLocker/List-BitLockerrecoveryKeys.ps1",
+      "purpose": {
+        "en": "List BitLocker recovery keys stored in Active Directory.",
+        "de": "In Active Directory gespeicherte BitLocker-Wiederherstellungsschlüssel auflisten.",
+        "es": "Listar las claves de recuperación de BitLocker almacenadas en Active Directory.",
+        "fr": "Lister les clés de récupération BitLocker stockées dans Active Directory."
+      }
+    },
+    {
+      "path": "BitLocker/Start-Bitlocker.ps1",
+      "purpose": {
+        "en": "Start BitLocker encryption with predefined settings (including PIN workflows).",
+        "de": "BitLocker-Verschlüsselung mit vordefinierten Einstellungen starten (inkl. PIN-Abläufen).",
+        "es": "Iniciar el cifrado de BitLocker con una configuración predefinida (incluidos los flujos con PIN).",
+        "fr": "Démarrer le chiffrement BitLocker avec des paramètres prédéfinis (y compris les scénarios avec PIN)."
+      }
+    },
+    {
+      "path": "BitLocker/Update-BitLockerRecovery.ps1",
+      "purpose": {
+        "en": "Upload missing BitLocker recovery information to Active Directory.",
+        "de": "Fehlende BitLocker-Wiederherstellungsinformationen nach Active Directory hochladen.",
+        "es": "Cargar en Active Directory la información de recuperación de BitLocker que falte.",
+        "fr": "Téléverser vers Active Directory les informations de récupération BitLocker manquantes."
+      }
+    },
+    {
+      "path": "Exchange/Set-MaintananceMode.ps1",
+      "purpose": {
+        "en": "Put an Exchange 2013 DAG node into maintenance mode.",
+        "de": "Einen Exchange-2013-DAG-Knoten in den Wartungsmodus versetzen.",
+        "es": "Poner un nodo DAG de Exchange 2013 en modo de mantenimiento.",
+        "fr": "Placer un nœud DAG Exchange 2013 en mode maintenance."
+      }
+    },
+    {
+      "path": "Exchange/Set-Ex2013Vdir.ps1",
+      "purpose": {
+        "en": "Configure Exchange 2013 virtual directories/URLs.",
+        "de": "Virtuelle Verzeichnisse und URLs von Exchange 2013 konfigurieren.",
+        "es": "Configurar los directorios virtuales y las URL de Exchange 2013.",
+        "fr": "Configurer les répertoires virtuels et les URL d'Exchange 2013."
+      }
+    },
+    {
+      "path": "GPO/Check-LocalGroupPolicy.ps1",
+      "purpose": {
+        "en": "Detect and fix local Group Policy processing issues based on event logs.",
+        "de": "Probleme bei der Verarbeitung lokaler Gruppenrichtlinien anhand der Ereignisprotokolle erkennen und beheben.",
+        "es": "Detectar y corregir problemas de procesamiento de directivas de grupo locales a partir de los registros de eventos.",
+        "fr": "Détecter et corriger les problèmes de traitement des stratégies de groupe locales à partir des journaux d'événements."
+      }
+    },
+    {
+      "path": "GPO/get-GPOBackup.ps1",
+      "purpose": {
+        "en": "Create timestamped GPO backups including HTML reports.",
+        "de": "GPO-Backups mit Zeitstempel inklusive HTML-Berichten erstellen.",
+        "es": "Crear copias de seguridad de GPO con marca de tiempo, incluidos informes HTML.",
+        "fr": "Créer des sauvegardes de GPO horodatées, avec rapports HTML."
+      }
+    },
+    {
+      "path": "GPO/get-GPOreport.ps1",
+      "purpose": {
+        "en": "Export/report GPO links and metadata for documentation.",
+        "de": "GPO-Verknüpfungen und Metadaten für die Dokumentation exportieren bzw. berichten.",
+        "es": "Exportar e informar los vínculos y metadatos de las GPO para la documentación.",
+        "fr": "Exporter et documenter les liaisons et métadonnées des GPO."
+      }
+    },
+    {
+      "path": "GPO/invoke-GPupdateDomain.ps1",
+      "purpose": {
+        "en": "Trigger remote GPUpdate for computers in an OU (or wider scope).",
+        "de": "Remote-GPUpdate für Computer in einer OU (oder einem größeren Bereich) auslösen.",
+        "es": "Lanzar GPUpdate de forma remota para los equipos de una OU (o de un ámbito mayor).",
+        "fr": "Déclencher un GPUpdate distant pour les ordinateurs d'une OU (ou d'un périmètre plus large)."
+      }
+    },
+    {
+      "path": "Intune/create-package.ps1",
+      "purpose": {
+        "en": "Build `.intunewin` packages from source folders.",
+        "de": "`.intunewin`-Pakete aus Quellordnern erzeugen.",
+        "es": "Generar paquetes `.intunewin` a partir de carpetas de origen.",
+        "fr": "Générer des packages `.intunewin` à partir de dossiers sources."
+      }
+    },
+    {
+      "path": "Intune/get-AutopilotLogs.ps1",
+      "purpose": {
+        "en": "Collect logs and diagnostics for Autopilot pre-provisioning.",
+        "de": "Protokolle und Diagnosedaten für das Autopilot-Pre-Provisioning sammeln.",
+        "es": "Recopilar registros y diagnósticos del aprovisionamiento previo de Autopilot.",
+        "fr": "Collecter les journaux et diagnostics du pré-provisionnement Autopilot."
+      }
+    },
+    {
+      "path": "Linux-Files/allow_windowsupdate.squid",
+      "purpose": {
+        "en": "Squid ACL allowlist for Windows Update endpoints.",
+        "de": "Squid-ACL-Positivliste für Windows-Update-Endpunkte.",
+        "es": "Lista de permitidos (ACL de Squid) para los endpoints de Windows Update.",
+        "fr": "Liste d'autorisation (ACL Squid) pour les points de terminaison Windows Update."
+      }
+    },
+    {
+      "path": "Linux-Files/allow_psgallery.squid",
+      "purpose": {
+        "en": "Squid ACL allowlist for PowerShell Gallery / NuGet endpoints.",
+        "de": "Squid-ACL-Positivliste für PowerShell-Gallery-/NuGet-Endpunkte.",
+        "es": "Lista de permitidos (ACL de Squid) para los endpoints de PowerShell Gallery / NuGet.",
+        "fr": "Liste d'autorisation (ACL Squid) pour les points de terminaison PowerShell Gallery / NuGet."
+      }
+    },
+    {
+      "path": "Linux-Files/allow_github.squid",
+      "purpose": {
+        "en": "Squid ACL allowlist for GitHub endpoints.",
+        "de": "Squid-ACL-Positivliste für GitHub-Endpunkte.",
+        "es": "Lista de permitidos (ACL de Squid) para los endpoints de GitHub.",
+        "fr": "Liste d'autorisation (ACL Squid) pour les points de terminaison GitHub."
+      }
+    },
+    {
+      "path": "Linux-Files/allow_vscode.squid",
+      "purpose": {
+        "en": "Squid ACL allowlist for Visual Studio Code endpoints.",
+        "de": "Squid-ACL-Positivliste für Visual-Studio-Code-Endpunkte.",
+        "es": "Lista de permitidos (ACL de Squid) para los endpoints de Visual Studio Code.",
+        "fr": "Liste d'autorisation (ACL Squid) pour les points de terminaison Visual Studio Code."
+      }
+    },
+    {
+      "path": "Network/Check-Network.ps1",
+      "purpose": {
+        "en": "Validate client network connectivity and configuration.",
+        "de": "Netzwerkverbindung und -konfiguration eines Clients prüfen.",
+        "es": "Validar la conectividad y la configuración de red de un cliente.",
+        "fr": "Valider la connectivité et la configuration réseau d'un client."
+      }
+    },
+    {
+      "path": "Network/disable-NetBios.ps1",
+      "purpose": {
+        "en": "Disable NetBIOS over TCP/IP on active adapters.",
+        "de": "NetBIOS über TCP/IP auf aktiven Adaptern deaktivieren.",
+        "es": "Desactivar NetBIOS sobre TCP/IP en los adaptadores activos.",
+        "fr": "Désactiver NetBIOS sur TCP/IP sur les cartes réseau actives."
+      }
+    },
+    {
+      "path": "User/create-user.ps1",
+      "purpose": {
+        "en": "Create AD users (including Microsoft 365 onboarding patterns).",
+        "de": "AD-Benutzer anlegen (inklusive Microsoft-365-Onboarding).",
+        "es": "Crear usuarios de AD (incluida la incorporación a Microsoft 365).",
+        "fr": "Créer des utilisateurs AD (y compris l'intégration Microsoft 365)."
+      }
+    },
+    {
+      "path": "User/Get-LastLogonOU.ps1",
+      "purpose": {
+        "en": "Report last logon values for users in an OU (AD + Exchange context).",
+        "de": "Letzte Anmeldung aller Benutzer einer OU auswerten (AD und Exchange).",
+        "es": "Informar del último inicio de sesión de los usuarios de una OU (contexto de AD y Exchange).",
+        "fr": "Rapporter la dernière ouverture de session des utilisateurs d'une OU (contexte AD et Exchange)."
+      }
+    },
+    {
+      "path": "Windows/set-cert4rdp.ps1",
+      "purpose": {
+        "en": "Bind/set the RDP certificate from a specific issuing CA.",
+        "de": "Das RDP-Zertifikat einer bestimmten ausstellenden CA zuweisen.",
+        "es": "Asignar el certificado de RDP emitido por una CA concreta.",
+        "fr": "Affecter le certificat RDP émis par une autorité de certification donnée."
+      }
+    },
+    {
+      "path": "Windows/Remove-AzureArc.ps1",
+      "purpose": {
+        "en": "Remove Azure Arc agent/components and reboot automatically if required.",
+        "de": "Azure-Arc-Agent und -Komponenten entfernen und bei Bedarf automatisch neu starten.",
+        "es": "Eliminar el agente y los componentes de Azure Arc y reiniciar automáticamente si es necesario.",
+        "fr": "Supprimer l'agent et les composants Azure Arc, avec redémarrage automatique si nécessaire."
+      }
+    },
+    {
+      "path": "WSUS/decline-WSUSUpdatesTypes.ps1",
+      "purpose": {
+        "en": "Decline selected update classifications/products in WSUS.",
+        "de": "Ausgewählte Updateklassifizierungen bzw. Produkte in WSUS ablehnen.",
+        "es": "Rechazar clasificaciones o productos de actualización seleccionados en WSUS.",
+        "fr": "Refuser des classifications ou produits de mise à jour sélectionnés dans WSUS."
+      }
+    },
+    {
+      "path": "WSUS/Reset-WSUSClient.cmd",
+      "purpose": {
+        "en": "Reset WSUS client configuration and detection state.",
+        "de": "WSUS-Client-Konfiguration und Erkennungsstatus zurücksetzen.",
+        "es": "Restablecer la configuración del cliente WSUS y su estado de detección.",
+        "fr": "Réinitialiser la configuration du client WSUS et son état de détection."
+      }
+    },
+    {
+      "path": "WSUS/start-WsusServerSync.ps1",
+      "purpose": {
+        "en": "Start WSUS synchronization (supports recursive upstream/downstream and email logging).",
+        "de": "WSUS-Synchronisierung starten (unterstützt rekursive Upstream-/Downstream-Server und E-Mail-Protokollierung).",
+        "es": "Iniciar la sincronización de WSUS (admite servidores ascendentes/descendentes recursivos y registro por correo).",
+        "fr": "Démarrer la synchronisation WSUS (prend en charge les serveurs amont/aval récursifs et la journalisation par e-mail)."
+      }
+    },
+    {
+      "path": "WSUS/Get-WsusHealth.ps1",
+      "purpose": {
+        "en": "Run comprehensive WSUS health checks and generate diagnostic output.",
+        "de": "Umfassende WSUS-Health-Checks ausführen und Diagnoseausgaben erzeugen.",
+        "es": "Ejecutar comprobaciones completas de salud de WSUS y generar la salida de diagnóstico.",
+        "fr": "Exécuter des contrôles de santé WSUS complets et produire une sortie de diagnostic."
+      }
+    }
+  ],
+  "templates": [
+    {
+      "path": "GPO/Templates/Win11-24H2-IT-Grundschutz-Darksite.md",
+      "purpose": {
+        "en": "Windows 11 24H2 &ndash; IT basic protection (darksite / restricted cloud communication).",
+        "de": "Windows 11 24H2 &ndash; IT-Grundschutz (Darksite / eingeschränkte Cloud-Kommunikation).",
+        "es": "Windows 11 24H2 &ndash; protección básica de TI (darksite / comunicación limitada con la nube).",
+        "fr": "Windows 11 24H2 &ndash; protection de base informatique (darksite / communication cloud restreinte)."
+      }
+    },
+    {
+      "path": "GPO/Templates/Win11-Disable-Copilot.md",
+      "purpose": {
+        "en": "Windows 11 &ndash; disable Microsoft Copilot and AI features.",
+        "de": "Windows 11 &ndash; Microsoft Copilot und KI-Funktionen deaktivieren.",
+        "es": "Windows 11 &ndash; desactivar Microsoft Copilot y las funciones de IA.",
+        "fr": "Windows 11 &ndash; désactiver Microsoft Copilot et les fonctions d'IA."
+      }
+    },
+    {
+      "path": "GPO/Templates/MSOffice-Deactivate-Copilot.md",
+      "purpose": {
+        "en": "Microsoft Office &ndash; disable Copilot and AI features.",
+        "de": "Microsoft Office &ndash; Copilot und KI-Funktionen deaktivieren.",
+        "es": "Microsoft Office &ndash; desactivar Copilot y las funciones de IA.",
+        "fr": "Microsoft Office &ndash; désactiver Copilot et les fonctions d'IA."
+      }
+    },
+    {
+      "path": "GPO/Templates/VisualStudio-Deactivate-Copilot.md",
+      "purpose": {
+        "en": "Visual Studio &ndash; disable Copilot and AI features.",
+        "de": "Visual Studio &ndash; Copilot und KI-Funktionen deaktivieren.",
+        "es": "Visual Studio &ndash; desactivar Copilot y las funciones de IA.",
+        "fr": "Visual Studio &ndash; désactiver Copilot et les fonctions d'IA."
+      }
+    }
+  ]
+}

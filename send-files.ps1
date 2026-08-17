@@ -19,7 +19,7 @@ Path where file will moved after sending
 Filter for file types
 
 .PARAMETER SmtpServer
-SmtpServer witch is uses to send the mail
+SmtpServer which is used to send the mail
 
 .PARAMETER From
 Mail From

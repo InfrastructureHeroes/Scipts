@@ -33,7 +33,7 @@ Ce dépôt contient des scripts d'administration pour :
 ## Table des matières
 
 - [Aperçu du dépôt](#aperçu-du-dépôt)
-- [Inventaire des scripts (analysé depuis le dépôt)](#inventaire-des-scripts-analysé-depuis-le-dépôt)
+- [Inventaire des scripts](#inventaire-des-scripts)
   - [Scripts racine](#scripts-racine)
   - [ActiveDirectory](#activedirectory)
   - [Azure](#azure)
@@ -46,136 +46,158 @@ Ce dépôt contient des scripts d'administration pour :
   - [User](#user)
   - [Windows](#windows)
   - [WSUS](#wsus)
+- [Modèles de GPO](#modèles-de-gpo)
 - [Fichiers supplémentaires](#fichiers-supplémentaires)
 - [Notes](#notes)
 
 
-## Inventaire des scripts (analysé depuis le dépôt)
+## Inventaire des scripts
 
-Les descriptions sont basées sur `.SYNOPSIS` / `.DESCRIPTION` lorsqu'elles existent ; sinon, elles sont déduites du nom et du contenu des scripts.
+Les tableaux ci-dessous sont générés par [`Tools/Update-Readme.ps1`](./Tools/Update-Readme.ps1). Les textes d'objet sont maintenus dans [`Tools/readme-inventory.json`](./Tools/readme-inventory.json) ; la version, la licence et les liens d'articles proviennent des en-têtes des scripts. Ne modifiez pas les tableaux à la main.
 
 > **Notes version/licence**
-> - **Version** : déterminée dans cet ordre : variable `$ScriptVersion` dans le script, puis `$script:BuildVer`, puis `Version    :` dans l'en-tête, sinon `n/a`.
-> - **Licence** : lue sur la ligne `License    :` de la section `.NOTES` ; si absente, `Not specified`.
+> - **Version** : déterminée dans cet ordre : variable `$ScriptVersion` dans le script, puis `$script:BuildVer`, puis le premier mot de `Version    :` dans l'en-tête, sinon `n/d`.
+> - **Licence** : lue sur la ligne `License    :` de l'en-tête, à défaut sur une mention de licence explicite de l'en-tête. Si aucune n'existe, `Non spécifiée`.
+> - **Article** : issu de la section `.LINK` de l'en-tête (`EN` = infrastructureheroes.org, `DE` = infrastrukturhelden.de).
 
+<!-- BEGIN GENERATED: inventory -->
 ### Scripts racine
 
-| Fichier | Objet | Version | Licence |
-|---|---|---|---|
-| `Set-WinRelease.ps1` | Set registry keys to keep Windows 10 on a specific release. | 1.1 | The MIT License (MIT) |
-| `Get-WindowsSid.ps1` | Collect Windows SIDs from online AD computers via Sysinternals PSGetSid. | 1.2 | The MIT License (MIT) |
-| `install-greenshot.ps1` | Install the ZIP version of Greenshot and create Start Menu entries. | 1.1 | The MIT License (MIT) |
-| `Set-Network.ps1` | Apply common network settings (DNS domain, NetBIOS, IPv6). | 1.2 | The MIT License (MIT) |
-| `New-DokuwikiAnimal.ps1` | Create a DokuWiki "animal" structure with matching AD groups and shares. | 0.1 | The MIT License (MIT) |
-| `send-files.ps1` | Send files from a directory via email. | 1.3 | The MIT License (MIT) |
-| `generate-hosts.ps1` | Generate a hosts file based on Active Directory. | 1.1 | The MIT License (MIT) |
+| Fichier | Objet | Version | Licence | Article |
+|---|---|---|---|---|
+| `Set-WinRelease.ps1` | Définir des clés de registre pour maintenir Windows sur une version précise (version cible des mises à jour de fonctionnalités). | 1.1 | Licence MIT (MIT) | &ndash; |
+| `Get-WindowsSid.ps1` | Collecter les SID Windows des ordinateurs AD accessibles via Sysinternals PSGetSid. | 1.2 | Licence MIT (MIT) | [EN](https://www.infrastructureheroes.org/microsoft-infrastructure/microsoft-windows/the-windows-sid-and-an-old-problem/) / [DE](https://www.infrastrukturhelden.de/microsoft-infrastruktur/microsoft-windows/die-windows-sid-und-ein-altes-problem/) |
+| `install-greenshot.ps1` | Installer la version ZIP de Greenshot et créer les entrées du menu Démarrer. | 1.1 | Licence MIT (MIT) | &ndash; |
+| `Set-Network.ps1` | Appliquer les paramètres réseau courants (domaine DNS, NetBIOS, IPv6). | 1.2 | Licence MIT (MIT) | &ndash; |
+| `New-DokuwikiAnimal.ps1` | Créer une structure DokuWiki « animal » avec les groupes AD et les partages correspondants. | 0.1 | Licence MIT (MIT) | &ndash; |
+| `send-files.ps1` | Envoyer par e-mail les fichiers d'un répertoire. | 1.3 | Licence MIT (MIT) | [DE](https://www.infrastrukturhelden.de/?p=13527) |
+| `generate-hosts.ps1` | Générer un fichier hosts à partir d'Active Directory. | 1.1 | Licence MIT (MIT) | &ndash; |
 
 ### ActiveDirectory
 
-| Fichier | Objet | Version | Licence |
-|---|---|---|---|
-| `ActiveDirectory/Configure-AD.ps1` | Configure an AD domain (e.g., recycle bin, gMSA prep, central store, password policies, OU structure). | 0.2 | Not specified |
-| `ActiveDirectory/Get-ADPermissionsReport.ps1` | Export CSV report of Active Directory permissions. | 0.2 | Not specified |
-| `ActiveDirectory/Get-LAPSAuditReport.ps1` | Query security events for Microsoft LAPS-related audit activity. | n/a | Not specified |
-| `ActiveDirectory/Get-LocalNTLMlogs.ps1` | Analyze local `Microsoft-Windows-NTLM/Operational` events with classification. | 1.0 | GNU General Public License v3 (GPLv3) |
-| `ActiveDirectory/Get-NTLMLogons.ps1` | Analyze security logs for NTLM logons and authentication usage. | 1.3 | GNU General Public License v3 (GPLv3) |
-| `ActiveDirectory/Get-PKICertlist.ps1` | Enumerate certificates/templates from AD CS / PKI context. | n/a | Not specified |
-| `ActiveDirectory/Locate-46xx.ps1` | Locate AD lockout-related events (46xx security events). | 1.0 | Not specified |
-| `ActiveDirectory/Locate-ADLockout.ps1` | Locate user lockout sources in Active Directory. | 1.0 | Not specified |
-| `ActiveDirectory/Repair-DFSR.ps1` | Repair DFS-R replication (including SYSVOL) on domain controllers. | 0.1 | Not specified |
-| `ActiveDirectory/Reset-DSRM.ps1` | Reset DSRM password on a domain controller. | 0.3 | GNU General Public License v3 (GPLv3) |
-| `ActiveDirectory/execute-RemoteScriptWithLAPS.ps1` | Run remote scripts with local admin credentials managed by Microsoft LAPS. | 1.1 | Not specified |
-| `ActiveDirectory/get-CVE20201472Events.ps1` | Check domain controllers for Netlogon CVE-2020-1472-related event IDs (5827-5829). | 1.0 | Not specified |
-| `ActiveDirectory/get-adinfo.ps1` | Collect core AD forest/domain information and report details. | 0.5 | Not specified |
-| `ActiveDirectory/install-AD.ps1` | Install and bootstrap a new Active Directory domain. | 0.1 | Not specified |
-| `ActiveDirectory/install-DC.ps1` | Install/promote an additional domain controller. | 0.1 | Not specified |
-| `ActiveDirectory/move-FSMO.ps1` | Move FSMO roles to a new domain controller. | 0.1 | Not specified |
-| `ActiveDirectory/set-BSI-TR-02102-2.ps1` | Configure Windows cryptographic settings according to BSI TR-02102-2 (TLS/cipher hardening). | 0.2 | GNU General Public License v3 (GPLv3) |
+| Fichier | Objet | Version | Licence | Article |
+|---|---|---|---|---|
+| `ActiveDirectory/Configure-AD.ps1` | Configurer un domaine AD (corbeille, préparation gMSA, magasin central, stratégies de mot de passe, structure d'OU). | 0.2 | Licence MIT (MIT) | &ndash; |
+| `ActiveDirectory/Get-ADPermissionsReport.ps1` | Exporter un rapport CSV des autorisations Active Directory. | 0.2 | Non spécifiée | &ndash; |
+| `ActiveDirectory/Get-DFSRBacklog.ps1` | Contrôler le backlog DFSR et générer des rapports de réplication (export CSV et comparaison de hachages en option). | 0.5 | GNU General Public License v3 (GPLv3) | &ndash; |
+| `ActiveDirectory/Get-LAPSAuditReport.ps1` | Interroger les événements de sécurité liés à l'audit de Microsoft LAPS. | n/d | Non spécifiée | &ndash; |
+| `ActiveDirectory/Get-LocalNTLMlogs.ps1` | Analyser et classifier les événements locaux `Microsoft-Windows-NTLM/Operational`. | 1.0 | GNU General Public License v3 (GPLv3) | &ndash; |
+| `ActiveDirectory/Get-NTLMLogons.ps1` | Analyser les journaux de sécurité pour les ouvertures de session NTLM et l'usage de l'authentification. | 1.3 | GNU General Public License v3 (GPLv3) | &ndash; |
+| `ActiveDirectory/Get-PKICertlist.ps1` | Énumérer les certificats et modèles du contexte AD CS / PKI. | n/d | Non spécifiée | &ndash; |
+| `ActiveDirectory/Locate-46xx.ps1` | Localiser les événements de verrouillage AD (événements de sécurité 46xx). | 1.0 | Non spécifiée | &ndash; |
+| `ActiveDirectory/Locate-ADLockout.ps1` | Identifier la source des verrouillages de comptes dans Active Directory. | 1.0 | Non spécifiée | &ndash; |
+| `ActiveDirectory/Repair-DFSR.ps1` | Réparer la réplication DFS-R (y compris SYSVOL) sur les contrôleurs de domaine. | 0.1 | Non spécifiée | &ndash; |
+| `ActiveDirectory/Reset-DSRM.ps1` | Réinitialiser le mot de passe DSRM sur un contrôleur de domaine. | 0.3 | GNU General Public License v3 (GPLv3) | &ndash; |
+| `ActiveDirectory/execute-RemoteScriptWithLAPS.ps1` | Exécuter des scripts distants avec des comptes administrateur locaux gérés par Microsoft LAPS. | 1.1 | Non spécifiée | [DE](https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/powershell-skripte-mit-local-administrator-password-solution-laps-nutzen-und-auditieren/) |
+| `ActiveDirectory/get-CVE20201472Events.ps1` | Vérifier sur les contrôleurs de domaine les événements Netlogon liés à CVE-2020-1472 (5827-5829). | 1.0 | Non spécifiée | [DE](https://www.infrastrukturhelden.de/?p=14850) |
+| `ActiveDirectory/get-adinfo.ps1` | Collecter les informations principales de la forêt et du domaine AD et générer le rapport. | 0.7 | GNU General Public License v3 (GPLv3) | &ndash; |
+| `ActiveDirectory/install-AD.ps1` | Installer et initialiser un nouveau domaine Active Directory. | 0.1 | Non spécifiée | &ndash; |
+| `ActiveDirectory/install-DC.ps1` | Installer ou promouvoir un contrôleur de domaine supplémentaire. | 0.1 | Non spécifiée | &ndash; |
+| `ActiveDirectory/move-FSMO.ps1` | Transférer les rôles FSMO vers un nouveau contrôleur de domaine. | 0.1 | Non spécifiée | &ndash; |
+| `ActiveDirectory/set-BSI-TR-02102-2.ps1` | Configurer les paramètres cryptographiques de Windows selon BSI TR-02102-2 (durcissement TLS et suites de chiffrement). | 0.3 | GNU General Public License v3 (GPLv3) | &ndash; |
 
 ### Azure
 
-| Fichier | Objet | Version | Licence |
-|---|---|---|---|
-| `Azure/Install-AzCopy.ps1` | Download and install the latest AzCopy for the current user. | 1.0 | Not specified |
-| `Azure/Install-AzModule.ps1` | Install/update Azure PowerShell modules (`Az`). | n/a | Not specified |
+| Fichier | Objet | Version | Licence | Article |
+|---|---|---|---|---|
+| `Azure/Install-AzCopy.ps1` | Télécharger et installer la dernière version d'AzCopy pour l'utilisateur courant. | 1.0 | Non spécifiée | &ndash; |
+| `Azure/Install-AzModule.ps1` | Installer ou mettre à jour les modules Azure PowerShell (`Az`). | n/d | Non spécifiée | &ndash; |
 
 ### BitLocker
 
-| Fichier | Objet | Version | Licence |
-|---|---|---|---|
-| `BitLocker/List-BitLockerrecoveryKeys.ps1` | List BitLocker recovery keys stored in Active Directory. | n/a | Not specified |
-| `BitLocker/Start-Bitlocker.ps1` | Start BitLocker encryption with predefined settings (including PIN workflows). | n/a | Not specified |
-| `BitLocker/Update-BitLockerRecovery.ps1` | Upload missing BitLocker recovery information to Active Directory. | 1.2 | The MIT License (MIT) |
+| Fichier | Objet | Version | Licence | Article |
+|---|---|---|---|---|
+| `BitLocker/List-BitLockerrecoveryKeys.ps1` | Lister les clés de récupération BitLocker stockées dans Active Directory. | n/d | Non spécifiée | &ndash; |
+| `BitLocker/Start-Bitlocker.ps1` | Démarrer le chiffrement BitLocker avec des paramètres prédéfinis (y compris les scénarios avec PIN). | n/d | Non spécifiée | &ndash; |
+| `BitLocker/Update-BitLockerRecovery.ps1` | Téléverser vers Active Directory les informations de récupération BitLocker manquantes. | 1.2 | Non spécifiée | [DE](https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/bitlocker-wiederherstellungs-keys-nachtraglich-im-ad-sichern/) |
 
 ### Exchange
 
-| Fichier | Objet | Version | Licence |
-|---|---|---|---|
-| `Exchange/Set-MaintananceMode.ps1` | Put an Exchange 2013 DAG node into maintenance mode. | 0.2 | Not specified |
-| `Exchange/Set-Ex2013Vdir.ps1` | Configure Exchange 2013 virtual directories/URLs. | 0.1 | Not specified |
+| Fichier | Objet | Version | Licence | Article |
+|---|---|---|---|---|
+| `Exchange/Set-MaintananceMode.ps1` | Placer un nœud DAG Exchange 2013 en mode maintenance. | 0.2 | Non spécifiée | &ndash; |
+| `Exchange/Set-Ex2013Vdir.ps1` | Configurer les répertoires virtuels et les URL d'Exchange 2013. | 0.1 | Non spécifiée | &ndash; |
 
 ### GPO
 
-| Fichier | Objet | Version | Licence |
-|---|---|---|---|
-| `GPO/Check-LocalGroupPolicy.ps1` | Detect and fix local Group Policy processing issues based on event logs. | 0.4 | The MIT License (MIT) |
-| `GPO/get-GPOBackup.ps1` | Create timestamped GPO backups including HTML reports. | 1.8 | The MIT License (MIT) |
-| `GPO/get-GPOreport.ps1` | Export/report GPO links and metadata for documentation. | n/a | Not specified |
-| `GPO/invoke-GPupdateDomain.ps1` | Trigger remote GPUpdate for computers in an OU (or wider scope). | 1.1 | The MIT License (MIT) |
+| Fichier | Objet | Version | Licence | Article |
+|---|---|---|---|---|
+| `GPO/Check-LocalGroupPolicy.ps1` | Détecter et corriger les problèmes de traitement des stratégies de groupe locales à partir des journaux d'événements. | 0.4 | Licence MIT (MIT) | &ndash; |
+| `GPO/get-GPOBackup.ps1` | Créer des sauvegardes de GPO horodatées, avec rapports HTML. | 1.8 | Licence MIT (MIT) | [DE](https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/gruppenrichtlinien-richtig-sichern-und-dokumentieren.html) |
+| `GPO/get-GPOreport.ps1` | Exporter et documenter les liaisons et métadonnées des GPO. | n/d | Non spécifiée | &ndash; |
+| `GPO/invoke-GPupdateDomain.ps1` | Déclencher un GPUpdate distant pour les ordinateurs d'une OU (ou d'un périmètre plus large). | 1.1 | Licence MIT (MIT) | &ndash; |
 
 ### Intune
 
-| Fichier | Objet | Version | Licence |
-|---|---|---|---|
-| `Intune/create-package.ps1` | Build `.intunewin` packages from source folders. | 1.0 | Not specified |
-| `Intune/get-AutopilotLogs.ps1` | Collect logs and diagnostics for Autopilot pre-provisioning. | 1.0.2 | Not specified |
+| Fichier | Objet | Version | Licence | Article |
+|---|---|---|---|---|
+| `Intune/create-package.ps1` | Générer des packages `.intunewin` à partir de dossiers sources. | 1.0 | Non spécifiée | &ndash; |
+| `Intune/get-AutopilotLogs.ps1` | Collecter les journaux et diagnostics du pré-provisionnement Autopilot. | 1.0.2 | Licence MIT (MIT) | &ndash; |
 
 ### Linux-Files
 
-| Fichier | Objet | Version | Licence |
-|---|---|---|---|
-| `Linux-Files/allow_windowsupdate.squid` | Squid ACL allowlist for Windows Update endpoints. | n/a | Not specified |
-| `Linux-Files/allow_psgallery.squid` | Squid ACL allowlist for PowerShell Gallery / NuGet endpoints. | n/a | Not specified |
-| `Linux-Files/allow_github.squid` | Squid ACL allowlist for GitHub endpoints. | n/a | Not specified |
-| `Linux-Files/allow_vscode.squid` | Squid ACL allowlist for Visual Studio Code endpoints. | n/a | Not specified |
+| Fichier | Objet | Version | Licence | Article |
+|---|---|---|---|---|
+| `Linux-Files/allow_windowsupdate.squid` | Liste d'autorisation (ACL Squid) pour les points de terminaison Windows Update. | n/d | Non spécifiée | &ndash; |
+| `Linux-Files/allow_psgallery.squid` | Liste d'autorisation (ACL Squid) pour les points de terminaison PowerShell Gallery / NuGet. | n/d | Non spécifiée | &ndash; |
+| `Linux-Files/allow_github.squid` | Liste d'autorisation (ACL Squid) pour les points de terminaison GitHub. | n/d | Non spécifiée | &ndash; |
+| `Linux-Files/allow_vscode.squid` | Liste d'autorisation (ACL Squid) pour les points de terminaison Visual Studio Code. | n/d | Non spécifiée | &ndash; |
 
 ### Network
 
-| Fichier | Objet | Version | Licence |
-|---|---|---|---|
-| `Network/Check-Network.ps1` | Validate client network connectivity and configuration. | 0.6 | Except for the LDAP Test Code, witch is licensed by Evotec under MIT License |
-| `Network/disable-NetBios.ps1` | Disable NetBIOS over TCP/IP on active adapters. | n/a | Not specified |
+| Fichier | Objet | Version | Licence | Article |
+|---|---|---|---|---|
+| `Network/Check-Network.ps1` | Valider la connectivité et la configuration réseau d'un client. | 0.6 | MIT (code de test LDAP : MIT &copy; Evotec) | &ndash; |
+| `Network/disable-NetBios.ps1` | Désactiver NetBIOS sur TCP/IP sur les cartes réseau actives. | n/d | Non spécifiée | &ndash; |
 
 ### User
 
-| Fichier | Objet | Version | Licence |
-|---|---|---|---|
-| `User/create-user.ps1` | Create AD users (including Microsoft 365 onboarding patterns). | 0.3 | The MIT License (MIT) |
-| `User/Get-LastLogonOU.ps1` | Report last logon values for users in an OU (AD + Exchange context). | 0.2 FN 03.12.2025 Changed License to MIT, housekeeping Header | The MIT License (MIT) |
+| Fichier | Objet | Version | Licence | Article |
+|---|---|---|---|---|
+| `User/create-user.ps1` | Créer des utilisateurs AD (y compris l'intégration Microsoft 365). | 0.3 | Licence MIT (MIT) | [DE](https://www.infrastrukturhelden.de/microsoft-infrastruktur/active-directory/benutzer-einfachen-anlegen-mit-powershell/) |
+| `User/Get-LastLogonOU.ps1` | Rapporter la dernière ouverture de session des utilisateurs d'une OU (contexte AD et Exchange). | 0.2 | Licence MIT (MIT) | &ndash; |
 
 ### Windows
 
-| Fichier | Objet | Version | Licence |
-|---|---|---|---|
-| `Windows/set-cert4rdp.ps1` | Bind/set the RDP certificate from a specific issuing CA. | 0.2 | The MIT License (MIT) |
-| `Windows/Remove-AzureArc.ps1` | Remove Azure Arc agent/components and reboot automatically if required. | 1.1 | The MIT License (MIT) |
+| Fichier | Objet | Version | Licence | Article |
+|---|---|---|---|---|
+| `Windows/set-cert4rdp.ps1` | Affecter le certificat RDP émis par une autorité de certification donnée. | 0.2 | Licence MIT (MIT) | &ndash; |
+| `Windows/Remove-AzureArc.ps1` | Supprimer l'agent et les composants Azure Arc, avec redémarrage automatique si nécessaire. | 1.1 | Licence MIT (MIT) | &ndash; |
 
 ### WSUS
 
-| Fichier | Objet | Version | Licence |
-|---|---|---|---|
-| `WSUS/decline-WSUSUpdatesTypes.ps1` | Decline selected update classifications/products in WSUS. | 1.8 | The MIT License (MIT) |
-| `WSUS/Reset-WSUSClient.cmd` | Reset WSUS client configuration and detection state. | n/a | Not specified |
-| `WSUS/start-WsusServerSync.ps1` | Start WSUS synchronization (supports recursive upstream/downstream and email logging). | n/a | Not specified |
-| `WSUS/Get-WsusHealth.ps1` | Run comprehensive WSUS health checks and generate diagnostic output. | 1.3 | Except for the LDAP Test Code, witch is licensed by Evotec under MIT License |
+| Fichier | Objet | Version | Licence | Article |
+|---|---|---|---|---|
+| `WSUS/decline-WSUSUpdatesTypes.ps1` | Refuser des classifications ou produits de mise à jour sélectionnés dans WSUS. | 1.8 | Licence MIT (MIT) | [DE](https://www.infrastrukturhelden.de/microsoft-infrastruktur/wsus/windows-server-update-services-bereinigen.html) |
+| `WSUS/Reset-WSUSClient.cmd` | Réinitialiser la configuration du client WSUS et son état de détection. | n/d | Non spécifiée | &ndash; |
+| `WSUS/start-WsusServerSync.ps1` | Démarrer la synchronisation WSUS (prend en charge les serveurs amont/aval récursifs et la journalisation par e-mail). | n/d | Non spécifiée | &ndash; |
+| `WSUS/Get-WsusHealth.ps1` | Exécuter des contrôles de santé WSUS complets et produire une sortie de diagnostic. | 1.3 | MIT (code de test LDAP : MIT &copy; Evotec) | [DE](https://www.infrastrukturhelden.de/microsoft-infrastruktur/wsus/wsus-fehleranalyse-und-health-checks-praxisleitfaden-mit-powershell/) |
+<!-- END GENERATED: inventory -->
+
+## Modèles de GPO
+
+Objets de stratégie de groupe d'exemple publiés avec les articles. Chaque modèle comporte une description Markdown et une sauvegarde de GPO importable (ZIP). Détails et licence : [`GPO/Templates/readme.md`](./GPO/Templates/readme.md).
+
+<!-- BEGIN GENERATED: gpo-templates -->
+| Modèle | Objet | Sauvegarde GPO |
+|---|---|---|
+| [`GPO/Templates/Win11-24H2-IT-Grundschutz-Darksite.md`](./GPO/Templates/Win11-24H2-IT-Grundschutz-Darksite.md) | Windows 11 24H2 &ndash; protection de base informatique (darksite / communication cloud restreinte). | [ZIP](./GPO/Templates/Win11-24H2-IT-Grundschutz-Darksite.zip) |
+| [`GPO/Templates/Win11-Disable-Copilot.md`](./GPO/Templates/Win11-Disable-Copilot.md) | Windows 11 &ndash; désactiver Microsoft Copilot et les fonctions d'IA. | [ZIP](./GPO/Templates/Win11-Disable-Copilot.zip) |
+| [`GPO/Templates/MSOffice-Deactivate-Copilot.md`](./GPO/Templates/MSOffice-Deactivate-Copilot.md) | Microsoft Office &ndash; désactiver Copilot et les fonctions d'IA. | [ZIP](./GPO/Templates/MSOffice-Deactivate-Copilot.zip) |
+| [`GPO/Templates/VisualStudio-Deactivate-Copilot.md`](./GPO/Templates/VisualStudio-Deactivate-Copilot.md) | Visual Studio &ndash; désactiver Copilot et les fonctions d'IA. | [ZIP](./GPO/Templates/VisualStudio-Deactivate-Copilot.zip) |
+<!-- END GENERATED: gpo-templates -->
 
 ## Fichiers supplémentaires
 
 - `Intune/Readme.md` – Notes spécifiques Intune (en allemand).
-- `Dokumente/Zertifizierungsstellen mit Windows Server 2012R2.pdf` – PKI/CA documentation PDF.
+- `Dokumente/Zertifizierungsstellen mit Windows Server 2012R2.pdf` – documentation des autorités de certification (PKI/CA) au format PDF.
+- `GPO/Templates/readme.md` – index et conditions de licence des modèles de GPO.
 
 ## Notes
 
 - Certains scripts sont matures et versionnés.
 - D'autres sont des aides opérationnelles rapides pour l'administration quotidienne.
 - Validez toujours les scripts dans un environnement de test avant usage en production.
+- Vous cherchez les [diagrammes de cycle de vie](https://github.com/FabianNiesen/InfrastrukturHelden-LifeCycle-diagrams) ? Ils se trouvent dans un dépôt séparé.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Z8Z8FB6VH)

@@ -38,13 +38,13 @@ Sie stellen **keine 1:1-Vorlagen** dar und müssen vor einem produktiven Einsatz
 ### Verfügbare Templates
 
 - **Windows 11 24H2 – IT-Grundschutz (Darksite / eingeschränkte Cloud-Kommunikation)**  
-  → [`Win11-24H2-IT-Grundschutz-Darksite.md`](./Win11-24H2-IT-Grundschutz-Darksite.md)
-- **Windows 11 – Copilot deaktivieren**  
-  → [`Win11-Disable-Copilot.md`](./Win11-Disable-Copilot.md)
-- **Microsoft Office – Copilot deaktivieren**  
-  → [`MSOffice-Deactivate-Copilot.md`](./MSOffice-Deactivate-Copilot.md)
-- **Visual Studio – Copilot deaktivieren**  
-  → [`VisualStudio-Deactivate-Copilot.md`](./VisualStudio-Deactivate-Copilot.md)
+  → [`Win11-24H2-IT-Grundschutz-Darksite.md`](./Win11-24H2-IT-Grundschutz-Darksite.md) · [GPO-Backup](./Win11-24H2-IT-Grundschutz-Darksite.zip)
+- **Windows 11 – Microsoft Copilot und KI-Funktionen deaktivieren**  
+  → [`Win11-Disable-Copilot.md`](./Win11-Disable-Copilot.md) · [GPO-Backup](./Win11-Disable-Copilot.zip)
+- **Microsoft Office – Copilot und KI-Funktionen deaktivieren**  
+  → [`MSOffice-Deactivate-Copilot.md`](./MSOffice-Deactivate-Copilot.md) · [GPO-Backup](./MSOffice-Deactivate-Copilot.zip)
+- **Visual Studio – Copilot und KI-Funktionen deaktivieren**  
+  → [`VisualStudio-Deactivate-Copilot.md`](./VisualStudio-Deactivate-Copilot.md) · [GPO-Backup](./VisualStudio-Deactivate-Copilot.zip)
 
 Weitere Templates, Varianten und Versionen werden fortlaufend ergänzt.
 
@@ -92,13 +92,15 @@ They are **not** 1:1 templates and must always be evaluated, tested, and adapted
 ### Available templates
 
 - **Windows 11 24H2 – IT Basic Protection (Darksite / restricted cloud communication)**  
-  → [`Win11-24H2-IT-Grundschutz-Darksite.md`](./Win11-24H2-IT-Grundschutz-Darksite.md)
-- **Windows 11 – Disable Copilot**  
-  → [`Win11-Disable-Copilot.md`](./Win11-Disable-Copilot.md)
-- **Microsoft Office – Disable Copilot**  
-  → [`MSOffice-Deactivate-Copilot.md`](./MSOffice-Deactivate-Copilot.md)
-- **Visual Studio – Disable Copilot**  
-  → [`VisualStudio-Deactivate-Copilot.md`](./VisualStudio-Deactivate-Copilot.md)
+  → [`Win11-24H2-IT-Grundschutz-Darksite.md`](./Win11-24H2-IT-Grundschutz-Darksite.md) · [GPO backup](./Win11-24H2-IT-Grundschutz-Darksite.zip)
+- **Windows 11 – Disable Microsoft Copilot and AI features**  
+  → [`Win11-Disable-Copilot.md`](./Win11-Disable-Copilot.md) · [GPO backup](./Win11-Disable-Copilot.zip)
+- **Microsoft Office – Disable Copilot and AI features**  
+  → [`MSOffice-Deactivate-Copilot.md`](./MSOffice-Deactivate-Copilot.md) · [GPO backup](./MSOffice-Deactivate-Copilot.zip)
+- **Visual Studio – Disable Copilot and AI features**  
+  → [`VisualStudio-Deactivate-Copilot.md`](./VisualStudio-Deactivate-Copilot.md) · [GPO backup](./VisualStudio-Deactivate-Copilot.zip)
+
+Further templates, variants and versions are added continuously.
 
 ---
 
@@ -143,13 +145,15 @@ Las GPO proporcionadas son **configuraciones de referencia y ejemplo**.
 ### Plantillas disponibles
 
 - **Windows 11 24H2 – IT-Grundschutz (Darksite / comunicación limitada con la nube)**  
-  → [`Win11-24H2-IT-Grundschutz-Darksite.md`](./Win11-24H2-IT-Grundschutz-Darksite.md)
-- **Windows 11 – Desactivar Copilot**  
-  → [`Win11-Disable-Copilot.md`](./Win11-Disable-Copilot.md)
-- **Microsoft Office – Desactivar Copilot**  
-  → [`MSOffice-Deactivate-Copilot.md`](./MSOffice-Deactivate-Copilot.md)
-- **Visual Studio – Desactivar Copilot**  
-  → [`VisualStudio-Deactivate-Copilot.md`](./VisualStudio-Deactivate-Copilot.md)
+  → [`Win11-24H2-IT-Grundschutz-Darksite.md`](./Win11-24H2-IT-Grundschutz-Darksite.md) · [Copia de seguridad de GPO](./Win11-24H2-IT-Grundschutz-Darksite.zip)
+- **Windows 11 – Desactivar Microsoft Copilot y las funciones de IA**  
+  → [`Win11-Disable-Copilot.md`](./Win11-Disable-Copilot.md) · [Copia de seguridad de GPO](./Win11-Disable-Copilot.zip)
+- **Microsoft Office – Desactivar Copilot y las funciones de IA**  
+  → [`MSOffice-Deactivate-Copilot.md`](./MSOffice-Deactivate-Copilot.md) · [Copia de seguridad de GPO](./MSOffice-Deactivate-Copilot.zip)
+- **Visual Studio – Desactivar Copilot y las funciones de IA**  
+  → [`VisualStudio-Deactivate-Copilot.md`](./VisualStudio-Deactivate-Copilot.md) · [Copia de seguridad de GPO](./VisualStudio-Deactivate-Copilot.zip)
+
+Se irán añadiendo continuamente más plantillas, variantes y versiones.
 
 ---
 
@@ -194,13 +198,15 @@ Elles **ne constituent pas** des modèles 1:1 et doivent être évaluées, test�
 ### Modèles disponibles
 
 - **Windows 11 24H2 – IT-Grundschutz (Darksite / communication cloud restreinte)**  
-  → [`Win11-24H2-IT-Grundschutz-Darksite.md`](./Win11-24H2-IT-Grundschutz-Darksite.md)
-- **Windows 11 – Désactiver Copilot**  
-  → [`Win11-Disable-Copilot.md`](./Win11-Disable-Copilot.md)
-- **Microsoft Office – Désactiver Copilot**  
-  → [`MSOffice-Deactivate-Copilot.md`](./MSOffice-Deactivate-Copilot.md)
-- **Visual Studio – Désactiver Copilot**  
-  → [`VisualStudio-Deactivate-Copilot.md`](./VisualStudio-Deactivate-Copilot.md)
+  → [`Win11-24H2-IT-Grundschutz-Darksite.md`](./Win11-24H2-IT-Grundschutz-Darksite.md) · [Sauvegarde GPO](./Win11-24H2-IT-Grundschutz-Darksite.zip)
+- **Windows 11 – Désactiver Microsoft Copilot et les fonctions d'IA**  
+  → [`Win11-Disable-Copilot.md`](./Win11-Disable-Copilot.md) · [Sauvegarde GPO](./Win11-Disable-Copilot.zip)
+- **Microsoft Office – Désactiver Copilot et les fonctions d'IA**  
+  → [`MSOffice-Deactivate-Copilot.md`](./MSOffice-Deactivate-Copilot.md) · [Sauvegarde GPO](./MSOffice-Deactivate-Copilot.zip)
+- **Visual Studio – Désactiver Copilot et les fonctions d'IA**  
+  → [`VisualStudio-Deactivate-Copilot.md`](./VisualStudio-Deactivate-Copilot.md) · [Sauvegarde GPO](./VisualStudio-Deactivate-Copilot.zip)
+
+D'autres modèles, variantes et versions seront ajoutés en continu.
 
 ---
 

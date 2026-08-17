@@ -1,8 +1,8 @@
-# README
+# Visual Studio – Disable Copilot and AI features
 
 ## Table of Contents
 
-- [README](#readme)
+- [Visual Studio – Disable Copilot and AI features](#visual-studio--disable-copilot-and-ai-features)
   - [Table of Contents](#table-of-contents)
   - [English](#english)
   - [Deutsch](#deutsch)
