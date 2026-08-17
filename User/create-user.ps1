@@ -10,8 +10,9 @@ Author     :    Fabian Niesen (infrastrukturhelden.de)
 Filename   :    create-user.ps1
 Requires   :    PowerShell Version 3.0
 
-Version    :    0.3
-History    :    0.3 FN  03.12.2025 Changed License to MIT, housekeeping Header
+Version    :    0.4
+History    :    0.4 FN  04.08.2026 Use shared helper functions from Modules\IH.Common
+                0.3 FN  03.12.2025 Changed License to MIT, housekeeping Header
                 0.2 FN  27.08.2022  Add SmtpPort due #4, fixed some encoding and Typos - Not testest, since my test env is down - Any problems, open an issue at https://github.com/InfrastructureHeroes/Scipts
                 0.1 FN  22.01.2019  initial draft
 License    :    The MIT License (MIT)
@@ -60,29 +61,24 @@ Param(
 [string] $smtpuser = "",
 [int] $SmtpPort =""
 )
-$scriptversion = "0.3"
+$scriptversion = "0.4"
 Write-Output "create-user.ps1 Version $scriptversion "
 [String] $WelcomeSub = "Willkommen bei Infrastrukturhelden.de"
 [String] $WelcomeBody = "Hallo $Vorname" + ',<br>hier schreiben wir dir noch eine nette Begrüssung<br>Besuche uns auf <a href="https://www.infrastrukturhelden.de">Infrastrukturhelden.de</a>'
 
-Function SendEmailStatus($From, $To, $Subject, $SmtpServer, $BodyAsHtml, $Body)
-  { 
-    $SmtpMessage = New-Object System.Net.Mail.MailMessage $From, $To, $Subject, $Body
-    $SmtpMessage.IsBodyHTML = $BodyAsHtml
-    $SmtpClient = New-Object System.Net.Mail.SmtpClient $SmtpServer 
-    IF ($TLS) { $SmtpClient.EnableSsl = $true }
-    IF ($SmtpAuth) {
-      IF (-not $smtppw) { $smtppw = Read-Host -Prompt "Password for SMTP user $smtpuser" -AsSecureString }
-      $SmtpClient.Credentials = New-Object System.Net.NetworkCredential($smtpuser, $smtppw)
-    }
-    IF ($SmtpPort) { $SmtpClient.Port = $SmtpPort }
-    $SmtpClient.Send($SmtpMessage)
-    If($? -eq $False){Write-Warning "$($Error[0].Exception.Message) | $($Error[0].Exception.GetBaseException().Message)"}
-    $SmtpMessage.Dispose()
-    Remove-Variable SmtpClient
-    Remove-Variable SmtpMessage
-  }
-If (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole( [Security.Principal.WindowsBuiltInRole]  "Administrator"))
+#Shared helper functions (Send-EmailStatus, Test-AdminRights) live in Modules\IH.Common
+Import-Module (Join-Path $PSScriptRoot "..\Modules\IH.Common\IH.Common.psd1") -Force -ErrorAction Stop
+
+# Common parameters for all mails sent by this script
+$MailParam = @{
+    From       = $From
+    SmtpServer = $SmtpServer
+    BodyAsHtml = $true
+}
+IF ($TLS) { $MailParam.UseTls = $true }
+IF ($SmtpAuth) { $MailParam.Credential = New-SmtpCredential -UserName $smtpuser -Password $smtppw }
+IF ($SmtpPort) { $MailParam.SmtpPort = $SmtpPort }
+If (-NOT (Test-AdminRights))
 {
     $newProcess = new-object System.Diagnostics.ProcessStartInfo "PowerShell";
     $newProcess.Arguments = $myInvocation.MyCommand.Definition;
@@ -115,4 +111,4 @@ IF ( $O365 ) {
   Write-Verbose "Assigned Licenses: $($(Get-AzureADUserLicenseDetail -ObjectId $Email ).SkuPartNumber)"
 }
 # Willkommensemail
-SendEmailStatus -From $From -To $Email -Subject $WelcomeSub -SmtpServer $SmtpServer -BodyAsHtml $True -Body $WelcomeBody
+Send-EmailStatus @MailParam -To $Email -Subject $WelcomeSub -Body $WelcomeBody

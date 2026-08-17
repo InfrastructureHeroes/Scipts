@@ -13,8 +13,9 @@ C:\PS> get-AutopilotLogs.ps1
 Author     : Fabian Niesen (www.fabian-niesen.de)
 Filename   : get-AutopilotLogs.ps1
 Requires   : PowerShell Version 4.0
-Version    : 1.0.2
-History    : 1.0.2   FN  26.08.2022  Add ToDo list, changed LogName
+Version    : 1.0.3
+History    : 1.0.3   FN  04.08.2026  Use shared helper functions from Modules\IH.Common
+             1.0.2   FN  26.08.2022  Add ToDo list, changed LogName
              1.0.1   FN  25.08.2022  Buxfixes
              1.0.0   FN  21.08.2022  initial version
 
@@ -31,7 +32,7 @@ Copyright (c) Fabian Niesen if not stated otherwise. All rights reserved. Licens
 
 #>
 $ErrorActionPreference = "SilentlyContinue"
-$script:BuildVer = "1.0.2"
+$script:BuildVer = "1.0.3"
 $script:ProgramFiles = $env:ProgramFiles
 $script:ParentFolder = $PSScriptRoot | Split-Path -Parent
 $script:ScriptName = $myInvocation.MyCommand.Name
@@ -44,69 +45,13 @@ $LogFile = $Logpath +"\" + $script:ScriptName + ".log"
 $ntpserver = "ptbtime1.ptb.de,ptbtime2.ptb.de,time.windows.com,time.nist.gov"
 ####################################################
 #region Logfiles
-<#
-.COPYRIGHT for this region
-Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-See LICENSE in the project https://github.com/gregnottage/IntuneScripts for license information.
-
-.Notes
-Removed EventLog Handling and smaller changes by Fabian Niesen
-#>
-Function Start-Log {
-    param (
-        [string]$FilePath,
-
-        [Parameter(HelpMessage = 'Deletes existing file if used with the -DeleteExistingFile switch')]
-        [switch]$DeleteExistingFile
-    )
-	
-    Try {
-        If (!(Test-Path $FilePath)) {
-            ## Create the log file
-            New-Item $FilePath -Type File -Force | Out-Null
-        }
-            
-        If ($DeleteExistingFile) {
-            Remove-Item $FilePath -Force
-        }
-			
-        ## Set the global variable to be used as the FilePath for all subsequent Write-Log
-        ## calls in this session
-        $script:ScriptLogFilePath = $FilePath
-    }
-    Catch {
-        Write-Error $_.Exception.Message
-    }
-}
-
-####################################################
-
-Function Write-Log {
-    #Write-Log -Message 'warning' -LogLevel 2
-    #Write-Log -Message 'Error' -LogLevel 3
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$Message,
-			
-        [Parameter()]
-        [ValidateSet(1, 2, 3)]
-        [int]$LogLevel = 1,
-
-        [Parameter(HelpMessage = 'Outputs message to Event Log,when used with -WriteEventLog')]
-        [switch]$WriteEventLog
-    )
-    Write-Host $Message
-    $TimeGenerated = "$(Get-Date -Format HH:mm:ss).$((Get-Date).Millisecond)+000"
-    $Line = '<![LOG[{0}]LOG]!><time="{1}" date="{2}" component="{3}" context="" type="{4}" thread="" file="">'
-    $LineFormat = $Message, $TimeGenerated, (Get-Date -Format MM-dd-yyyy), "$($MyInvocation.ScriptName | Split-Path -Leaf):$($MyInvocation.ScriptLineNumber)", $LogLevel
-    $Line = $Line -f $LineFormat
-    Add-Content -Value $Line -Path $ScriptLogFilePath
-}
+#Shared helper functions (Start-Log, Write-Log, Test-AdminRights) live in Modules\IH.Common
+Import-Module (Join-Path $PSScriptRoot "..\Modules\IH.Common\IH.Common.psd1") -Force -ErrorAction Stop
 #endregion Logfiles
 ####################################################
 
 ### Check for Admin rights
-if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))  
+if (-NOT (Test-AdminRights))
 {  
   $arguments = "& '" +$myinvocation.mycommand.definition + "'"
   Start-Process powershell -Verb runAs -ArgumentList $arguments

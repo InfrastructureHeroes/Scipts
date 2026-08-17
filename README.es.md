@@ -46,6 +46,7 @@ Este repositorio contiene scripts de administración para:
   - [User](#user)
   - [Windows](#windows)
   - [WSUS](#wsus)
+- [Modulo compartido (Modules/IH.Common)](#modulo-compartido-modulesihcommon)
 - [Archivos adicionales](#archivos-adicionales)
 - [Notas](#notas)
 
@@ -74,7 +75,7 @@ Las descripciones se basan en `.SYNOPSIS` / `.DESCRIPTION` cuando existen; en ca
 
 | Archivo | Propósito | Versión | Licencia |
 |---|---|---|---|
-| `ActiveDirectory/Configure-AD.ps1` | Configure an AD domain (e.g., recycle bin, gMSA prep, central store, password policies, OU structure). | 0.2 | Not specified |
+| `ActiveDirectory/Configure-AD.ps1` | Configure an AD domain (e.g., recycle bin, gMSA prep, central store, password policies, OU structure). | 0.3 | Not specified |
 | `ActiveDirectory/Get-ADPermissionsReport.ps1` | Export CSV report of Active Directory permissions. | 0.2 | Not specified |
 | `ActiveDirectory/Get-LAPSAuditReport.ps1` | Query security events for Microsoft LAPS-related audit activity. | n/a | Not specified |
 | `ActiveDirectory/Get-LocalNTLMlogs.ps1` | Analyze local `Microsoft-Windows-NTLM/Operational` events with classification. | 1.0 | GNU General Public License v3 (GPLv3) |
@@ -82,7 +83,7 @@ Las descripciones se basan en `.SYNOPSIS` / `.DESCRIPTION` cuando existen; en ca
 | `ActiveDirectory/Get-PKICertlist.ps1` | Enumerate certificates/templates from AD CS / PKI context. | n/a | Not specified |
 | `ActiveDirectory/Locate-46xx.ps1` | Locate AD lockout-related events (46xx security events). | 1.0 | Not specified |
 | `ActiveDirectory/Locate-ADLockout.ps1` | Locate user lockout sources in Active Directory. | 1.0 | Not specified |
-| `ActiveDirectory/Repair-DFSR.ps1` | Repair DFS-R replication (including SYSVOL) on domain controllers. | 0.1 | Not specified |
+| `ActiveDirectory/Repair-DFSR.ps1` | Repair DFS-R replication (including SYSVOL) on domain controllers. | 0.2 | Not specified |
 | `ActiveDirectory/Reset-DSRM.ps1` | Reset DSRM password on a domain controller. | 0.3 | GNU General Public License v3 (GPLv3) |
 | `ActiveDirectory/execute-RemoteScriptWithLAPS.ps1` | Run remote scripts with local admin credentials managed by Microsoft LAPS. | 1.1 | Not specified |
 | `ActiveDirectory/get-CVE20201472Events.ps1` | Check domain controllers for Netlogon CVE-2020-1472-related event IDs (5827-5829). | 1.0 | Not specified |
@@ -128,7 +129,7 @@ Las descripciones se basan en `.SYNOPSIS` / `.DESCRIPTION` cuando existen; en ca
 | Archivo | Propósito | Versión | Licencia |
 |---|---|---|---|
 | `Intune/create-package.ps1` | Build `.intunewin` packages from source folders. | 1.0 | Not specified |
-| `Intune/get-AutopilotLogs.ps1` | Collect logs and diagnostics for Autopilot pre-provisioning. | 1.0.2 | Not specified |
+| `Intune/get-AutopilotLogs.ps1` | Collect logs and diagnostics for Autopilot pre-provisioning. | 1.0.3 | Not specified |
 
 ### Linux-Files
 
@@ -143,14 +144,14 @@ Las descripciones se basan en `.SYNOPSIS` / `.DESCRIPTION` cuando existen; en ca
 
 | Archivo | Propósito | Versión | Licencia |
 |---|---|---|---|
-| `Network/Check-Network.ps1` | Validate client network connectivity and configuration. | 0.6 | Except for the LDAP Test Code, witch is licensed by Evotec under MIT License |
+| `Network/Check-Network.ps1` | Validate client network connectivity and configuration. | 0.7 | Except for the LDAP Test Code, witch is licensed by Evotec under MIT License |
 | `Network/disable-NetBios.ps1` | Disable NetBIOS over TCP/IP on active adapters. | n/a | Not specified |
 
 ### User
 
 | Archivo | Propósito | Versión | Licencia |
 |---|---|---|---|
-| `User/create-user.ps1` | Create AD users (including Microsoft 365 onboarding patterns). | 0.3 | The MIT License (MIT) |
+| `User/create-user.ps1` | Create AD users (including Microsoft 365 onboarding patterns). | 0.4 | The MIT License (MIT) |
 | `User/Get-LastLogonOU.ps1` | Report last logon values for users in an OU (AD + Exchange context). | 0.2 FN 03.12.2025 Changed License to MIT, housekeeping Header | The MIT License (MIT) |
 
 ### Windows
@@ -164,10 +165,26 @@ Las descripciones se basan en `.SYNOPSIS` / `.DESCRIPTION` cuando existen; en ca
 
 | Archivo | Propósito | Versión | Licencia |
 |---|---|---|---|
-| `WSUS/decline-WSUSUpdatesTypes.ps1` | Decline selected update classifications/products in WSUS. | 1.8 | The MIT License (MIT) |
+| `WSUS/decline-WSUSUpdatesTypes.ps1` | Decline selected update classifications/products in WSUS. | 1.9 | The MIT License (MIT) |
 | `WSUS/Reset-WSUSClient.cmd` | Reset WSUS client configuration and detection state. | n/a | Not specified |
 | `WSUS/start-WsusServerSync.ps1` | Start WSUS synchronization (supports recursive upstream/downstream and email logging). | n/a | Not specified |
-| `WSUS/Get-WsusHealth.ps1` | Run comprehensive WSUS health checks and generate diagnostic output. | 1.3 | Except for the LDAP Test Code, witch is licensed by Evotec under MIT License |
+| `WSUS/Get-WsusHealth.ps1` | Run comprehensive WSUS health checks and generate diagnostic output. | 1.4 | Except for the LDAP Test Code, witch is licensed by Evotec under MIT License |
+
+## Modulo compartido (Modules/IH.Common)
+
+Las funciones auxiliares que antes se copiaban en varios scripts ahora estan en el modulo
+`Modules/IH.Common`: `Start-Log`, `Write-Log`, `Get-LogFilePath`, `Start-Wait`,
+`New-CheckResult`, `Get-HtmlReportStyle`, `Send-EmailStatus`, `New-SmtpCredential`,
+`Test-AdminRights` y `Get-DefaultLogPath`.
+
+Los scripts cargan el modulo de forma relativa a su propia ruta, por ejemplo:
+
+```powershell
+Import-Module (Join-Path $PSScriptRoot "..\Modules\IH.Common\IH.Common.psd1") -Force -ErrorAction Stop
+```
+
+Por eso hay que copiar tambien la carpeta `Modules` al sacar scripts del repositorio.
+Pruebas del modulo: `Invoke-Pester .\Modules\IH.Common` (requiere Pester 5).
 
 ## Archivos adicionales
 

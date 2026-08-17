@@ -69,8 +69,9 @@
                         The author assumes no responsibility for any damage or data loss caused by this script.
                         Test thoroughly in a controlled environment before deploying to production.
         GitHub     :    https://github.com/InfrastructureHeroes/Scipts
-        Version    :    1.3 FN 03.12.2025 Change to MIT License, housekeeping Header
-        History    : 	1.2 FN 01.12.2025 BugFixes
+        Version    :    1.4 FN 04.08.2026 Use shared helper functions from Modules\IH.Common
+        History    : 	1.3 FN 03.12.2025 Change to MIT License, housekeeping Header
+                        1.2 FN 01.12.2025 BugFixes
                         1.1 FN 01.12.2025 BugFixes
                         1.0 FN 30.11.2025 Initial version.
 .LINK
@@ -98,65 +99,27 @@ param(
 )
 
 #region Helper Functions
+#Shared helper functions (New-CheckResult, Send-EmailStatus, Get-HtmlReportStyle) live in Modules\IH.Common
+Import-Module (Join-Path $PSScriptRoot "..\Modules\IH.Common\IH.Common.psd1") -Force -ErrorAction Stop
 
-function New-CheckResult {
-        <#
-        .SYNOPSIS
-                Creates a standardized check result object
-        .PARAMETER Name
-                Name of the check
-        .PARAMETER Status
-                Status of the check (OK, Warning, Failed)
-        .PARAMETER Message
-                Detailed message about the check result
-        #>
-        param($Name, $Status, $Message)
-        [PSCustomObject]@{
-                Check   = $Name
-                Status  = $Status
-                Message = $Message
-                Time    = (Get-Date)
-        }
-}
-
-# Mail function
-Function SendEmailStatus {
-        param(
-                [string]$From,
-                [string]$To,
-                [string]$Subject,
-                [string]$SmtpServer,
-                [bool]$BodyAsHtml,
-                [string]$Body,
-                [int]$SmtpPort
-        )
-        try {
-                $SmtpMessage = New-Object System.Net.Mail.MailMessage $From, $To, $Subject, $Body
-                $SmtpMessage.IsBodyHTML = $BodyAsHtml
-                $SmtpClient = New-Object System.Net.Mail.SmtpClient($SmtpServer, $SmtpPort)
-                if ($SmtpTLS) { $SmtpClient.EnableSsl = $true }
-                if ($SmtpAuth) {
-                        if (-not $SmtpPw) { $SmtpPw = Read-Host -Prompt "Password for SMTP user $SmtpUser" -AsSecureString }
-                        $SmtpClient.Credentials = New-Object System.Net.NetworkCredential($SmtpUser, $SmtpPw)
-                }
-                $SmtpClient.Send($SmtpMessage)
-                Write-Output "Email sent successfully."
-                $SmtpMessage.Dispose()
-                Remove-Variable SmtpClient
-                Remove-Variable SmtpMessage
-        }
-        catch {
-                Write-Warning "Failed to send email: $($_.Exception.Message)"
-        }
-}
-$scriptversion = "1.3"
+$scriptversion = "1.4"
 # HTML Style for email
-$Style = "<Style>BODY{font-size:12px;font-family:verdana,sans-serif;color:navy;font-weight:normal;}" + "TABLE{border-width:1px;cellpadding=10;border-style:solid;border-color:navy;border-collapse:collapse;}" + "TH{font-size:12px;border-width:1px;padding:10px;border-style:solid;border-color:navy;}" + "TD{font-size:10px;border-width:1px;padding:10px;border-style:solid;border-color:navy;}</Style>"
+$Style = Get-HtmlReportStyle
 $SmtpSubject = $SmtpSubject + " - WSUS Server: $WSUSServer"
+# Common parameters for all mails sent by this script
+$MailParam = @{
+        From       = $SmtpFrom
+        To         = $SmtpTo
+        SmtpServer = $SmtpServer
+        SmtpPort   = $SmtpPort
+        BodyAsHtml = $true
+}
+if ($SmtpTLS) { $MailParam.UseTls = $true }
+if ($SmtpAuth) { $MailParam.Credential = New-SmtpCredential -UserName $SmtpUser -Password $SmtpPw }
 # Test mail if requested
 if ($TestMail) {
         $TestBody = "<h1>Test email from WSUS Health Check on $env:COMPUTERNAME</h1><BR>Send over: $SmtpServer"
-        SendEmailStatus -From $SmtpFrom -To $SmtpTo -Subject "Test: $SmtpSubject" -SmtpServer $SmtpServer -BodyAsHtml $true -Body $TestBody -SmtpPort $SmtpPort
+        Send-EmailStatus @MailParam -Subject "Test: $SmtpSubject" -Body $TestBody
 }
 
 #endregion
@@ -520,7 +483,7 @@ IF ($CSVExportPath) {
 if ($EmailLog -and $SmtpServer) {
         $Body = "<h1>WSUS Health Report from $env:COMPUTERNAME</h1>"
         $Body += $results | ConvertTo-Html -Head $Style | Out-String
-        SendEmailStatus -From $SmtpFrom -To $SmtpTo -Subject $SmtpSubject -SmtpServer $SmtpServer -BodyAsHtml $true -Body $Body -SmtpPort $SmtpPort
+        Send-EmailStatus @MailParam -Subject $SmtpSubject -Body $Body
 }
 
 # set exit code: non-zero if any Failed
