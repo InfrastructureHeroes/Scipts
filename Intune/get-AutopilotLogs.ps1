@@ -13,8 +13,9 @@ C:\PS> get-AutopilotLogs.ps1
 Author     : Fabian Niesen (www.fabian-niesen.de)
 Filename   : get-AutopilotLogs.ps1
 Requires   : PowerShell Version 4.0
-Version    : 1.0.2
-History    : 1.0.2   FN  26.08.2022  Add ToDo list, changed LogName
+Version    : 1.0.3
+History    : 1.0.3   FN  Improved error handling: errors during log collection are no longer suppressed but logged
+             1.0.2   FN  26.08.2022  Add ToDo list, changed LogName
              1.0.1   FN  25.08.2022  Buxfixes
              1.0.0   FN  21.08.2022  initial version
 
@@ -30,8 +31,10 @@ https://github.com/InfrastructureHeroes/Scipts/
 Copyright (c) Fabian Niesen if not stated otherwise. All rights reserved. Licensed under the MIT license.
 
 #>
-$ErrorActionPreference = "SilentlyContinue"
-$script:BuildVer = "1.0.2"
+# Log collection is best effort - a single failing step must not abort the run,
+# but the errors have to be visible instead of being swallowed silently.
+$ErrorActionPreference = "Continue"
+$script:BuildVer = "1.0.3"
 $script:ProgramFiles = $env:ProgramFiles
 $script:ParentFolder = $PSScriptRoot | Split-Path -Parent
 $script:ScriptName = $myInvocation.MyCommand.Name
@@ -75,7 +78,7 @@ Function Start-Log {
         $script:ScriptLogFilePath = $FilePath
     }
     Catch {
-        Write-Error $_.Exception.Message
+        Throw "Could not create the logfile $FilePath`: $($_.Exception.Message)"
     }
 }
 
@@ -100,7 +103,9 @@ Function Write-Log {
     $Line = '<![LOG[{0}]LOG]!><time="{1}" date="{2}" component="{3}" context="" type="{4}" thread="" file="">'
     $LineFormat = $Message, $TimeGenerated, (Get-Date -Format MM-dd-yyyy), "$($MyInvocation.ScriptName | Split-Path -Leaf):$($MyInvocation.ScriptLineNumber)", $LogLevel
     $Line = $Line -f $LineFormat
-    Add-Content -Value $Line -Path $ScriptLogFilePath
+    IF ([string]::IsNullOrEmpty($ScriptLogFilePath)) { Write-Warning "No logfile initialized - Start-Log has to be called first."; return }
+    try { Add-Content -Value $Line -Path $ScriptLogFilePath -ErrorAction Stop }
+    catch { Write-Warning "Could not write to the logfile $ScriptLogFilePath`: $($_.Exception.Message)" }
 }
 #endregion Logfiles
 ####################################################

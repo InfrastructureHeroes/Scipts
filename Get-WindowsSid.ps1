@@ -38,8 +38,9 @@
                     The author assumes no responsibility for any damage or data loss caused by this script.
                     Test thoroughly in a controlled environment before deploying to production.
     
-    Version    : 1.2
+    Version    : 1.3
     History    : 
+                    1.3 FN  Improved error handling: no global SilentlyContinue, PsGetSid failures are reported per computer
                     1.2 FN  03.12.2025 Change License to MIT, housekeeping Header
                     1.1 FN  25.10.2025 Change License to GPLv3
                     1.0 FN  24.09.2022  first official
@@ -58,7 +59,7 @@ Param(
 #ToDo: Test for local PsGetsid64.exe, ask for Path or Download
 #ToDo: Add Parameter for CSV Export
 #ToDo: Test for PSGetSid exists
-$ErrorActionPreference = "SilentlyContinue"
+$ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 $ScriptName = $myInvocation.MyCommand.Name
 $ScriptName = $ScriptName.Substring(0, $scriptName.Length - 4)
@@ -92,8 +93,19 @@ ForEach ($Computer in $Computers)
     IF ( $($Computer.Online) -eq $true)
     { 
         Write-Verbose "$($Computer.DNSHostName) - Starte PSSID"
-        $pssid =  (& $PSGetSid \\$($Computer.name) -nobanner) | Select-String -Pattern "S-1-5-21-"
-        $Computer.SID = $pssid
+        # Own scope with 'Continue', so that output on stderr of the native command does not abort the whole run
+        $psgetsidOutput = & { $ErrorActionPreference = 'Continue'; & $PSGetSid \\$($Computer.name) -nobanner 2>&1 }
+        IF ($LASTEXITCODE -ne 0)
+        {
+            Write-Warning "PsGetSid failed for $($Computer.name) (Exit code $LASTEXITCODE): $($psgetsidOutput -join ' ')"
+            $Computer.SID = "ERROR: $($psgetsidOutput -join ' ')"
+        }
+        ELSE
+        {
+            $pssid = $psgetsidOutput | Select-String -Pattern "S-1-5-21-"
+            IF (-not $pssid) { Write-Warning "No SID found in the PsGetSid output for $($Computer.name): $($psgetsidOutput -join ' ')" }
+            $Computer.SID = $pssid
+        }
     } ELSEIF ( $($Computer.Online) -eq $false) {
         Write-Verbose "$($Computer.DNSHostName) - System Offline"
     } Else { Write-host "WTF $($Computer.DNSHostName)" }
@@ -107,3 +119,4 @@ IF ( $CSV)
     Write-Output "CSV file generated - $csvpath"
     $SIDs | Export-Csv -Path $csvpath -Force -Delimiter ";" -NoTypeInformation
 }
+Stop-Transcript

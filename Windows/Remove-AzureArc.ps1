@@ -90,7 +90,8 @@ Function Get-PendingRebootStatus {
                     }
                 }
             } catch {
-                Write-Error $_.Exception.Message
+                # Do not report "no reboot pending" if the check itself failed
+                Throw "Could not determine the pending reboot status: $($_.Exception.Message)"
             } finally {
                 #Clearing Variables
                 $null = $WMI_Reg
@@ -104,12 +105,19 @@ Function Get-PendingRebootStatus {
 #ENDREGION Functions
 $scriptversion = "1.1"
 Write-Output "Remove-AzureArc.ps1 Version $scriptversion "
-$AzureArc = $( (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -ErrorAction SilentlyContinue ).UBR -ge 2031)
+$UBR = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -ErrorAction Stop).UBR
+IF ($null -eq $UBR) { Throw "Could not read the UBR (patchlevel) from HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion." }
+$AzureArc = $UBR -ge 2031
 IF ( -not $AzureArc) 
     { Write-Output "Patchlevel is not high enough for Azure Arc - No action required " }
 Else {
     # Get-WindowsFeature -Name AzureArcSetup
-    IF ( (get-WindowsFeature -Name AzureArcSetup).InstallState -like "Installed" ) {Write-Warning "AzureArc is Installed - Remove Feature Restart required" ; Uninstall-WindowsFeature -Name AzureArcSetup -Restart:$false -confirm:$false  }
+    IF ( (get-WindowsFeature -Name AzureArcSetup).InstallState -like "Installed" )
+    {
+        Write-Warning "AzureArc is Installed - Remove Feature Restart required"
+        $uninstall = Uninstall-WindowsFeature -Name AzureArcSetup -Restart:$false -confirm:$false
+        IF ( -not $uninstall.Success ) { Throw "Uninstalling the AzureArcSetup feature failed (ExitCode: $($uninstall.ExitCode))." }
+    }
     ELSE { Write-Output "Windows Arc is not installed"}
     IF ( Get-PendingRebootStatus ) { 
         Write-Warning "Reboot required - Will reboot in 60 sec. Use >Shutdown.exe /a< to abort."

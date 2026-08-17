@@ -108,9 +108,11 @@ Write-Warning "Be Aware, you need to enter the Password during the execution twi
 
 
 If ( $OnlyOne ) {
-	Try {Test-Connection $ServerName}
-	catch { Throw "Server $ServerName not reachable!"}
+	Try {Test-Connection $ServerName -Count 1 -ErrorAction Stop | Out-Null}
+	catch { Throw "Server $ServerName not reachable: $($_.Exception.Message)"}
 	$ntdsutil = ntdsutil "set dsrm password" "reset password on server NULL" q q
+	IF ($LASTEXITCODE -ne 0) { Throw "ntdsutil failed with exit code $LASTEXITCODE`: $($ntdsutil -join ' ')" }
+	Write-Output $ntdsutil
 } elseif ( $AllDC) {
 	Write-Host "Not Implemented now"
 	<# Action when this condition is true #>

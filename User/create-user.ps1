@@ -10,8 +10,9 @@ Author     :    Fabian Niesen (infrastrukturhelden.de)
 Filename   :    create-user.ps1
 Requires   :    PowerShell Version 3.0
 
-Version    :    0.3
-History    :    0.3 FN  03.12.2025 Changed License to MIT, housekeeping Header
+Version    :    0.4
+History    :    0.4 FN  Improved error handling: no silently swallowed errors, mail errors are reported, wait loop for AAD sync has a timeout
+                0.3 FN  03.12.2025 Changed License to MIT, housekeeping Header
                 0.2 FN  27.08.2022  Add SmtpPort due #4, fixed some encoding and Typos - Not testest, since my test env is down - Any problems, open an issue at https://github.com/InfrastructureHeroes/Scipts
                 0.1 FN  22.01.2019  initial draft
 License    :    The MIT License (MIT)
@@ -60,8 +61,11 @@ Param(
 [string] $smtpuser = "",
 [int] $SmtpPort =""
 )
-$scriptversion = "0.3"
+$scriptversion = "0.4"
 Write-Output "create-user.ps1 Version $scriptversion "
+$ErrorActionPreference = "Stop"
+# Maximum time to wait for the new user to appear in Azure AD after the sync cycle
+[int]$AADSyncTimeoutSeconds = 900
 [String] $WelcomeSub = "Willkommen bei Infrastrukturhelden.de"
 [String] $WelcomeBody = "Hallo $Vorname" + ',<br>hier schreiben wir dir noch eine nette Begrüssung<br>Besuche uns auf <a href="https://www.infrastrukturhelden.de">Infrastrukturhelden.de</a>'
 
@@ -76,23 +80,34 @@ Function SendEmailStatus($From, $To, $Subject, $SmtpServer, $BodyAsHtml, $Body)
       $SmtpClient.Credentials = New-Object System.Net.NetworkCredential($smtpuser, $smtppw)
     }
     IF ($SmtpPort) { $SmtpClient.Port = $SmtpPort }
-    $SmtpClient.Send($SmtpMessage)
-    If($? -eq $False){Write-Warning "$($Error[0].Exception.Message) | $($Error[0].Exception.GetBaseException().Message)"}
-    $SmtpMessage.Dispose()
-    Remove-Variable SmtpClient
-    Remove-Variable SmtpMessage
+    try { $SmtpClient.Send($SmtpMessage) }
+    catch { Write-Warning "Could not send mail to $To`: $($_.Exception.Message) | $($_.Exception.GetBaseException().Message)" }
+    finally
+    {
+      $SmtpMessage.Dispose()
+      Remove-Variable SmtpClient
+      Remove-Variable SmtpMessage
+    }
   }
 If (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole( [Security.Principal.WindowsBuiltInRole]  "Administrator"))
 {
     $newProcess = new-object System.Diagnostics.ProcessStartInfo "PowerShell";
     $newProcess.Arguments = $myInvocation.MyCommand.Definition;
     $newProcess.Verb = "runas";
-    break    
+    Throw "This script needs to run with administrative permissions. Please start PowerShell as administrator."
 } 
 if(@(get-module | where-object {$_.Name -eq "ActiveDirectory"} ).count -eq 0) {import-module ActiveDirectory}
 Import-Module ActiveDirectory
 IF ($DC -eq "") { $DC = $(Get-ADDomainController).HostName ; Write-Verbose "Kein DC angegeben, nutze $DC"  }
-IF ( $O365 ) { Try { Connect-AzureAD } catch { Write-Verbose "Installiere AzureAD Modul" ; Install-Module -Name AzureAD -Force ; Connect-AzureAD } }
+IF ( $O365 )
+{
+  IF ( -not (Get-Command Connect-AzureAD -ErrorAction SilentlyContinue))
+  {
+    Write-Verbose "Installiere AzureAD Modul"
+    Install-Module -Name AzureAD -Force
+  }
+  Connect-AzureAD
+}
 IF (-not $Password) { $Password = Read-Host -Prompt "Initial password for $Username" -AsSecureString }
 #Zeichenlimit für SAM Account
 Write-Verbose "Lege Benutzer an"
@@ -104,7 +119,20 @@ IF ( $Abt -eq "" ) { Write-verbose "Keine Abteilung ausgewählt" } Else { Add-AD
 IF ( $O365 ) {
   Write-Verbose "Starte AAD Sync"
   Invoke-Command -ComputerName $ADCServer -ScriptBlock { Start-ADSyncSyncCycle -PolicyType Delta }
-  while ( $(try {Get-AzureADUser -ObjectId $Email} catch {}).count -lt 1) { start-sleep -Seconds 10 ; Write-Verbose "Wait for user appear online"}
+  $waited = 0
+  $aadUser = $null
+  while (-not $aadUser)
+  {
+    try { $aadUser = Get-AzureADUser -ObjectId $Email }
+    catch { Write-Verbose "User $Email not available in Azure AD yet: $($_.Exception.Message)" }
+    if (-not $aadUser)
+    {
+      IF ($waited -ge $AADSyncTimeoutSeconds) { Throw "User $Email did not appear in Azure AD within $AADSyncTimeoutSeconds seconds. Please check the AAD Connect sync on $ADCServer." }
+      Start-Sleep -Seconds 10
+      $waited += 10
+      Write-Verbose "Wait for user appear online"
+    }
+  }
   #Lizenzzuweisen
   Set-AzureADUser -ObjectId $Email -UsageLocation "DE"
   $license = New-Object -TypeName Microsoft.Open.AzureAD.Model.AssignedLicense
