@@ -999,6 +999,18 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 
 .EXAMPLE
     New-UserAccount -UserName "jdoe"
+
+.LINK
+    https://github.com/[username]/[repository]/blob/main/[path]/[ScriptName].ps1
+
+.NOTES
+    Author     :    [Author Name]
+    Filename   :    [ScriptName].ps1
+    Requires   :    PowerShell Version 5.1
+
+    Version    :    1.0
+    History    :
+                    1.0 YYYYMMDD [Author] Initial Version
 #>
 function New-UserAccount {
     param([string]$UserName)
@@ -1485,6 +1497,10 @@ See the [Documentation Templates](#documentation-templates) section.
 
 - [Cmdlet 1]: [URL]
 - [Cmdlet 2]: [URL]
+
+## GitHub Repository Link
+
+- [Script File]: https://github.com/[username]/[repository]/blob/main/[path]/[ScriptName].ps1
 ```
 
 ---
