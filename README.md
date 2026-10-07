@@ -72,6 +72,8 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 
 ### ActiveDirectory
 
+**Directory Documentation:** [English](ActiveDirectory/README.md) | [Deutsch](ActiveDirectory/README.de.md)
+
 | File | Purpose | Version | License |
 |---|---|---|---|
 | `ActiveDirectory/Configure-AD.ps1` | Configure an AD domain (e.g., recycle bin, gMSA prep, central store, password policies, OU structure). | 0.2 | Not specified |
@@ -94,12 +96,16 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 
 ### Azure
 
+**Directory Documentation:** [English](Azure/README.md) | [Deutsch](Azure/README.de.md)
+
 | File | Purpose | Version | License |
 |---|---|---|---|
 | `Azure/Install-AzCopy.ps1` | Download and install the latest AzCopy for the current user. | 1.0 | Not specified |
 | `Azure/Install-AzModule.ps1` | Install/update Azure PowerShell modules (`Az`). | n/a | Not specified |
 
 ### BitLocker
+
+**Directory Documentation:** [English](BitLocker/README.md) | [Deutsch](BitLocker/README.de.md)
 
 | File | Purpose | Version | License |
 |---|---|---|---|
@@ -109,12 +115,16 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 
 ### Exchange
 
+**Directory Documentation:** [English](Exchange/README.md) | [Deutsch](Exchange/README.de.md)
+
 | File | Purpose | Version | License |
 |---|---|---|---|
 | `Exchange/Set-MaintananceMode.ps1` | Put an Exchange 2013 DAG node into maintenance mode. | 0.2 | Not specified |
 | `Exchange/Set-Ex2013Vdir.ps1` | Configure Exchange 2013 virtual directories/URLs. | 0.1 | Not specified |
 
 ### GPO
+
+**Directory Documentation:** [English](GPO/README.md) | [Deutsch](GPO/README.de.md)
 
 | File | Purpose | Version | License |
 |---|---|---|---|
@@ -124,6 +134,8 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 | `GPO/invoke-GPupdateDomain.ps1` | Trigger remote GPUpdate for computers in an OU (or wider scope). | 1.1 | The MIT License (MIT) |
 
 ### Intune
+
+**Directory Documentation:** [English](Intune/README.md) | [Deutsch](Intune/README.de.md)
 
 | File | Purpose | Version | License |
 |---|---|---|---|
@@ -141,12 +153,16 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 
 ### Network
 
+**Directory Documentation:** [English](Network/README.md) | [Deutsch](Network/README.de.md)
+
 | File | Purpose | Version | License |
 |---|---|---|---|
 | `Network/Check-Network.ps1` | Validate client network connectivity and configuration. | 0.6 | Except for the LDAP Test Code, witch is licensed by Evotec under MIT License |
 | `Network/disable-NetBios.ps1` | Disable NetBIOS over TCP/IP on active adapters. | n/a | Not specified |
 
 ### User
+
+**Directory Documentation:** [English](User/README.md) | [Deutsch](User/README.de.md)
 
 | File | Purpose | Version | License |
 |---|---|---|---|
@@ -155,12 +171,16 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 
 ### Windows
 
+**Directory Documentation:** [English](Windows/README.md) | [Deutsch](Windows/README.de.md)
+
 | File | Purpose | Version | License |
 |---|---|---|---|
 | `Windows/set-cert4rdp.ps1` | Bind/set the RDP certificate from a specific issuing CA. | 0.2 | The MIT License (MIT) |
 | `Windows/Remove-AzureArc.ps1` | Remove Azure Arc agent/components and reboot automatically if required. | 1.1 | The MIT License (MIT) |
 
 ### WSUS
+
+**Directory Documentation:** [English](WSUS/README.md) | [Deutsch](WSUS/README.de.md)
 
 | File | Purpose | Version | License |
 |---|---|---|---|
@@ -171,7 +191,9 @@ The descriptions are based on `.SYNOPSIS` / `.DESCRIPTION` where available; othe
 
 ## Additional files
 
-- `Intune/Readme.md` – Intune-specific notes (in German).
+- `Intune/README.md` – Intune directory documentation (English and German).
+- `GPO/Templates/README.md` – GPO templates documentation (English, German, Spanish, French).
+- `GPO/Client_Side_Extension-GUID_List.md` – Group Policy Client-Side Extension GUID reference.
 - `Dokumente/Zertifizierungsstellen mit Windows Server 2012R2.pdf` – PKI/CA documentation PDF.
 
 ## Notes

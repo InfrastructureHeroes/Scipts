@@ -1,5 +1,7 @@
 # Windows Group Policy Templates (GPO)
 
+**Language versions:** [English](#description-english) | [Deutsch](#beschreibung-deutsch--maßgeblich) | [Español](#descripción-español) | [Français](#description-français)
+
 ### TOC
 
 - [Windows Group Policy Templates (GPO)](#windows-group-policy-templates-gpo)
